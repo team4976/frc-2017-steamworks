@@ -1,6 +1,7 @@
 *.xml
 *.class
 *.jar
+!gradle-wrapper.jar
 *.ipr
 *.iml
 *.iws
