@@ -7,3 +7,4 @@
 *.iws
 .gradle/
 run/
+.idea/

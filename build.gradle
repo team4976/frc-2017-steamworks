@@ -1,0 +1,56 @@
+/**
+ * This is a modified build.gradle for Toast modules
+ * @author Qormix
+ */
+
+buildscript {
+
+    repositories {
+
+        mavenCentral()
+
+        maven {
+
+            name = "GradleRIO"
+            url = "http://dev.imjac.in/maven"
+        }
+    }
+
+    dependencies {
+
+        classpath group: 'jaci.openrio.gradle', name: 'GradleRIO', version: '+', classifier: 'Toast'
+    }
+}
+
+allprojects {
+
+    repositories {
+
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+apply plugin: 'GradleRIO'
+
+repositories {
+
+    maven {
+
+        name = "Toast"
+        url = "http://dev.imjac.in/maven"
+    }
+}
+
+gradlerio.team = "4976"
+gradlerio.deployFile = "toast/modules/${archivesBaseName}.jar"
+
+dependencies {
+
+    compile 'com.github.Qormix:Robotics-Library:6f2102326e'
+    compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'
+}
