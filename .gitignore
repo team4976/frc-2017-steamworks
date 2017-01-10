@@ -1,0 +1,8 @@
+*.xml
+*.class
+*.jar
+*.ipr
+*.iml
+*.iws
+.gradle/
+run/
