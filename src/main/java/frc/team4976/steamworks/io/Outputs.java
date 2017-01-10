@@ -3,6 +3,8 @@ package frc.team4976.steamworks.io;
 import frc.team4976.library.IterativeRobotModule;
 import frc.team4976.library.Subsystem;
 import frc.team4976.library.outputs.CANMotor;
+import frc.team4976.library.outputs.Solenoid;
+import jaci.openrio.toast.core.Toast;
 
 public class Outputs extends Subsystem {
 
@@ -12,4 +14,6 @@ public class Outputs extends Subsystem {
     public CANMotor driveLeftRear = new CANMotor(module, 12, 0.02);
     public CANMotor driveRightFront = new CANMotor(module, 13, 0.02);
     public CANMotor driveRightRear = new CANMotor(module, 14, 0.02);
+
+    public Solenoid shifter = new Solenoid(module, Toast.isReal() ? 20 : 0, 0, 1);
 }

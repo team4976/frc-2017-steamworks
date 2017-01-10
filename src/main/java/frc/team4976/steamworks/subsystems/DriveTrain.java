@@ -1,5 +1,6 @@
 package frc.team4976.steamworks.subsystems;
 
+import frc.team4976.library.listeners.BooleanListener;
 import frc.team4976.steamworks.RobotModule;
 import jaci.openrio.toast.lib.math.Vec2D;
 
@@ -13,17 +14,21 @@ public class DriveTrain {
 
     public void init() {
 
+        module.driver.Y.addListener(new BooleanListener() {
+
+            @Override public void rising() { module.outputs.shifter.output(true); }
+
+            @Override public void falling() { module.outputs.shifter.output(false); }
+        });
+
         module.driver.LH.addListener(value -> {
 
             velocity.setX(value > 0 ? value * value : value * -value);
-
-            System.out.println("Stick: " + value);
             drive();
         });
 
         module.driver.BT.addListener(value -> {
 
-            System.out.println("Trigger: " + value);
             velocity.setY(value);
             drive();
         });
