@@ -1,5 +1,6 @@
 package frc.team4976.steamworks.subsystems;
 
+import frc.team4976.library.Evalable;
 import frc.team4976.library.listeners.BooleanListener;
 import frc.team4976.steamworks.RobotModule;
 import jaci.openrio.toast.lib.math.Vec2D;
@@ -19,6 +20,7 @@ public class DriveTrain {
             @Override public void rising() { module.outputs.shifter.output(true); }
 
             @Override public void falling() { module.outputs.shifter.output(false); }
+
         });
 
         module.driver.LH.addListener(value -> {
