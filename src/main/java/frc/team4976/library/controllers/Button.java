@@ -6,17 +6,17 @@ import java.util.ArrayList;
 
 public class Button {
 
-    protected int id;
+    int id;
 
     private ArrayList<BooleanListener> listeners = new ArrayList<>();
     private boolean[] values = new boolean[2];
     private int onTime = 0;
 
-    public Button(int id) { this.id = id; }
+    Button(int id) { this.id = id; }
 
-    protected boolean get() { throw new NullPointerException(); }
+    public boolean get() { throw new NullPointerException(); }
 
-    public void eval() {
+    void eval() {
 
         values[0] = values[1];
         values[1] = get();

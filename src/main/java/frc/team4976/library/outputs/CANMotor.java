@@ -1,10 +1,11 @@
 package frc.team4976.library.outputs;
 
 import edu.wpi.first.wpilibj.CANTalon;
+import edu.wpi.first.wpilibj.PIDOutput;
 import frc.team4976.library.IterativeRobotModule;
 import frc.team4976.library.Subsystem;
 
-public class CANMotor extends Subsystem {
+public class CANMotor extends Subsystem implements PIDOutput {
 
     private CANTalon motor;
     private double ramp = 1;
@@ -12,7 +13,7 @@ public class CANMotor extends Subsystem {
     private double targetSpeed = 0;
     private double speed = 0;
 
-    public CANMotor(IterativeRobotModule module, int port) {
+    public CANMotor(IterativeRobotModule module, int port){
 
         super(module);
         motor = new CANTalon(port);
@@ -49,4 +50,6 @@ public class CANMotor extends Subsystem {
     }
 
     public double get() { return speed; }
+
+    @Override public void pidWrite(double output) { motor.set(output); }
 }
