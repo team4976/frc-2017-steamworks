@@ -1,10 +1,11 @@
 package ca._4976.library.outputs;
 
+import ca._4976.library.IterativeRobot;
 import edu.wpi.first.wpilibj.VictorSP;
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
 
-public class PWMMotor extends Subsystem {
+public class PWMMotor {
+
+    private IterativeRobot module;
 
     private VictorSP motor;
     private double ramp = 1;
@@ -12,15 +13,14 @@ public class PWMMotor extends Subsystem {
     private double targetSpeed = 0;
     private double speed = 0;
 
-    public PWMMotor(IterativeRobotModule module, int port) {
+    public PWMMotor(int port) {
 
-        super(module);
         motor = new VictorSP(port);
     }
 
-    public PWMMotor(IterativeRobotModule module, int port, double ramp) {
+    public PWMMotor(IterativeRobot module, int port, double ramp) {
 
-        super(module);
+        this.module = module;
         motor = new VictorSP(port);
         this.ramp = ramp;
     }

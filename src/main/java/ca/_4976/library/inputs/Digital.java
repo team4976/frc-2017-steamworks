@@ -1,13 +1,14 @@
 package ca._4976.library.inputs;
 
+import ca._4976.library.IterativeRobot;
 import edu.wpi.first.wpilibj.DigitalInput;
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
 import ca._4976.library.listeners.BooleanListener;
 
 import java.util.ArrayList;
 
-public class Digital extends Subsystem {
+public class Digital {
+
+    private IterativeRobot module;
 
     private DigitalInput input;
 
@@ -15,9 +16,9 @@ public class Digital extends Subsystem {
     private boolean[] values = new boolean[2];
     private int onTime = 0;
 
-    public Digital(IterativeRobotModule module, int id) {
+    public Digital(IterativeRobot module, int id) {
 
-        super(module);
+        this.module = module;
         input = new DigitalInput(id);
     }
 

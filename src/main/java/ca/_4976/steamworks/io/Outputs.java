@@ -1,13 +1,14 @@
 package ca._4976.steamworks.io;
 
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
+import ca._4976.library.IterativeRobot;
 import ca._4976.library.outputs.CANMotor;
 import ca._4976.library.outputs.Solenoid;
 
-public class Outputs extends Subsystem {
+public class Outputs {
 
-    public Outputs(IterativeRobotModule module) { super(module); }
+    private IterativeRobot module;
+
+    public Outputs(IterativeRobot module) { this.module = module; }
 
     public CANMotor driveLeftFront = new CANMotor(module, 11, 0.02);
     public CANMotor driveLeftRear = new CANMotor(module, 12, 0.02);

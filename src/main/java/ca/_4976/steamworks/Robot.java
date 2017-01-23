@@ -1,13 +1,13 @@
 package ca._4976.steamworks;
 
-import ca._4976.library.IterativeRobotModule;
+import ca._4976.library.IterativeRobot;
 import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
 import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
 
-public class Robot extends IterativeRobotModule {
+public class Robot extends IterativeRobot {
 
     public XboxController driver = new XboxController(0);
     public XboxController operator = new XboxController(1);
@@ -30,8 +30,6 @@ public class Robot extends IterativeRobotModule {
     @Override public void autonomousInit() { profile.run(); }
 
     @Override public void teleopPeriodic() {
-
-        super.teleopPeriodic();
 
         driver.eval();
     }

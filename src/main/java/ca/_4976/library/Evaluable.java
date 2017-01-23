@@ -1,6 +1,6 @@
 package ca._4976.library;
 
-public interface Evalable {
+public interface Evaluable {
 
     void eval();
 }

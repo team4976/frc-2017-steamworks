@@ -1,20 +1,21 @@
 package ca._4976.library.inputs;
 
+import ca._4976.library.IterativeRobot;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
 
-public class DigitalEncoder extends Subsystem implements PIDSource {
+public class DigitalEncoder implements PIDSource {
+
+    private IterativeRobot module;
 
     private Encoder encoder;
 
     private PIDSourceType type = PIDSourceType.kDisplacement;
 
-    public DigitalEncoder(IterativeRobotModule module, int a, int b) {
+    public DigitalEncoder(IterativeRobot module, int a, int b) {
 
-        super(module);
+        this.module = module;
         encoder = new Encoder(a, b);
     }
 

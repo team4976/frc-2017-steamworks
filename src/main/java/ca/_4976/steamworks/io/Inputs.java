@@ -1,9 +1,10 @@
 package ca._4976.steamworks.io;
 
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
+import ca._4976.library.IterativeRobot;
 
-public class Inputs extends Subsystem {
+public class Inputs {
 
-    public Inputs(IterativeRobotModule module) { super(module); }
+    private IterativeRobot module;
+
+    public Inputs(IterativeRobot module) { this.module = module; }
 }

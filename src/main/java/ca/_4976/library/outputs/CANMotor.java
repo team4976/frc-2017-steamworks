@@ -1,11 +1,12 @@
 package ca._4976.library.outputs;
 
+import ca._4976.library.IterativeRobot;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.PIDOutput;
-import ca._4976.library.IterativeRobotModule;
-import ca._4976.library.Subsystem;
 
-public class CANMotor extends Subsystem implements PIDOutput {
+public class CANMotor implements PIDOutput {
+
+    private IterativeRobot module;
 
     private CANTalon motor;
     private double ramp = 1;
@@ -13,15 +14,13 @@ public class CANMotor extends Subsystem implements PIDOutput {
     private double targetSpeed = 0;
     private double speed = 0;
 
-    public CANMotor(IterativeRobotModule module, int port){
+    public CANMotor(int port){
 
-        super(module);
         motor = new CANTalon(port);
     }
 
-    public CANMotor(IterativeRobotModule module, int port, double ramp) {
+    public CANMotor(IterativeRobot module, int port, double ramp) {
 
-        super(module);
         motor = new CANTalon(port);
         this.ramp = ramp;
     }
@@ -44,7 +43,7 @@ public class CANMotor extends Subsystem implements PIDOutput {
 
     public void set(double speed) {
 
-        if (targetSpeed == this.speed) module.runNextLoop(this::update);
+        if (targetSpeed == this.speed) update();
 
         targetSpeed = speed;
     }
