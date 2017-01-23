@@ -1,9 +1,9 @@
-package frc.team4976.library.outputs;
+package ca._4976.library.outputs;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
-import frc.team4976.library.IterativeRobotModule;
-import frc.team4976.library.Subsystem;
+import ca._4976.library.IterativeRobotModule;
+import ca._4976.library.Subsystem;
 
 public class Solenoid extends Subsystem {
 

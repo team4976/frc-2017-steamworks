@@ -1,13 +1,13 @@
-package frc.team4976.steamworks;
+package ca._4976.steamworks;
 
-import frc.team4976.library.IterativeRobotModule;
-import frc.team4976.library.controllers.XboxController;
-import frc.team4976.steamworks.io.Inputs;
-import frc.team4976.steamworks.io.Outputs;
-import frc.team4976.steamworks.subsystems.DriveTrain;
-import frc.team4976.steamworks.subsystems.motionprofiler.MotionProfile;
+import ca._4976.library.IterativeRobotModule;
+import ca._4976.library.controllers.XboxController;
+import ca._4976.steamworks.io.Inputs;
+import ca._4976.steamworks.io.Outputs;
+import ca._4976.steamworks.subsystems.DriveTrain;
+import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
 
-public class RobotModule extends IterativeRobotModule {
+public class Robot extends IterativeRobotModule {
 
     public XboxController driver = new XboxController(0);
     public XboxController operator = new XboxController(1);
@@ -19,14 +19,6 @@ public class RobotModule extends IterativeRobotModule {
     private MotionProfile profile = new MotionProfile(this);
 
     private boolean isRecording = false;
-
-    @Override public String getModuleName() {
-        return "Project_SteamWorks";
-    }
-
-    @Override public String getModuleVersion() {
-        return "0.0.1";
-    }
 
     @Override public void robotInit() {
 
@@ -46,7 +38,7 @@ public class RobotModule extends IterativeRobotModule {
 
     @Override public void testInit() {
 
-        if (operator.BACK.get() || true) {
+        if (operator.BACK.get()) {
 
             isRecording = true;
             profile.record();

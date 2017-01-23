@@ -1,11 +1,11 @@
-package frc.team4976.library;
+package ca._4976.library;
 
-import jaci.openrio.toast.lib.module.IterativeModule;
+import edu.wpi.first.wpilibj.IterativeRobot;
 
 import java.util.ArrayList;
 
 
-public abstract class IterativeRobotModule extends IterativeModule {
+public abstract class IterativeRobotModule extends IterativeRobot {
 
     private  ArrayList<Object[]> evalables = new ArrayList<>();
 

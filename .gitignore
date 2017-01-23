@@ -6,5 +6,6 @@
 *.iml
 *.iws
 .gradle/
+build/
 run/
 .idea/

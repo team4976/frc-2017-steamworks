@@ -1,6 +1,6 @@
-package frc.team4976.library.controllers;
+package ca._4976.library.controllers;
 
-import edu.wpi.first.wpilibj.Joystick;;
+import edu.wpi.first.wpilibj.Joystick;
 
 public class XboxController {
 

@@ -1,56 +1,43 @@
-/**
- * This is a modified build.gradle for Toast modules
- * @author Qormix
- */
-
 buildscript {
-
-    repositories {
-
-        mavenCentral()
-
-        maven {
-
-            name = "GradleRIO"
-            url = "http://dev.imjac.in/maven"
-        }
-    }
-
-    dependencies {
-
-        classpath group: 'jaci.openrio.gradle', name: 'GradleRIO', version: '+', classifier: 'Toast'
-    }
-}
-
-allprojects {
-
-    repositories {
-
-        jcenter()
-        maven { url "https://jitpack.io" }
-    }
-}
-
-apply plugin: 'java'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'maven'
-apply plugin: 'GradleRIO'
-
-repositories {
-
+  repositories {
     maven {
-
-        name = "Toast"
-        url = "http://dev.imjac.in/maven"
+      url "https://plugins.gradle.org/m2/"
     }
+  }
+  dependencies {
+    classpath "gradle.plugin.jaci.openrio.gradle:GradleRIO:2017.1.1"
+  }
 }
 
-gradlerio.team = "4976"
-gradlerio.deployFile = "toast/modules/${archivesBaseName}.jar"
+plugins {
+    id "java"
+    id "eclipse"
+    id "idea"
+    id "jaci.openrio.gradle.GradleRIO" version "2017.1.1"
+}
+
+apply plugin: "jaci.openrio.gradle.GradleRIO"
+
+frc {
+    team = "4976"
+    robotClass = "ca._4976.steamworks.Robot"
+}
 
 dependencies {
+    compile wpilib()
+    compile talonSrx()
+}
 
-    compile 'com.github.Qormix:Robotics-Library:6f2102326e'
-    compile group: 'jaci.openrio.toast', name: 'Toast', version: '+'
+def robotManifest = {
+  attributes 'Main-Class': 'edu.wpi.first.wpilibj.RobotBase'
+  attributes 'Robot-Class': frc.robotClass
+}
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    manifest robotManifest
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.2.1'
 }

@@ -1,17 +1,16 @@
-package frc.team4976.steamworks.subsystems.motionprofiler;
+package ca._4976.steamworks.subsystems.motionprofiler;
 
-import frc.team4976.steamworks.RobotModule;
-import jaci.openrio.toast.core.Toast;
+import ca._4976.steamworks.Robot;
 
 import java.util.ArrayList;
 
 public class MotionProfile {
 
-    private RobotModule module;
+    private Robot module;
 
     private ArrayList<TimeStamp> timeStamps = new ArrayList<>();
 
-    public MotionProfile(RobotModule module) { this.module = module; }
+    public MotionProfile(Robot module) { this.module = module; }
 
     public synchronized void record() {
 
@@ -21,10 +20,9 @@ public class MotionProfile {
 
     public class Record implements Runnable {
 
-        private RobotModule module;
-        private Toast toast = Toast.getToast();
+        private Robot module;
 
-        private Record(RobotModule module) { this.module = module; }
+        private Record(Robot module) { this.module = module; }
 
         @Override public void run() {
 
@@ -33,7 +31,7 @@ public class MotionProfile {
             long tickTime = 1000000000 / 200;
             long lastTick = System.nanoTime() - tickTime;
 
-            while (toast.isEnabled()) {
+            while (module.isEnabled()) {
 
                 if (System.nanoTime() - lastTick > tickTime) {
 
@@ -52,9 +50,9 @@ public class MotionProfile {
 
     public class Run implements Runnable {
 
-        private RobotModule module;
+        private Robot module;
 
-        public Run(RobotModule module) { this.module = module; }
+        public Run(Robot module) { this.module = module; }
 
         @Override public void run() {
 

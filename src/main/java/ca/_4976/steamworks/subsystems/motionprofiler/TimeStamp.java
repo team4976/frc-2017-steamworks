@@ -1,4 +1,4 @@
-package frc.team4976.steamworks.subsystems.motionprofiler;
+package ca._4976.steamworks.subsystems.motionprofiler;
 
 public class TimeStamp {
 

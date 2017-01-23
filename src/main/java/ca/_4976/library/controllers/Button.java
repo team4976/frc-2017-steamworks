@@ -1,29 +1,22 @@
-package frc.team4976.library.inputs;
+package ca._4976.library.controllers;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-import frc.team4976.library.IterativeRobotModule;
-import frc.team4976.library.Subsystem;
-import frc.team4976.library.listeners.BooleanListener;
+import ca._4976.library.listeners.BooleanListener;
 
 import java.util.ArrayList;
 
-public class Digital extends Subsystem {
+public class Button {
 
-    private DigitalInput input;
+    int id;
 
     private ArrayList<BooleanListener> listeners = new ArrayList<>();
     private boolean[] values = new boolean[2];
     private int onTime = 0;
 
-    public Digital(IterativeRobotModule module, int id) {
+    Button(int id) { this.id = id; }
 
-        super(module);
-        input = new DigitalInput(id);
-    }
+    public boolean get() { throw new NullPointerException(); }
 
-    public boolean get() { return input.get(); }
-
-    public void eval() {
+    void eval() {
 
         values[0] = values[1];
         values[1] = get();

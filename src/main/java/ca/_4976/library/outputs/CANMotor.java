@@ -1,9 +1,9 @@
-package frc.team4976.library.outputs;
+package ca._4976.library.outputs;
 
-import edu.wpi.first.wpilibj.CANTalon;
+import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.PIDOutput;
-import frc.team4976.library.IterativeRobotModule;
-import frc.team4976.library.Subsystem;
+import ca._4976.library.IterativeRobotModule;
+import ca._4976.library.Subsystem;
 
 public class CANMotor extends Subsystem implements PIDOutput {
 

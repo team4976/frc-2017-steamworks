@@ -1,11 +1,10 @@
-package frc.team4976.library.inputs;
+package ca._4976.library.inputs;
 
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
-import frc.team4976.library.IterativeRobotModule;
-import frc.team4976.library.Subsystem;
-import frc.team4976.library.outputs.CANMotor;
+import ca._4976.library.IterativeRobotModule;
+import ca._4976.library.Subsystem;
+import ca._4976.library.outputs.CANMotor;
 
 public class CANEncoder extends Subsystem implements PIDSource {
 
