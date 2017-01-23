@@ -70,11 +70,11 @@ public class MotionProfile {
 
                     final TimeStamp stamp = timeStamps.get(i);
 
-                    module.outputs.driveLeftFront.pidWrite(stamp.leftDriveOutput);
-                    module.outputs.driveLeftRear.pidWrite(stamp.leftDriveOutput);
+                    module.outputs.driveLeftFront.set(stamp.leftDriveOutput);
+                    module.outputs.driveLeftRear.set(stamp.leftDriveOutput);
 
-                    module.outputs.driveRightFront.pidWrite(stamp.rightDriveOutput);
-                    module.outputs.driveRightRear.pidWrite(stamp.rightDriveOutput);
+                    module.outputs.driveRightFront.set(stamp.rightDriveOutput);
+                    module.outputs.driveRightRear.set(stamp.rightDriveOutput);
 
                     i++;
                 }

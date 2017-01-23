@@ -44,7 +44,7 @@ public class PWMMotor {
 
     public void set(double speed) {
 
-        if (targetSpeed == this.speed) module.runNextLoop(this::update);
+        if (targetSpeed == this.speed) update();
 
         targetSpeed = speed;
     }

@@ -1,5 +1,7 @@
 package ca._4976.library.controllers;
 
+import ca._4976.library.Evaluable;
+import ca._4976.library.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class XboxController {
@@ -26,28 +28,39 @@ public class XboxController {
     public Axis BT = new ThisAxis(5, 4);
 
 
-    public XboxController(int port) { stick = new Joystick(port); }
+    public XboxController(IterativeRobot module, int port) {
 
-    public void eval() {
+        module.runNextLoop(new Evaluable() {
 
-        A.eval();
-        B.eval();
-        X.eval();
-        Y.eval();
-        LB.eval();
-        RB.eval();
-        BACK.eval();
-        START.eval();
-        LS.eval();
-        RS.eval();
+            @Override public void eval() {
 
-        LV.eval();
-        LH.eval();
-        LT.eval();
-        RT.eval();
-        BT.eval();
-        RV.eval();
-        RH.eval();
+                if (module.isOperatorControl()) {
+
+                    A.eval();
+                    B.eval();
+                    X.eval();
+                    Y.eval();
+                    LB.eval();
+                    RB.eval();
+                    BACK.eval();
+                    START.eval();
+                    LS.eval();
+                    RS.eval();
+
+                    LV.eval();
+                    LH.eval();
+                    LT.eval();
+                    RT.eval();
+                    BT.eval();
+                    RV.eval();
+                    RH.eval();
+                }
+
+                module.runNextLoop(this);
+            }
+        });
+
+        stick = new Joystick(port);
     }
 
     private class ThisButton extends Button {

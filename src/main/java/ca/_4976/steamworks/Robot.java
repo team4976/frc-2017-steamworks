@@ -9,8 +9,8 @@ import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
 
 public class Robot extends IterativeRobot {
 
-    public XboxController driver = new XboxController(0);
-    public XboxController operator = new XboxController(1);
+    public XboxController driver = new XboxController(this, 0);
+    public XboxController operator = new XboxController(this, 1);
 
     public Inputs inputs = new Inputs(this);
     public Outputs outputs = new Outputs(this);
@@ -18,31 +18,15 @@ public class Robot extends IterativeRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionProfile profile = new MotionProfile(this);
 
-    private boolean isRecording = false;
-
     @Override public void robotInit() {
 
         drive.init();
     }
 
-    @Override public void disabledInit() { }
-
     @Override public void autonomousInit() { profile.run(); }
-
-    @Override public void teleopPeriodic() {
-
-        driver.eval();
-    }
 
     @Override public void testInit() {
 
-        if (operator.BACK.get()) {
-
-            isRecording = true;
-            profile.record();
-        }
+        if (operator.BACK.get()) enableOperatorControl();
     }
-
-    @Override public void testPeriodic() { if (isRecording) teleopPeriodic(); }
-
 }

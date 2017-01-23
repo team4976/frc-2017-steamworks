@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.hal.HAL;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 /**
  * IterativeRobot implements a specific type of Robot Program framework, extending the RobotBase
@@ -44,6 +43,7 @@ public class IterativeRobot extends RobotBase {
     private boolean m_autonomousInitialized;
     private boolean m_teleopInitialized;
     private boolean m_testInitialized;
+    private boolean m_operatorControl;
 
     private ArrayList<Evaluable> evaluables = new ArrayList<>();
     private ArrayList<Long> evalTimes = new ArrayList<>();
@@ -60,6 +60,7 @@ public class IterativeRobot extends RobotBase {
         m_autonomousInitialized = false;
         m_teleopInitialized = false;
         m_testInitialized = false;
+        m_operatorControl = false;
     }
 
     /**
@@ -87,13 +88,13 @@ public class IterativeRobot extends RobotBase {
                     LiveWindow.setEnabled(false);
                     disabledInit();
                     m_disabledInitialized = true;
+                    m_operatorControl = false;
                     // reset the initialization flags for the other modes
                     m_autonomousInitialized = false;
                     m_teleopInitialized = false;
                     m_testInitialized = false;
                 }
                 HAL.observeUserProgramDisabled();
-                peridoic();
                 disabledPeriodic();
             } else if (isTest()) {
                 // call TestInit() if we are now just entering test mode from either
@@ -109,6 +110,7 @@ public class IterativeRobot extends RobotBase {
                 HAL.observeUserProgramTest();
                 peridoic();
                 testPeriodic();
+                if (m_operatorControl) teleopPeriodic();
             } else if (isAutonomous()) {
                 // call Autonomous_Init() if this is the first time
                 // we've entered autonomous_mode
@@ -138,11 +140,18 @@ public class IterativeRobot extends RobotBase {
                     m_disabledInitialized = false;
                 }
                 HAL.observeUserProgramTeleop();
+                peridoic();
                 teleopPeriodic();
             }
-            peridoic();
             robotPeriodic();
         }
+    }
+
+    public void enableOperatorControl() { m_operatorControl = true; }
+
+    @Override public boolean isOperatorControl() {
+
+        return m_operatorControl || super.isOperatorControl();
     }
 
     public void runNextLoop(Evaluable evaluable) {
@@ -161,9 +170,9 @@ public class IterativeRobot extends RobotBase {
 
         if (evalTimes.size() == evaluables.size()) {
 
-            for (int i = 0; i < evaluables.size(); i++) {
+            for (int i = evaluables.size() - 1; i >= 0; i--) {
 
-                if (System.currentTimeMillis() <= evalTimes.get(0)) {
+                if (System.currentTimeMillis() >= evalTimes.get(i)) {
 
                     evaluables.get(i).eval();
                     evaluables.remove(i);
@@ -186,9 +195,7 @@ public class IterativeRobot extends RobotBase {
      * until RobotInit() exits. Code in RobotInit() that waits for enable will cause the robot to
      * never indicate that the code is ready, causing the robot to be bypassed in a match.
      */
-    protected void robotInit() {
-        System.out.println("Default IterativeRobot.robotInit() method... Overload me!");
-    }
+    protected void robotInit() { }
 
     /**
      * Initialization code for disabled mode should go here.
@@ -196,9 +203,7 @@ public class IterativeRobot extends RobotBase {
      * <p>Users should override this method for initialization code which will be called each time the
      * robot enters disabled mode.
      */
-    protected void disabledInit() {
-        System.out.println("Default IterativeRobot.disabledInit() method... Overload me!");
-    }
+    protected void disabledInit() { }
 
     /**
      * Initialization code for autonomous mode should go here.
@@ -206,9 +211,7 @@ public class IterativeRobot extends RobotBase {
      * <p>Users should override this method for initialization code which will be called each time the
      * robot enters autonomous mode.
      */
-    protected void autonomousInit() {
-        System.out.println("Default IterativeRobot.autonomousInit() method... Overload me!");
-    }
+    protected void autonomousInit() { }
 
     /**
      * Initialization code for teleop mode should go here.
@@ -216,9 +219,7 @@ public class IterativeRobot extends RobotBase {
      * <p>Users should override this method for initialization code which will be called each time the
      * robot enters teleop mode.
      */
-    protected void teleopInit() {
-        System.out.println("Default IterativeRobot.teleopInit() method... Overload me!");
-    }
+    protected void teleopInit() { }
 
     /**
      * Initialization code for test mode should go here.
@@ -227,13 +228,9 @@ public class IterativeRobot extends RobotBase {
      * robot enters test mode.
      */
     @SuppressWarnings("PMD.JUnit4TestShouldUseTestAnnotation")
-    protected void testInit() {
-        System.out.println("Default IterativeRobot.testInit() method... Overload me!");
-    }
+    protected void testInit() { }
 
   /* ----------- Overridable periodic code ----------------- */
-
-    private boolean m_rpFirstRun = true;
 
     /**
      * Periodic code for all robot modes should go here.
@@ -245,14 +242,8 @@ public class IterativeRobot extends RobotBase {
      * disconnected.  For most use cases the variable timing will not be an issue.  If your code does
      * require guaranteed fixed periodic timing, consider using Notifier or PIDController instead.
      */
-    protected void robotPeriodic() {
-        if (m_rpFirstRun) {
-            System.out.println("Default IterativeRobot.robotPeriodic() method... Overload me!");
-            m_rpFirstRun = false;
-        }
-    }
+    protected void robotPeriodic() { }
 
-    private boolean m_dpFirstRun = true;
 
     /**
      * Periodic code for disabled mode should go here.
@@ -265,14 +256,8 @@ public class IterativeRobot extends RobotBase {
      * disconnected.  For most use cases the variable timing will not be an issue.  If your code does
      * require guaranteed fixed periodic timing, consider using Notifier or PIDController instead.
      */
-    protected void disabledPeriodic() {
-        if (m_dpFirstRun) {
-            System.out.println("Default IterativeRobot.disabledPeriodic() method... Overload me!");
-            m_dpFirstRun = false;
-        }
-    }
+    protected void disabledPeriodic() { }
 
-    private boolean m_apFirstRun = true;
 
     /**
      * Periodic code for autonomous mode should go here.
@@ -285,14 +270,8 @@ public class IterativeRobot extends RobotBase {
      * disconnected.  For most use cases the variable timing will not be an issue.  If your code does
      * require guaranteed fixed periodic timing, consider using Notifier or PIDController instead.
      */
-    protected void autonomousPeriodic() {
-        if (m_apFirstRun) {
-            System.out.println("Default IterativeRobot.autonomousPeriodic() method... Overload me!");
-            m_apFirstRun = false;
-        }
-    }
+    protected void autonomousPeriodic() { }
 
-    private boolean m_tpFirstRun = true;
 
     /**
      * Periodic code for teleop mode should go here.
@@ -305,14 +284,7 @@ public class IterativeRobot extends RobotBase {
      * disconnected.  For most use cases the variable timing will not be an issue.  If your code does
      * require guaranteed fixed periodic timing, consider using Notifier or PIDController instead.
      */
-    protected void teleopPeriodic() {
-        if (m_tpFirstRun) {
-            System.out.println("Default IterativeRobot.teleopPeriodic() method... Overload me!");
-            m_tpFirstRun = false;
-        }
-    }
-
-    private boolean m_tmpFirstRun = true;
+    protected void teleopPeriodic() { }
 
     /**
      * Periodic code for test mode should go here.
@@ -326,10 +298,5 @@ public class IterativeRobot extends RobotBase {
      * require guaranteed fixed periodic timing, consider using Notifier or PIDController instead.
      */
     @SuppressWarnings("PMD.JUnit4TestShouldUseTestAnnotation")
-    protected void testPeriodic() {
-        if (m_tmpFirstRun) {
-            System.out.println("Default IterativeRobot.testPeriodic() method... Overload me!");
-            m_tmpFirstRun = false;
-        }
-    }
+    protected void testPeriodic() { }
 }

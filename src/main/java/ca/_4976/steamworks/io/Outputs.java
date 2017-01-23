@@ -2,6 +2,7 @@ package ca._4976.steamworks.io;
 
 import ca._4976.library.IterativeRobot;
 import ca._4976.library.outputs.CANMotor;
+import ca._4976.library.outputs.PWMMotor;
 import ca._4976.library.outputs.Solenoid;
 
 public class Outputs {
@@ -10,10 +11,10 @@ public class Outputs {
 
     public Outputs(IterativeRobot module) { this.module = module; }
 
-    public CANMotor driveLeftFront = new CANMotor(module, 11, 0.02);
-    public CANMotor driveLeftRear = new CANMotor(module, 12, 0.02);
-    public CANMotor driveRightFront = new CANMotor(module, 13, 0.02);
-    public CANMotor driveRightRear = new CANMotor(module, 14, 0.02);
+    public PWMMotor driveLeftFront = new PWMMotor(module, 0, 0.02);
+    public PWMMotor driveLeftRear = new PWMMotor(module, 1, 0.02);
+    public PWMMotor driveRightFront = new PWMMotor(module, 2, 0.02);
+    public PWMMotor driveRightRear = new PWMMotor(module, 3, 0.02);
 
     public Solenoid shifter = new Solenoid(module, 20, 0, 1);
 }
