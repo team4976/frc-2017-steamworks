@@ -1,6 +1,6 @@
 package ca._4976.library.controllers;
 
-import ca._4976.library.listeners.BooleanListener;
+import ca._4976.library.listeners.ButtonListener;
 
 import java.util.ArrayList;
 
@@ -8,7 +8,7 @@ public class Button {
 
     int id;
 
-    private ArrayList<BooleanListener> listeners = new ArrayList<>();
+    private ArrayList<ButtonListener> listeners = new ArrayList<>();
     private boolean[] values = new boolean[2];
     private int onTime = 0;
 
@@ -21,22 +21,18 @@ public class Button {
         values[0] = values[1];
         values[1] = get();
 
-        if (values[1] && onTime > -1) onTime++; else onTime = 0;
+        if (!values[0] && values[1]) listeners.forEach(ButtonListener::rising);
 
-        if (onTime == -1 && !values[1]) onTime = 0;
+        else if (values[0] && !values[1]) listeners.forEach(ButtonListener::falling);
 
-        if (values[0] != values[1]) for (BooleanListener listener : listeners) listener.changed();
+        if (values[0] && !values[1] && onTime < 25) listeners.forEach(ButtonListener::pressed);
 
-        if (!values[0] && values[1]) for (BooleanListener listener : listeners) listener.rising();
+        else if (values[0] && !values[1]) listeners.forEach(ButtonListener::pressed);
 
-        if (values[0] && !values[1]) for (BooleanListener listener : listeners) listener.falling();
+        if (values[1]) onTime++;
 
-        if (onTime > 24) for (BooleanListener listener : listeners) {
-
-            listener.held();
-            onTime = -1;
-        }
+        else onTime = 0;
     }
 
-    public void addListener(BooleanListener listener) { listeners.add(listener); }
+    public void addListener(ButtonListener listener) { listeners.add(listener); }
 }

@@ -1,7 +1,7 @@
 package ca._4976.library.controllers;
 
+import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.Evaluable;
-import ca._4976.library.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class XboxController {
@@ -21,44 +21,40 @@ public class XboxController {
 
     public Axis LH = new ThisAxis(0);
     public Axis LV = new ThisAxis(1);
-    public Axis RH = new ThisAxis(2);
-    public Axis RV = new ThisAxis(3);
-    public Axis LT = new ThisAxis(4);
-    public Axis RT = new ThisAxis(5);
-    public Axis BT = new ThisAxis(5, 4);
+    public Axis RH = new ThisAxis(4);
+    public Axis RV = new ThisAxis(5);
+    public Axis LT = new ThisAxis(2);
+    public Axis RT = new ThisAxis(3);
+    public Axis BT = new ThisAxis(3, 2);
 
 
-    public XboxController(IterativeRobot module, int port) {
+    public XboxController(AsynchronousRobot module, int port) {
 
-        module.runNextLoop(new Evaluable() {
+        module.runNextLoop(() -> {
 
-            @Override public void eval() {
+            if (module.isOperatorControl()) {
 
-                if (module.isOperatorControl()) {
+                A.eval();
+                B.eval();
+                X.eval();
+                Y.eval();
+                LB.eval();
+                RB.eval();
+                BACK.eval();
+                START.eval();
+                LS.eval();
+                RS.eval();
 
-                    A.eval();
-                    B.eval();
-                    X.eval();
-                    Y.eval();
-                    LB.eval();
-                    RB.eval();
-                    BACK.eval();
-                    START.eval();
-                    LS.eval();
-                    RS.eval();
-
-                    LV.eval();
-                    LH.eval();
-                    LT.eval();
-                    RT.eval();
-                    BT.eval();
-                    RV.eval();
-                    RH.eval();
-                }
-
-                module.runNextLoop(this);
+                LV.eval();
+                LH.eval();
+                LT.eval();
+                RT.eval();
+                BT.eval();
+                RV.eval();
+                RH.eval();
             }
-        });
+
+        }, -1);
 
         stick = new Joystick(port);
     }

@@ -7,6 +7,4 @@ public abstract class BooleanListener {
     public void rising() { }
 
     public void changed() {  }
-
-    public void held() { }
 }

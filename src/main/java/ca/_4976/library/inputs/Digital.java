@@ -1,6 +1,6 @@
 package ca._4976.library.inputs;
 
-import ca._4976.library.IterativeRobot;
+import ca._4976.library.AsynchronousRobot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import ca._4976.library.listeners.BooleanListener;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Digital {
 
-    private IterativeRobot module;
+    private AsynchronousRobot module;
 
     private DigitalInput input;
 
@@ -16,7 +16,7 @@ public class Digital {
     private boolean[] values = new boolean[2];
     private int onTime = 0;
 
-    public Digital(IterativeRobot module, int id) {
+    public Digital(AsynchronousRobot module, int id) {
 
         this.module = module;
         input = new DigitalInput(id);

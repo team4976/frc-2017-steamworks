@@ -1,17 +1,17 @@
 package ca._4976.library.outputs;
 
-import ca._4976.library.IterativeRobot;
+import ca._4976.library.AsynchronousRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 public class Solenoid {
 
-    private IterativeRobot module;
+    private AsynchronousRobot module;
 
     private DoubleSolenoid solenoid;
     private long setTime = 0;
     private int offDelay = 600;
 
-    public Solenoid(IterativeRobot module, int pcmId, int outPin, int inPin) {
+    public Solenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
 
         this.module = module;
         solenoid = new DoubleSolenoid(pcmId, outPin, inPin);

@@ -1,12 +1,13 @@
 package ca._4976.library.outputs;
 
-import ca._4976.library.IterativeRobot;
+import ca._4976.library.AsynchronousRobot;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class CANMotor implements PIDOutput {
 
-    private IterativeRobot module;
+    private AsynchronousRobot module;
 
     private CANTalon motor;
     private double ramp = 1;
@@ -14,12 +15,14 @@ public class CANMotor implements PIDOutput {
     private double targetSpeed = 0;
     private double speed = 0;
 
+    private NetworkTable table = NetworkTable.getTable("CANMotors");
+
     public CANMotor(int port){
 
         motor = new CANTalon(port);
     }
 
-    public CANMotor(IterativeRobot module, int port, double ramp) {
+    public CANMotor(AsynchronousRobot module, int port, double ramp) {
 
         motor = new CANTalon(port);
         this.ramp = ramp;
@@ -27,16 +30,12 @@ public class CANMotor implements PIDOutput {
 
     private void update() {
 
-        if (Math.abs(targetSpeed - speed) > ramp) {
+        if (Math.abs(targetSpeed - speed) > ramp) speed = targetSpeed > speed ? speed + ramp : speed - ramp;
 
-            speed = targetSpeed > speed ? speed + ramp : speed - ramp;
-            motor.set(speed);
+        else speed = targetSpeed;
 
-        } else {
-
-            speed = targetSpeed;
-            motor.set(speed);
-        }
+        motor.set(speed);
+        table.putNumber(motor.getDeviceID() + "", speed);
 
         if (speed != targetSpeed) module.runNextLoop(this::update);
     }

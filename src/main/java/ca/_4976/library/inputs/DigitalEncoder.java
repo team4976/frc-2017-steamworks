@@ -1,25 +1,27 @@
 package ca._4976.library.inputs;
 
-import ca._4976.library.IterativeRobot;
+import ca._4976.library.AsynchronousRobot;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 
 public class DigitalEncoder implements PIDSource {
 
-    private IterativeRobot module;
+    private AsynchronousRobot module;
 
     private Encoder encoder;
 
     private PIDSourceType type = PIDSourceType.kDisplacement;
 
-    public DigitalEncoder(IterativeRobot module, int a, int b) {
+    public DigitalEncoder(AsynchronousRobot module, int a, int b) {
 
         this.module = module;
         encoder = new Encoder(a, b);
     }
 
     public void setScalar(double scalar) { encoder.setDistancePerPulse(scalar); }
+
+    public void setMinRate(double rate) { encoder.setMinRate(rate); }
 
     public double getRate() { return encoder.getRate(); }
 

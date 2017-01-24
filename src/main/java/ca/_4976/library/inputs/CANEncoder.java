@@ -1,19 +1,19 @@
 package ca._4976.library.inputs;
 
-import ca._4976.library.IterativeRobot;
+import ca._4976.library.AsynchronousRobot;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import ca._4976.library.outputs.CANMotor;
 
 public class CANEncoder implements PIDSource {
 
-    private IterativeRobot module;
+    private AsynchronousRobot module;
 
     private CANMotor encoder;
 
     private PIDSourceType type = PIDSourceType.kDisplacement;
 
-    public CANEncoder(IterativeRobot module, CANMotor motor) {
+    public CANEncoder(AsynchronousRobot module, CANMotor motor) {
 
         this.module = module;
         encoder = motor;

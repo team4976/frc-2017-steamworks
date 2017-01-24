@@ -18,7 +18,7 @@ public class MotionProfile {
 
     public synchronized void run() { new Thread(new Run(module)).start(); }
 
-    public class Record implements Runnable {
+    private class Record implements Runnable {
 
         private Robot module;
 
@@ -39,8 +39,8 @@ public class MotionProfile {
 
                     final TimeStamp stamp = new TimeStamp();
 
-                    stamp.leftDriveOutput = module.outputs.driveLeftFront.get();
-                    stamp.rightDriveOutput = module.outputs.driveRightFront.get();
+                    stamp.leftDriveOutput = module.inputs.driveLeft.getRate();
+                    stamp.rightDriveOutput = module.inputs.driveRight.getRate();
 
                     timeStamps.add(stamp);
                 }
@@ -48,11 +48,13 @@ public class MotionProfile {
         }
     }
 
-    public class Run implements Runnable {
+    private class Run implements Runnable {
 
         private Robot module;
 
-        public Run(Robot module) { this.module = module; }
+        private Run(Robot module) { this.module = module; }
+
+        private double kP = 1 / 15;
 
         @Override public void run() {
 
@@ -70,11 +72,11 @@ public class MotionProfile {
 
                     final TimeStamp stamp = timeStamps.get(i);
 
-                    module.outputs.driveLeftFront.set(stamp.leftDriveOutput);
-                    module.outputs.driveLeftRear.set(stamp.leftDriveOutput);
+                    module.outputs.driveLeftFront.set(kP * stamp.leftDriveOutput);
+                    module.outputs.driveLeftRear.set(kP * stamp.leftDriveOutput);
 
-                    module.outputs.driveRightFront.set(stamp.rightDriveOutput);
-                    module.outputs.driveRightRear.set(stamp.rightDriveOutput);
+                    module.outputs.driveRightFront.set(kP * stamp.rightDriveOutput);
+                    module.outputs.driveRightRear.set(kP * stamp.rightDriveOutput);
 
                     i++;
                 }
