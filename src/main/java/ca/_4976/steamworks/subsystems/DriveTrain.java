@@ -1,5 +1,7 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.library.listeners.ButtonListener;
+import ca._4976.library.listeners.DoubleListener;
 import ca._4976.library.math.Vector2D;
 import ca._4976.steamworks.Robot;
 
@@ -28,7 +30,9 @@ public class DriveTrain {
 
     private void drive() {
 
-        module.outputs.driveLeftFront.set(-velocity.getX() + velocity.getY());
-        module.outputs.driveRightFront.set(-velocity.getX() - velocity.getY());
+        module.outputs.driveLeftFront.set(-velocity.getX() - velocity.getY());
+        module.outputs.driveLeftRear.set(-velocity.getX() - velocity.getY());
+        module.outputs.driveRightFront.set(-velocity.getX() + velocity.getY());
+        module.outputs.driveRightRear.set(-velocity.getX() + velocity.getY());
     }
 }

@@ -1,20 +1,16 @@
 package ca._4976.steamworks;
 
 import ca._4976.library.AsynchronousRobot;
-import ca._4976.library.Evaluable;
 import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
 import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Robot extends AsynchronousRobot {
 
     public XboxController driver = new XboxController(this, 0);
     public XboxController operator = driver;
-
-    public NetworkTable table = NetworkTable.getTable("encoder");
 
     public Inputs inputs = new Inputs(this);
     public Outputs outputs = new Outputs(this);
@@ -22,27 +18,32 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionProfile profile = new MotionProfile(this);
 
-    @Override public void disabledInit() {
+    public void getEncoderDistance() {
 
-        outputs.compressor.setClosedLoopControl(false);
+        if (isOperatorControl()) {
+
+            System.out.print("velocity: " + inputs.driveLeft.getRate());
+            System.out.println(" velocity: " + inputs.driveRight.getRate());
+        }
     }
 
-    @Override public void teleopInit() {
+    @Override public void robotInit() {
 
-        System.out.println("hello");
-        setCheckEncoder();
-        runNextLoop(this::setCheckEncoder, -1);
+        runNextLoop(this::getEncoderDistance, -1);
     }
-
-    public void setCheckEncoder() { table.putNumber("value", inputs.driveRight.getDistance()); }
 
     @Override public void autonomousInit() { profile.run(); }
 
+    @Override public void teleopInit() {
+
+        System.out.println("Operator Control Enabled");
+    }
+
     @Override public void testInit() {
 
-        outputs.compressor.setClosedLoopControl(true);
+        System.out.println("Test Initialized");
 
-        if (operator.BACK.get() || true) {
+        if (operator.BACK.get() || driver.BACK.get() || true) {
 
             enableOperatorControl();
             profile.record();
