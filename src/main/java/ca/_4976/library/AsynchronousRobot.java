@@ -25,6 +25,8 @@ public class AsynchronousRobot extends RobotBase {
 
     @Override public void startCompetition() {
 
+        robotInit();
+
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
         HAL.observeUserProgramStarting();
 
@@ -44,6 +46,9 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = false;
                     teleopInizalized = false;
                     testInizalized = false;
+                    enableOperatorControl = false;
+
+                    disabledInit();
                 }
 
                 HAL.observeUserProgramDisabled();
@@ -59,24 +64,11 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = true;
                     teleopInizalized = false;
                     testInizalized = false;
+
+                    autonomousInit();
                 }
 
                 HAL.observeUserProgramAutonomous();
-                checkEvaluables();
-
-            } else if (isTest()) {
-
-                if (!testInizalized) {
-
-                    LiveWindow.setEnabled(true);
-
-                    disabledInizalized = false;
-                    autonomousInizalized = false;
-                    teleopInizalized = false;
-                    testInizalized = true;
-                }
-
-                HAL.observeUserProgramTest();
                 checkEvaluables();
 
             } else if (isOperatorControl()) {
@@ -89,9 +81,28 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = false;
                     teleopInizalized = true;
                     testInizalized = false;
+
+                    teleopInit();
                 }
 
                 HAL.observeUserProgramTeleop();
+                checkEvaluables();
+
+            } else if (isTest()) {
+
+                if (!testInizalized) {
+
+                    LiveWindow.setEnabled(true);
+
+                    disabledInizalized = false;
+                    autonomousInizalized = false;
+                    teleopInizalized = false;
+                    testInizalized = true;
+
+                    testInit();
+                }
+
+                HAL.observeUserProgramTest();
                 checkEvaluables();
             }
         }
@@ -114,17 +125,22 @@ public class AsynchronousRobot extends RobotBase {
 
         constantEvaluables.forEach(Evaluable::eval);
 
-        for (int i = evaluables.size() - 1; i >= 0; i--) {
+        if (evalTimes.size() == evaluables.size()) {
 
-            if (evalTimes.get(i) <= System.currentTimeMillis()) {
+            for (int i = evaluables.size() - 1; i >= 0; i--) {
 
-                evaluables.get(i).eval();
-                evaluables.remove(i);
-                evalTimes.remove(i);
+                if (evalTimes.get(i) <= System.currentTimeMillis()) {
+
+                    evaluables.get(i).eval();
+                    evaluables.remove(i);
+                    evalTimes.remove(i);
+                }
             }
-        }
+
+        } else { System.out.println("what"); }
     }
 
+    protected void robotInit() { }
     protected void disabledInit() { }
     protected void autonomousInit() { }
     protected void teleopInit() { }

@@ -2,10 +2,11 @@ package ca._4976.library.outputs;
 
 import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.Evaluable;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.VictorSP;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
-public class PWMMotor {
+public class PWMMotor implements PIDOutput {
 
     private AsynchronousRobot module;
 
@@ -55,4 +56,6 @@ public class PWMMotor {
     }
 
     public double get() { return speed; }
+
+    @Override public void pidWrite(double output) { motor.set(output); }
 }

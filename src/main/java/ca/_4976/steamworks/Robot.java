@@ -18,11 +18,32 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionProfile profile = new MotionProfile(this);
 
+    public void getEncoderDistance() {
+
+        if (isOperatorControl()) {
+
+            System.out.print("velocity: " + inputs.driveLeft.getRate());
+            System.out.println(" velocity: " + inputs.driveRight.getRate());
+        }
+    }
+
+    @Override public void robotInit() {
+
+        runNextLoop(this::getEncoderDistance, -1);
+    }
+
     @Override public void autonomousInit() { profile.run(); }
+
+    @Override public void teleopInit() {
+
+        System.out.println("Operator Control Enabled");
+    }
 
     @Override public void testInit() {
 
-        if (operator.BACK.get() || (driver.BACK.get() && driver.START.get())) {
+        System.out.println("Test Initialized");
+
+        if (operator.BACK.get() || driver.BACK.get() || true) {
 
             enableOperatorControl();
             profile.record();

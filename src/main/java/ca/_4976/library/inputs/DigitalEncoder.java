@@ -19,13 +19,15 @@ public class DigitalEncoder implements PIDSource {
         encoder = new Encoder(a, b);
     }
 
+    public void setReversed(boolean reversed) { encoder.setReverseDirection(reversed); }
+
     public void setScalar(double scalar) { encoder.setDistancePerPulse(scalar); }
 
     public void setMinRate(double rate) { encoder.setMinRate(rate); }
 
     public double getRate() { return encoder.getRate(); }
 
-    public double getDistance() { return encoder.get(); }
+    public double getDistance() { return encoder.getDistance(); }
 
     @Override public void setPIDSourceType(PIDSourceType pidSource) { }
 
