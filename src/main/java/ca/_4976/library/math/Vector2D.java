@@ -33,6 +33,4 @@ public class Vector2D {
     public void add(Vector2D vector2D) { add(vector2D.getX(), vector2D.getY());}
 
     public void sub(Vector2D vector2D) { sub(vector2D.getX(), vector2D.getY());}
-
-
 }

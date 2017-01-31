@@ -44,10 +44,11 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = false;
                     teleopInizalized = false;
                     testInizalized = false;
+
+                    disabledInit();
                 }
 
                 HAL.observeUserProgramDisabled();
-                checkEvaluables();
 
             } else if (isAutonomous()) {
 
@@ -59,6 +60,8 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = true;
                     teleopInizalized = false;
                     testInizalized = false;
+
+                    autonomousInit();
                 }
 
                 HAL.observeUserProgramAutonomous();
@@ -74,6 +77,8 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = false;
                     teleopInizalized = false;
                     testInizalized = true;
+
+                    testInit();
                 }
 
                 HAL.observeUserProgramTest();
@@ -89,6 +94,8 @@ public class AsynchronousRobot extends RobotBase {
                     autonomousInizalized = false;
                     teleopInizalized = true;
                     testInizalized = false;
+
+                    teleopInit();
                 }
 
                 HAL.observeUserProgramTeleop();

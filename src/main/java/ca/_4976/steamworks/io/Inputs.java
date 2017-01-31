@@ -14,6 +14,8 @@ public class Inputs {
         driveRight = new DigitalEncoder(module, 2, 3);
 
         driveLeft.setMinRate(0.001);
+        driveLeft.setScalar(4.961e-5);
         driveRight.setMinRate(0.001);
+        driveRight.setScalar(4.961e-5);
     }
 }

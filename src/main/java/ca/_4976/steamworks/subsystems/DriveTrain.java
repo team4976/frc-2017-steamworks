@@ -28,9 +28,7 @@ public class DriveTrain {
 
     private void drive() {
 
-        module.outputs.driveLeftFront.set(velocity.getX() + velocity.getY());
-        module.outputs.driveLeftRear.set(velocity.getX() + velocity.getY());
-        module.outputs.driveRightFront.set(velocity.getX() - velocity.getY());
-        module.outputs.driveRightRear.set(velocity.getX() - velocity.getY());
+        module.outputs.driveLeftFront.set(-velocity.getX() + velocity.getY());
+        module.outputs.driveRightFront.set(-velocity.getX() - velocity.getY());
     }
 }
