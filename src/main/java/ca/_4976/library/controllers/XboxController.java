@@ -2,6 +2,7 @@ package ca._4976.library.controllers;
 
 import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.Evaluable;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 
 public class XboxController {
@@ -25,7 +26,7 @@ public class XboxController {
     public Axis RV = new ThisAxis(5);
     public Axis LT = new ThisAxis(2);
     public Axis RT = new ThisAxis(3);
-    public Axis BT = new ThisAxis(5, 4);
+    public Axis BT = new ThisAxis(3, 2);
 
 
     public XboxController(AsynchronousRobot module, int port) {
@@ -57,6 +58,12 @@ public class XboxController {
         }, -1);
 
         stick = new Joystick(port);
+    }
+
+    public void setRumble(double strength) {
+
+        stick.setRumble(GenericHID.RumbleType.kLeftRumble, strength);
+        stick.setRumble(GenericHID.RumbleType.kRightRumble, strength);
     }
 
     private class ThisButton extends Button {
