@@ -29,7 +29,7 @@ public class Robot extends AsynchronousRobot {
 
     @Override public void robotInit() {
 
-        runNextLoop(this::getEncoderDistance, -1);
+        //runNextLoop(this::getEncoderDistance, -1);
     }
 
     @Override public void autonomousInit() { profile.run(); }

@@ -1,6 +1,7 @@
 package ca._4976.steamworks.subsystems.motionprofiler;
 
 import ca._4976.steamworks.Robot;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 import java.util.ArrayList;
@@ -36,6 +37,9 @@ public class MotionProfile {
             long tickTime = 1000000000 / 200;
             long lastTick = System.nanoTime() - tickTime;
 
+            module.inputs.driveLeft.reset();
+            module.inputs.driveRight.reset();
+
             while (module.isEnabled()) {
 
                 if (System.nanoTime() - lastTick > tickTime) {
@@ -47,8 +51,11 @@ public class MotionProfile {
                     stamp.leftDriveOutput = module.outputs.driveLeftFront.get();
                     stamp.rightDriveOutput = module.outputs.driveRightFront.get();
 
-                    stamp.leftEncoderSpeed = module.inputs.driveLeft.getRate();
-                    stamp.leftEncoderSpeed = module.inputs.driveRight.getRate();
+                    stamp.leftEncoderPos = module.inputs.driveLeft.getDistance();
+                    stamp.rightEncoderPos = module.inputs.driveRight.getDistance();
+
+                    stamp.leftEncoderVelocity = module.inputs.driveLeft.getRate();
+                    stamp.rightEncoderVelocity = module.inputs.driveRight.getRate();
 
                     timeStamps.add(stamp);
                 }
@@ -57,10 +64,10 @@ public class MotionProfile {
             System.out.print("Pushing to Network....              ");
 
             double[] leftSetPoints = new double[timeStamps.size()];
-            for (int i = 0; i < leftSetPoints.length; i++) leftSetPoints[i] = timeStamps.get(i).leftEncoderSpeed;
+            for (int i = 0; i < leftSetPoints.length; i++) leftSetPoints[i] = timeStamps.get(i).leftEncoderPos;
 
             double[] rightSetPoints = new double[timeStamps.size()];
-            for (int i = 0; i < rightSetPoints.length; i++) rightSetPoints[i] = timeStamps.get(i).rightEncoderSpeed;
+            for (int i = 0; i < rightSetPoints.length; i++) rightSetPoints[i] = timeStamps.get(i).rightEncoderPos;
 
             table.putNumberArray("leftSetPoints", leftSetPoints);
             table.putNumberArray("rightSetPoints", rightSetPoints);
@@ -76,15 +83,14 @@ public class MotionProfile {
         private Run(Robot module) { this.module = module; }
 
         double kP = table.getNumber("kP", 0);
-        double kI = table.getNumber("kI", 0);
         double kD = table.getNumber("kD", 0);
 
         @Override public void run() {
 
             System.out.println("Run Time: " + timeStamps.size() / 200.0 + "s");
 
-            double[] actualLeftSpeed = new double[timeStamps.size()];
-            double[] actualRightSpeed = new double[timeStamps.size()];
+            double actualLeftPos;
+            double actualRightPos;
 
             int i = 0;
             long tickTime = 1000000000 / 200;
@@ -93,11 +99,14 @@ public class MotionProfile {
             double lError;
             double rError;
 
-            double lIntegral  = 0;
-            double rIntegral = 0;
-
             double lLastError = 0;
             double rLastError = 0;
+
+            module.inputs.driveLeft.reset();
+            module.inputs.driveRight.reset();
+
+            int ticks = 0;
+            long tickLength = 0;
 
             while (i < timeStamps.size() && module.isEnabled()) {
 
@@ -105,27 +114,44 @@ public class MotionProfile {
 
                     lastTick = System.nanoTime();
 
+                    long time = System.nanoTime();
+
                     final TimeStamp stamp = timeStamps.get(i);
 
-                    actualLeftSpeed[i] = module.inputs.driveLeft.getRate();
-                    actualRightSpeed[i] = module.inputs.driveRight.getRate();
+                    if (ticks > 199) {
 
-                    lError = actualLeftSpeed[i] - module.inputs.driveLeft.getRate();
-                    rError = actualRightSpeed[i] - module.inputs.driveLeft.getRate();
+                        System.out.println("Tick Runtime:" + tickLength / (double) ticks);
+                        ticks = 0;
+                        tickLength = 0;
+                    }
 
-                    lIntegral += lError * tickTime;
-                    rIntegral += rError * tickTime;
+                    actualLeftPos = module.inputs.driveLeft.getDistance();
+                    actualRightPos = module.inputs.driveRight.getDistance();
 
-                    double lDerivative = (lError - lLastError) / tickTime ;
-                    double rDerivative = (rError - rLastError) / tickTime;
+                    lError = -(actualLeftPos - stamp.leftEncoderPos);
+                    rError = -(actualRightPos - stamp.rightEncoderPos);
 
-                    outputLeft(stamp.leftDriveOutput + kP * lError + kI + lIntegral + kD * lDerivative);
-                    outputRight(stamp.rightDriveOutput + kP * rError + kI + rIntegral + kD * rDerivative);
+                    table.putNumber("leftA", actualLeftPos);
+                    table.putNumber("leftS", lError);
+
+                    table.putNumber("rightA", actualRightPos);
+                    table.putNumber("rightS", rError);
+
+
+                    double lDerivative = ((lError - lLastError) / tickTime) - stamp.leftEncoderVelocity;
+                    double rDerivative = ((rError - rLastError) / tickTime) - stamp.rightEncoderVelocity;
+
+                    System.out.println(actualLeftPos + " " + actualRightPos);
+
+                    outputLeft(stamp.leftDriveOutput + (kP * lError) + (kD * lDerivative));
+                    outputRight(stamp.rightDriveOutput + (kP * rError) + (kD * rDerivative));
 
                     lLastError = lError;
-                    rLastError = lError;
+                    rLastError = rError;
 
                     i++;
+                    ticks++;
+                    tickLength += System.nanoTime() - time;
                 }
             }
 
@@ -133,9 +159,6 @@ public class MotionProfile {
             outputRight(0);
 
             System.out.print("Pushing to Network....              ");
-
-            table.putNumberArray("actualLeftSpeed", actualLeftSpeed);
-            table.putNumberArray("actualRightSpeed", actualRightSpeed);
 
             System.out.println("Complete!");
         }
