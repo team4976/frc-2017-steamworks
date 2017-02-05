@@ -15,7 +15,7 @@ public class Robot extends AsynchronousRobot {
 
     @Override public void robotInit() {
     
-        System.out.println("Robot Initalized!")
+        System.out.println("Robot Initalized!");
     }
 
     @Override public void disabledInit() {  
