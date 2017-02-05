@@ -10,7 +10,7 @@ import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
 public class Robot extends AsynchronousRobot {
 
     public XboxController driver = new XboxController(this, 0);
-    public XboxController operator = driver;
+    public XboxController operator = new XboxController(this, 1);
 
     public Inputs inputs = new Inputs(this);
     public Outputs outputs = new Outputs(this);
@@ -18,35 +18,36 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionProfile profile = new MotionProfile(this);
 
-    public void getEncoderDistance() {
-
-        if (isOperatorControl()) {
-
-            System.out.print("velocity: " + inputs.driveLeft.getRate());
-            System.out.println(" velocity: " + inputs.driveRight.getRate());
-        }
-    }
-
     @Override public void robotInit() {
 
-        //runNextLoop(this::getEncoderDistance, -1);
+        System.out.println("Robot Initalized!");
     }
 
-    @Override public void autonomousInit() { profile.run(); }
+    @Override public void disabledInit() { 
+        
+        System.out.println("Robot was Disabled!");
+    }
+
+    @Override public void autonomousInit() {
+        
+        profile.run(); 
+    
+        System.out.println("Autonomous Initalized!");
+    }
 
     @Override public void teleopInit() {
 
-        System.out.println("Operator Control Enabled");
+        System.out.println("Operator Control Initalized!");
     }
 
     @Override public void testInit() {
-
-        System.out.println("Test Initialized");
-
-        if (operator.BACK.get() || driver.BACK.get() || true) {
+        
+        if (operator.BACK.get() || driver.BACK.get()) {
 
             enableOperatorControl();
             profile.record();
         }
+    
+        System.out.println("Autonomous Initalized!");
     }
 }
