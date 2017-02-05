@@ -5,7 +5,7 @@ import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
-import ca._4976.steamworks.subsystems.motionprofiler.MotionProfile;
+import ca._4976.steamworks.subsystems.MotionControl;
 
 public class Robot extends AsynchronousRobot {
 
@@ -16,7 +16,7 @@ public class Robot extends AsynchronousRobot {
     public Outputs outputs = new Outputs(this);
 
     private DriveTrain drive = new DriveTrain(this);
-    private MotionProfile profile = new MotionProfile(this);
+    private MotionControl profile = new MotionControl(this);
 
     @Override public void robotInit() {
 
@@ -30,7 +30,7 @@ public class Robot extends AsynchronousRobot {
 
     @Override public void autonomousInit() {
         
-        profile.run(); 
+        profile.play();
     
         System.out.println("Autonomous Initalized!");
     }
