@@ -24,6 +24,8 @@ public class CANMotor implements PIDOutput {
 
     public CANMotor(AsynchronousRobot module, int port, double ramp) {
 
+        this.module = module;
+
         motor = new CANTalon(port);
         this.ramp = ramp;
     }
