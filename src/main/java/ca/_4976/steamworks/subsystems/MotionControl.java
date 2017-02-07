@@ -51,13 +51,21 @@ public class MotionControl {
                     lastTickTime = System.nanoTime();
                     tickCount++;
 
+                    boolean[] driverButtons = new boolean[module.driver.buttons.length];
+                    for (int i = 0; i < driverButtons.length; i++) driverButtons[i] = module.driver.buttons[i].get();
+
+                    double[] driverAxes = new double[module.driver.axes.length];
+                    for (int i = 0; i < driverAxes.length; i++) driverAxes[i] = module.driver.axes[i].get();
+
                     moments.add(new Moment(
                             module.outputs.driveLeftFront.get(),
                             module.outputs.driveLeftFront.get(),
                             module.inputs.driveLeft.getDistance(),
                             module.inputs.driveRight.getDistance(),
                             module.inputs.driveLeft.getRate(),
-                            module.inputs.driveRight.getRate()
+                            module.inputs.driveRight.getRate(),
+                            driverButtons,
+                            driverAxes
                     ));
 
                     avgTickRate += System.nanoTime() - lastTickTime;
@@ -91,6 +99,18 @@ public class MotionControl {
                     lastTickTime = System.nanoTime();
 
                     Moment moment = moments.get(tickCount);
+                    Moment lastMoment = moments.get(tickCount > 0 ? tickCount : 0);
+
+                    for (int i = 0; i < moment.driverButtons.length; i++) {
+
+                        if (moment.driverButtons[i] && !lastMoment.driverButtons[i]) module.driver.buttons[i].triggerFalling();
+
+                        if (!moment.driverButtons[i] && lastMoment.driverButtons[i]) module.driver.buttons[i].triggerRising();
+                    }
+
+                    //TODO fix conflict
+                    //for (int i = 0; i < moment.driverAxes.length; i++)
+                    //    if (moment.driverAxes[i] != lastMoment.driverAxes[i]) module.driver.axes[i].triggerChanged(moment.driverAxes[i]);
 
                     double actualLeftPosition = module.inputs.driveLeft.getDistance();
                     double actualRightPosition = module.inputs.driveRight.getDistance();
@@ -143,13 +163,19 @@ public class MotionControl {
         private final double leftEncoderVelocity;
         private final double rightEncoderVelocity;
 
+        private final boolean[] driverButtons;
+
+        private final double[] driverAxes;
+
         private Moment(
                 double leftDriveOutput,
                 double rightDriveOutput,
                 double leftEncoderPosition,
                 double rightEncoderPosition,
                 double leftEncoderVelocity,
-                double rightEncoderVelocity
+                double rightEncoderVelocity,
+                boolean[] driverButtons,
+                double[] driverAxes
         ) {
             this.leftDriveOutput = leftDriveOutput;
             this.rightDriveOutput = rightDriveOutput;
@@ -157,6 +183,9 @@ public class MotionControl {
             this.rightEncoderPosition = rightEncoderPosition;
             this.leftEncoderVelocity = leftEncoderVelocity;
             this.rightEncoderVelocity = rightEncoderVelocity;
+
+            this.driverButtons = driverButtons;
+            this.driverAxes = driverAxes;
         }
     }
 
