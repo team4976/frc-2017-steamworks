@@ -35,4 +35,12 @@ public class Button {
     }
 
     public void addListener(ButtonListener listener) { listeners.add(listener); }
+
+    public void triggerRising() { listeners.forEach(ButtonListener::rising); }
+
+    public void triggerFalling() { listeners.forEach(ButtonListener::falling); }
+
+    public void triggerPressed() { listeners.forEach(ButtonListener::pressed); }
+
+    public void triggerHeld() { listeners.forEach(ButtonListener::held); }
 }
