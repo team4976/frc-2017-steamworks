@@ -32,5 +32,5 @@ public class Axis {
 
     public void addListener(DoubleListener listener) { listeners.add(listener); }
 
-    public void triggerChanged(double value) { listeners.forEach(doubleListener -> doubleListener.changed(value)); }
+    public void triggerChanged(double value) { listeners.forEach(doubleListener -> doubleListener.changed(value)); }    //force commit
 }
