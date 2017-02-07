@@ -143,7 +143,7 @@ public class MotionControl {
         private final double leftEncoderVelocity;
         private final double rightEncoderVelocity;
 
-        public Moment(
+        private Moment(
                 double leftDriveOutput,
                 double rightDriveOutput,
                 double leftEncoderPosition,

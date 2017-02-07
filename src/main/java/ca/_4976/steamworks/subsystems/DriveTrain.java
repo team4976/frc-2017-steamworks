@@ -1,7 +1,5 @@
 package ca._4976.steamworks.subsystems;
 
-import ca._4976.library.listeners.ButtonListener;
-import ca._4976.library.listeners.DoubleListener;
 import ca._4976.library.math.Vector2D;
 import ca._4976.steamworks.Robot;
 
