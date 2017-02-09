@@ -6,9 +6,6 @@ import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
-/**
- * Created by Aavin on 2017-02-02.
- */
 public class shooter_cock {
 
     boolean speed = false;

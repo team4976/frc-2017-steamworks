@@ -19,6 +19,7 @@ public class Outputs {
     public Solenoid climb;
 
     public LinearActuator hood;
+    public CANMotor shooter;
 
     public Outputs(AsynchronousRobot module) {
 
@@ -29,6 +30,7 @@ public class Outputs {
 
         HopperElevator = new CANMotor(2);
         ShooterElevator = new CANMotor(3);
+        shooter = new CANMotor(11);
 
         hood = new LinearActuator(4);
 
