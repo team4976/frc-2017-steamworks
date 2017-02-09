@@ -5,6 +5,7 @@ import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
+import ca._4976.steamworks.subsystems.GearHandling;
 import ca._4976.steamworks.subsystems.MotionControl;
 
 public class Robot extends AsynchronousRobot {
@@ -17,21 +18,22 @@ public class Robot extends AsynchronousRobot {
 
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
+    private GearHandling gearHandling = new GearHandling(this);
 
     @Override public void robotInit() {
 
         System.out.println("Robot Initalized!");
     }
 
-    @Override public void disabledInit() { 
-        
+    @Override public void disabledInit() {
+
         System.out.println("Robot was Disabled!");
     }
 
     @Override public void autonomousInit() {
-        
+
         profile.play();
-    
+
         System.out.println("Autonomous Initalized!");
     }
 

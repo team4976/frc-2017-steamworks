@@ -11,6 +11,7 @@ public class Inputs {
 
     public Digital optical0, optical1, optical2, TESTINGSWITCH;
 
+    public Digital gearSense;
 
     public Inputs(AsynchronousRobot module) {
 
@@ -31,5 +32,6 @@ public class Inputs {
         optical2 = new Digital(module, 6);
         TESTINGSWITCH = new Digital(module, 9);
 
+        gearSense = new Digital(module, 5);
     }
 }
