@@ -7,6 +7,7 @@ import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
 import ca._4976.steamworks.subsystems.GearHandling;
 import ca._4976.steamworks.subsystems.MotionControl;
+import ca._4976.steamworks.subsystems.LazySusan;
 
 public class Robot extends AsynchronousRobot {
 
@@ -19,22 +20,26 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
     private GearHandling gearHandling = new GearHandling(this);
+    private LazySusan lazySusan = new LazySusan(this);
 
     @Override public void robotInit() {
-
+    
         System.out.println("Robot Initalized!");
     }
 
-    @Override public void disabledInit() {
-
+    @Override public void disabledInit() {  
+    
         System.out.println("Robot was Disabled!");
     }
 
-    @Override public void autonomousInit() {
+    @Override public void autonomousInit() { 
+    
+        System.out.println("Autonomous Initialized!");
+    }
 
-        profile.play();
-
-        System.out.println("Autonomous Initalized!");
+    @Override public void teleopInit() { 
+    
+        System.out.println("Operator Control Initialized!");
     }
 
     @Override public void testInit() {
