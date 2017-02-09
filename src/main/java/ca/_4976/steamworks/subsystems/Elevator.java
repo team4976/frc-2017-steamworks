@@ -80,19 +80,6 @@ public class Elevator extends AsynchronousRobot {
             }
         });
 
-        module.inputs.optical0.addListener(new BooleanListener() {
-            @Override
-            public void falling() {
-                if (HECount <= 0 && SHECount <= 0) {
-                    module.runNextLoop(() -> {
-                        if(HECount <= 0 && SHECount <= 0) {
-                            stopMotors();
-                        }
-                    }, 5000);
-                }
-            }
-        });
-
         module.inputs.optical1.addListener(new BooleanListener() {
             @Override
             public void falling() {
