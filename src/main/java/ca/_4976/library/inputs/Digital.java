@@ -21,7 +21,7 @@ public class Digital {
         this.module = module;
         input = new DigitalInput(id);
 
-        for (int i = 0; i < values.length; i++) { values[i] = input.get(); }
+        for (int i = 0; i < values.length; i++) values[i] = input.get();
 
         module.runNextLoop(() -> {
 

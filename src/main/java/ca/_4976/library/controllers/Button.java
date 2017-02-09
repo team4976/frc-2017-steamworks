@@ -25,7 +25,7 @@ public class Button {
 
         else if (values[0] && !values[1]) listeners.forEach(ButtonListener::falling);
 
-        if (values[0] && !values[1] && onTime < 25) listeners.forEach(ButtonListener::pressed);
+        if (values[0] && !values[1] && onTime < 25) listeners.forEach(ButtonListener::held);
 
         else if (values[0] && !values[1]) listeners.forEach(ButtonListener::pressed);
 
@@ -35,4 +35,12 @@ public class Button {
     }
 
     public void addListener(ButtonListener listener) { listeners.add(listener); }
+
+    public void triggerRising() { listeners.forEach(ButtonListener::rising); }
+
+    public void triggerFalling() { listeners.forEach(ButtonListener::falling); }
+
+    public void triggerPressed() { listeners.forEach(ButtonListener::pressed); }
+
+    public void triggerHeld() { listeners.forEach(ButtonListener::held); }
 }

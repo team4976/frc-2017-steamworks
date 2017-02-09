@@ -29,6 +29,8 @@ public class DigitalEncoder implements PIDSource {
 
     public double getDistance() { return encoder.getDistance(); }
 
+    public void reset() { encoder.reset(); }
+
     @Override public void setPIDSourceType(PIDSourceType pidSource) { }
 
     @Override public PIDSourceType getPIDSourceType() { return null; }
