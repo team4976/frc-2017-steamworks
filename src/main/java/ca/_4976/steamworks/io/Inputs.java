@@ -8,6 +8,7 @@ public class Inputs {
 
     public DigitalEncoder driveLeft;
     public DigitalEncoder driveRight;
+    public DigitalEncoder shooter_encoder;
 
     public Digital optical0, optical1, optical2, TESTINGSWITCH;
 
@@ -17,6 +18,7 @@ public class Inputs {
 
         driveRight = new DigitalEncoder(module, 0, 1);
         driveLeft = new DigitalEncoder(module, 2, 3);
+        shooter_encoder = new DigitalEncoder(module, 12, 13);
 
         driveLeft.setReversed(true);
         driveRight.setReversed(true);

@@ -4,10 +4,7 @@ import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
-import ca._4976.steamworks.subsystems.DriveTrain;
-import ca._4976.steamworks.subsystems.GearHandling;
-import ca._4976.steamworks.subsystems.MotionControl;
-import ca._4976.steamworks.subsystems.LazySusan;
+import ca._4976.steamworks.subsystems.*;
 
 public class Robot extends AsynchronousRobot {
 
@@ -21,6 +18,7 @@ public class Robot extends AsynchronousRobot {
     private MotionControl profile = new MotionControl(this);
     private GearHandling gearHandling = new GearHandling(this);
     private LazySusan lazySusan = new LazySusan(this);
+    private shooter_cock Shooter_Cock= new shooter_cock(this);
 
     @Override public void robotInit() {
     

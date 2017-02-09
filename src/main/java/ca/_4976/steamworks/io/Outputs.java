@@ -18,6 +18,8 @@ public class Outputs {
     public Solenoid door;
     public Solenoid climb;
 
+    public LinearActuator hood;
+
     public Outputs(AsynchronousRobot module) {
 
         driveLeftFront = new PWMMotor(module, 1, 0.02);
@@ -28,7 +30,7 @@ public class Outputs {
         HopperElevator = new CANMotor(2);
         ShooterElevator = new CANMotor(3);
 
-        //Setting solenoid
+        hood = new LinearActuator(4);
 
         door = new Solenoid(module, 20, 1, 2);
         climb = new Solenoid(module, 20, 3, 4);
