@@ -6,7 +6,6 @@ import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.DriveTrain;
 import ca._4976.steamworks.subsystems.MotionControl;
-import ca._4976.steamworks.subsystems.Scaler;
 
 public class Robot extends AsynchronousRobot {
 
@@ -18,7 +17,6 @@ public class Robot extends AsynchronousRobot {
 
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
-    private Scaler scaler = new Scaler(this);
 
     @Override public void robotInit() {
 
@@ -37,19 +35,14 @@ public class Robot extends AsynchronousRobot {
         System.out.println("Autonomous Initalized!");
     }
 
-    @Override public void teleopInit() {
-
-        System.out.println("Operator Control Initalized!");
-    }
-
     @Override public void testInit() {
-        
+
         if (operator.BACK.get() || driver.BACK.get()) {
 
             enableOperatorControl();
             profile.record();
         }
-    
-        System.out.println("Autonomous Initalized!");
+
+        System.out.println("Test Initalized!");
     }
 }

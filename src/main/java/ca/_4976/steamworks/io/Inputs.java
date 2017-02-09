@@ -2,11 +2,15 @@ package ca._4976.steamworks.io;
 
 import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.inputs.DigitalEncoder;
+import ca._4976.library.inputs.Digital;
 
 public class Inputs {
 
     public DigitalEncoder driveLeft;
     public DigitalEncoder driveRight;
+
+    public Digital optical0, optical1, optical2, TESTINGSWITCH;
+
 
     public Inputs(AsynchronousRobot module) {
 
@@ -21,5 +25,11 @@ public class Inputs {
 
         driveLeft.setMinRate(0);
         driveRight.setMinRate(0);
+
+        optical0 = new Digital(module, 4);
+        optical1 = new Digital(module, 5);
+        optical2 = new Digital(module, 6);
+        TESTINGSWITCH = new Digital(module, 9);
+
     }
 }
