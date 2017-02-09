@@ -29,6 +29,4 @@ public class Solenoid {
         if (setTime < System.currentTimeMillis() - (offDelay * 0.90))
             solenoid.set(DoubleSolenoid.Value.kOff);
     }
-
-
 }

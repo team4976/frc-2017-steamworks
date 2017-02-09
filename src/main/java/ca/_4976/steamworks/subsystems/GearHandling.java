@@ -17,18 +17,20 @@ public class GearHandling extends AsynchronousRobot{
         //B button opens and closes the doors
         module.driver.B.addListener(new ButtonListener() {
             @Override
-            public void pressed() {
+            public void rising() {
                 module.outputs.door.output(!door);
                 door = !door;
+                System.out.println(door? "Door opened":"Door closed");
             }
         });
 
         //A button changes the position of the climber so it is out or upright
         module.driver.A.addListener(new ButtonListener() {
             @Override
-            public void pressed() {
+            public void rising() {
                 module.outputs.climb.output(!climber);
                 climber = !climber;
+                System.out.println(climber? "Climber forward":"Climber upright");
             }
         });
 
@@ -38,6 +40,7 @@ public class GearHandling extends AsynchronousRobot{
             public void rising() {
                 module.outputs.climb.output(true);
                 climber = true;
+                System.out.println("Climber forward");
             }
         });
     }
