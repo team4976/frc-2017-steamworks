@@ -14,6 +14,8 @@ public class Outputs {
 
     public CANMotor HopperElevator;
     public CANMotor ShooterElevator;
+    public CANMotor winchLeft;
+    public CANMotor winchRight;
 
     public Solenoid door;
     public Solenoid climb;
@@ -30,6 +32,8 @@ public class Outputs {
         driveRightRear = new PWMMotor(module, 3, 0.02);
 
         HopperElevator = new CANMotor(2);
+        winchLeft = new CANMotor(2);
+        winchRight = new CANMotor(2);
         ShooterElevator = new CANMotor(3);
         shooter = new CANMotor(11);
 
