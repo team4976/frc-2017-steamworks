@@ -17,6 +17,7 @@ public class Outputs {
 
     public Solenoid door;
     public Solenoid climb;
+    public Solenoid winchArm;
 
     public LinearActuator hood;
     public CANMotor shooter;
@@ -34,6 +35,7 @@ public class Outputs {
 
         hood = new LinearActuator(4);
 
+        winchArm = new Solenoid(module, 20, 1, 2);
         door = new Solenoid(module, 20, 1, 2);
         climb = new Solenoid(module, 20, 3, 4);
     }

@@ -11,7 +11,7 @@ public class Inputs {
     public DigitalEncoder shooter_encoder;
 
     public Digital optical0, optical1, optical2, TESTINGSWITCH;
-
+    public Digital winchSensor;
     public Digital gearSense;
 
     public Inputs(AsynchronousRobot module) {
@@ -33,7 +33,8 @@ public class Inputs {
         optical1 = new Digital(module, 5);
         optical2 = new Digital(module, 6);
         TESTINGSWITCH = new Digital(module, 9);
-
         gearSense = new Digital(module, 5);
+        winchSensor = new Digital(module, 0);
+
     }
 }

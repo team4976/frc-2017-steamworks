@@ -19,6 +19,7 @@ public class Robot extends AsynchronousRobot {
     private GearHandling gearHandling = new GearHandling(this);
     private LazySusan lazySusan = new LazySusan(this);
     private shooter_cock Shooter_Cock= new shooter_cock(this);
+    private Winch winch = new Winch(this);
 
     @Override public void robotInit() {
     
@@ -41,13 +42,7 @@ public class Robot extends AsynchronousRobot {
     }
 
     @Override public void testInit() {
-
-        if (operator.BACK.get() || driver.BACK.get()) {
-
-            enableOperatorControl();
-            profile.record();
-        }
-
-        System.out.println("Test Initalized!");
+        
+        System.out.println("Test Initialized!");
     }
 }
