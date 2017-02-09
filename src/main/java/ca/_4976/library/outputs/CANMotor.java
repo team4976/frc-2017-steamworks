@@ -44,9 +44,12 @@ public class CANMotor implements PIDOutput {
 
     public void set(double speed) {
 
-        if (targetSpeed == this.speed) update();
+        if (targetSpeed == this.speed) {
 
-        targetSpeed = speed;
+            targetSpeed = speed;
+            update();
+
+        } else targetSpeed = speed;
     }
 
     public double get() { return speed; }
