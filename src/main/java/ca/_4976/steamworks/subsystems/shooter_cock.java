@@ -23,13 +23,13 @@ public class shooter_cock {
         module.operator.A.addListener(new ButtonListener() {
             @Override
             public void falling() {
-                ShooterPid.setSetpoint(500);// get pid nummbers from midera
+                ShooterPid.setSetpoint(500);// get pid numbers from midura
                 linearAc = 0; //get values from vision
                 module.outputs.hood.set(linearAc);
                 ShooterPid.enable();
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//get number from grants code
-                System.out.println("turret result =" + turret_result);
+                System.out.println("turret result = " + turret_result);
 
                 if (RPM < 10000 && RPM > 100){// get min rps values
                     speed = true;
@@ -75,6 +75,7 @@ public class shooter_cock {
         module.operator.X.addListener(new ButtonListener() {
             @Override
             public void falling() {
+                module.elevator.stopMotors();
                 ShooterPid.disable();
                 System.out.println("mark its done");
             }

@@ -1,6 +1,7 @@
 package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.AsynchronousRobot;
+import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.BooleanListener;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
@@ -14,21 +15,19 @@ public class Elevator extends AsynchronousRobot {
 
     //Declare Variables
     public int HECount = 0, SHECount = 0, maxHE = 6, maxSHE = 3;
-    public boolean ballsReady = false, autoToggle = false;
+    public boolean ballsReady = false, autoToggle = true, cockingShooter = false;
     private Outputs outputs;
     private Inputs inputs;
+    private Robot module;
 
     public Elevator(Robot module) {
 
-        autoToggle = false;
+        //autoToggle = false;
         outputs = module.outputs;
         inputs = module.inputs;
+        this.module = module;
 
-
-        //Optical0 is the bottom of the hopper elevator
-        //Optical1 is the bottom of the shooter elevator/end of hopper elevator
-        //Optical2 is the top of shooter elevator
-        if(autoToggle == false) {
+        if(!autoToggle && !cockingShooter) {
             module.inputs.bottomOfHE.addListener(new BooleanListener() {
                 @Override
                 public void rising() {
@@ -112,6 +111,7 @@ public class Elevator extends AsynchronousRobot {
                 public void rising() {
                     //Decrease count in shooter elevator as ball leaves
                     System.out.println("HECount: " + HECount + " SHECount:" + SHECount);
+                    System.out.println("topOfShe rising");
                     SHECount--;
                 }
             });
@@ -133,6 +133,7 @@ public class Elevator extends AsynchronousRobot {
             module.inputs.topOfSHE.addListener(new BooleanListener() {
                 @Override
                 public void falling() {
+                    System.out.println("topOfShe rising");
                     if (HECount <= 0 && SHECount <= 0) {
                         module.runNextLoop(() -> {
                             if (HECount <= 0 && SHECount <= 0) {
@@ -179,6 +180,7 @@ public class Elevator extends AsynchronousRobot {
     }
 
 
+
     public void runHE(double speed) {
         outputs.HopperElevator.pidWrite(speed);
     }
@@ -190,19 +192,44 @@ public class Elevator extends AsynchronousRobot {
     public void fire() {
         runHE(0.75);
         runSHE(0.75);
+        cockingShooter = false;
         autoToggle = true;
     }
 
     public void cockingSetup() {
-        if(!ballsReady){
-            runHE(1);
-            runSHE(1);
-            if(inputs.topOfSHE.get() == true){
-                stopMotors();
-            }
-        }
+        System.out.println("Starting cockingSetup. autoToggle: " + autoToggle + " cockingShooter: " + cockingShooter);
+        autoToggle = true;
+        cockingShooter = true;
+        runHE(1);
+
     }
 
-    public void stopMotors(){ runHE(0); runSHE(0); }
+    public void loop(){
+        module.runNextLoop(new Evaluable() {
+            @Override
+            public void eval() {
+                System.out.println("cocking Shooter: " + cockingShooter);
+                if(cockingShooter == true){
+                    if (inputs.topOfSHE.get() == false) {
+                        runSHE(1);
+                    }
+                    if (inputs.topOfSHE.get() == true) {
+                        runSHE(0);
+                        cockingShooter = false;
+                        System.out.println("Top of shooter sensor triggered");
+                    }
+                }
+                module.runNextLoop(()->loop());
+            }
+
+        });
+
+    }
+
+    public void stopMotors(){
+        runHE(0);
+        runSHE(0);
+      //  cockingShooter = false;
+    }
 
 }
