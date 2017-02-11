@@ -4,6 +4,7 @@ import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.listeners.BooleanListener;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
+import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 
 /**
@@ -14,12 +15,15 @@ public class Elevator extends AsynchronousRobot {
     //Declare Variables
     public int HECount = 0, SHECount = 0, maxHE = 6, maxSHE = 3;
     public boolean ballsReady = false, autoToggle = false;
-    private Outputs op;
+    private Outputs outputs;
+    private Inputs inputs;
 
     public Elevator(Robot module) {
 
         autoToggle = false;
-        op = module.outputs;
+        outputs = module.outputs;
+        inputs = module.inputs;
+
 
         //Optical0 is the bottom of the hopper elevator
         //Optical1 is the bottom of the shooter elevator/end of hopper elevator
@@ -145,7 +149,7 @@ public class Elevator extends AsynchronousRobot {
             @Override
             public void rising() {
                 runHE(1);
-                 autoToggle = true;
+                autoToggle = true;
             }
         });
 
@@ -176,11 +180,11 @@ public class Elevator extends AsynchronousRobot {
 
 
     public void runHE(double speed) {
-        op.HopperElevator.pidWrite(speed);
+        outputs.HopperElevator.pidWrite(speed);
     }
 
     public void runSHE(double speed) {
-        op.ShooterElevator.pidWrite(speed);
+        outputs.ShooterElevator.pidWrite(speed);
     }
 
     public void fire() {
@@ -190,11 +194,14 @@ public class Elevator extends AsynchronousRobot {
     }
 
     public void cockingSetup() {
-      //  if (ballsReady) {
-            runHE(0.5);
-            runSHE(0.5);
+        if(!ballsReady){
+            runHE(1);
+            runSHE(1);
+            if(inputs.topOfSHE.get() == true){
+                stopMotors();
+            }
         }
-    //}
+    }
 
     public void stopMotors(){ runHE(0); runSHE(0); }
 
