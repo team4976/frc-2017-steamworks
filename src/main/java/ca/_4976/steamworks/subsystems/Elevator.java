@@ -121,11 +121,11 @@ public class Elevator extends AsynchronousRobot {
     }
 
     public void cockingSetup() {
-        if (ballsReady) {
+      //  if (ballsReady) {
             runHE(0.5);
             runSHE(0.5);
         }
-    }
+    //}
 
     public void stopMotors(){ runHE(0); runSHE(0); }
 

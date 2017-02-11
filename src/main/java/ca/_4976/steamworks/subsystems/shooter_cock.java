@@ -9,7 +9,7 @@ public class shooter_cock {
     boolean speed = false;
     boolean shooter_firing = false;
     double RPM = 500, linearAc = 0;
-    public int turret_result = 0, vision_state = 0, rumble = 0;
+    public int turret_result = 0, rumble = 0;
 
     private Robot module;
 
@@ -28,8 +28,8 @@ public class shooter_cock {
                 module.outputs.hood.set(linearAc);
                 ShooterPid.enable();
                 module.elevator.cockingSetup();
-                module.lazySusan.getVision_state();
-                turret_result = vision_state;//get number from grants code
+                turret_result = module.lazySusan.getVision_state();//get number from grants code
+                System.out.println("turret result =" + turret_result);
 
                 if (RPM < 10000 && RPM > 100){// get min rps values
                     speed = true;
@@ -51,32 +51,31 @@ public class shooter_cock {
             }
         });
 
-        module.operator.X.addListener(new ButtonListener() {
+        module.operator.B.addListener(new ButtonListener() {
             @Override
             public void rising() {
                 if (RPM < 10000 && RPM  > 100){
-                    shooter_firing = true;;
+                    module.elevator.stopMotors();
+                    module.elevator.fire();
                     System.out.println("Fire");
                 }
                 if (RPM > 10000 || RPM < 100){
-                    shooter_firing = false;
+                    module.elevator.stopMotors();
                     System.out.println("no fire");
                 }
             }
 
             @Override
             public void falling() {
-                shooter_firing = false;
-                System.out.println("falling");
+                module.elevator.stopMotors();
+                System.out.println("not firing");
             }
         });
 
-        module.operator.B.addListener(new ButtonListener() {
+        module.operator.X.addListener(new ButtonListener() {
             @Override
             public void falling() {
-               // ShooterPid.disable();
-                //disable.cockingSetup();
-                shooter_firing = false;
+                ShooterPid.disable();
                 System.out.println("mark its done");
             }
         });
