@@ -10,7 +10,7 @@ public class Inputs {
     public DigitalEncoder driveRight;
     public DigitalEncoder shooter_encoder;
 
-    public Digital optical0, optical1, optical2, TESTINGSWITCH;
+    public Digital bottomOfHE, bottomOfSHE, topOfSHE, TESTINGSWITCH;
     public Digital winchSensor;
     public Digital gearSense;
 
@@ -29,9 +29,9 @@ public class Inputs {
         driveLeft.setMinRate(0);
         driveRight.setMinRate(0);
 
-        optical0 = new Digital(module, 4);
-        optical1 = new Digital(module, 5);
-        optical2 = new Digital(module, 6);
+        bottomOfHE = new Digital(module, 4);
+        bottomOfSHE = new Digital(module, 5);
+        topOfSHE = new Digital(module, 6);
         TESTINGSWITCH = new Digital(module, 9);
         gearSense = new Digital(module, 7);
         winchSensor = new Digital(module, 8);
