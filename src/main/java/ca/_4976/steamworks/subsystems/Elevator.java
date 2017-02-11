@@ -4,10 +4,6 @@ import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.listeners.BooleanListener;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.io.Outputs;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import edu.wpi.first.wpilibj.DigitalInput;
-
-import java.util.ArrayList;
 
 
 /**
@@ -30,6 +26,7 @@ public class Elevator extends AsynchronousRobot {
         //Optical1 is the bottom of the shooter elevator/end of hopper elevator
         //Optical2 is the top of shooter elevator
 
+
         module.inputs.optical0.addListener(new BooleanListener() {
             @Override
             public void rising() {
@@ -43,10 +40,13 @@ public class Elevator extends AsynchronousRobot {
                 }
                 //If HECount is equal to or more than max amt move all balls to SHE
                 else if (HECount >= 9 && SHECount <= 3) {
-                    runHE(0.5);
-                    runSHE(0.5);
+                    runHE(1);
+                    runSHE(1);
+                } else if (HECount >= 9 && SHECount >= 3){
+                    stopMotors();
                 }
             }
+
         });
 
         module.inputs.optical1.addListener(new BooleanListener() {

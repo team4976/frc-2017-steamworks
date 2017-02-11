@@ -3,14 +3,12 @@ package ca._4976.steamworks.subsystems;
 import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
-import edu.wpi.first.wpilibj.*;
 
 /**
  * Created by Grant on 2/2/2017.
  */
 public class LazySusan extends AsynchronousRobot{
-              //midura is a placeholder for midura's ready, searching or failed variable
-              int vision_state = 0;
+    private int vision_state = 0;
     public LazySusan(Robot module){
 
 
@@ -18,12 +16,12 @@ public class LazySusan extends AsynchronousRobot{
             @Override
             public void falling() {
 
-                if(vision_state == 0) {
-                    vision_state = 2;
+                if(getVision_state() == 0) {
+                    setVision_state(2);
                     System.out.println("Seeing target");
                 }
-                else if(vision_state == 2) {
-                    vision_state = 0;
+                else if(getVision_state() == 2) {
+                    setVision_state(0);
                     System.out.println("Not seeing target");
                 }
             }
@@ -31,18 +29,29 @@ public class LazySusan extends AsynchronousRobot{
 
         //call midura's code
 
-        module.driver.A.addListener(new ButtonListener() {
+        module.operator.Y.addListener(new ButtonListener() {
             @Override public void rising() {
-                if (vision_state == 0) {
+                if (getVision_state() == 0) {
 
                     module.runNextLoop(() -> module.driver.setRumble(1), 0);
 
+                    module.runNextLoop(() -> module.operator.setRumble(1), 0);
+
                     module.runNextLoop(() -> module.driver.setRumble(0), 3000);
+
+                    module.runNextLoop(() -> module.operator.setRumble(0), 3000);
                 }
 
             }
 
         });
     }
+
+    public int getVision_state() {
+        return vision_state;
+    }
+
+    public void setVision_state(int vision_state) {
+        this.vision_state = vision_state;
+    }
 }
-//give up

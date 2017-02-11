@@ -17,9 +17,10 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
     private GearHandling gearHandling = new GearHandling(this);
-    private LazySusan lazySusan = new LazySusan(this);
+    public LazySusan lazySusan = new LazySusan(this);
     private shooter_cock Shooter_Cock= new shooter_cock(this);
     private Winch winch = new Winch(this);
+    public Elevator elevator = new Elevator(this);
 
     @Override public void robotInit() {
     
@@ -45,4 +46,6 @@ public class Robot extends AsynchronousRobot {
         
         System.out.println("Test Initialized!");
     }
+
+
 }

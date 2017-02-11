@@ -32,15 +32,15 @@ public class Outputs {
         driveRightRear = new PWMMotor(module, 3, 0.02);
 
         HopperElevator = new CANMotor(2);
-        winchLeft = new CANMotor(2);
-        winchRight = new CANMotor(2);
+        winchLeft = new CANMotor(6);
+        winchRight = new CANMotor(7);
         ShooterElevator = new CANMotor(3);
-        shooter = new CANMotor(11);
+        shooter = new CANMotor(12);
 
         hood = new LinearActuator(4);
 
-        winchArm = new Solenoid(module, 20, 1, 2);
-        door = new Solenoid(module, 20, 1, 2);
-        climb = new Solenoid(module, 20, 3, 4);
+        winchArm = new Solenoid(module, 20, 3, 5);
+        door = new Solenoid(module, 20, 1, 6);
+        climb = new Solenoid(module, 20, 0, 7);
     }
 }

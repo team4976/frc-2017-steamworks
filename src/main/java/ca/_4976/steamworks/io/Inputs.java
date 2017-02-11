@@ -33,8 +33,8 @@ public class Inputs {
         optical1 = new Digital(module, 5);
         optical2 = new Digital(module, 6);
         TESTINGSWITCH = new Digital(module, 9);
-        gearSense = new Digital(module, 5);
-        winchSensor = new Digital(module, 0);
+        gearSense = new Digital(module, 7);
+        winchSensor = new Digital(module, 8);
 
     }
 }
