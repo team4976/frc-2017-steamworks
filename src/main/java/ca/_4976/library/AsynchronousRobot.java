@@ -21,7 +21,7 @@ public class AsynchronousRobot extends RobotBase {
     private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
 
-    protected void enableOperatorControl() { enableOperatorControl = true; }
+    public void enableOperatorControl() { enableOperatorControl = true; }
 
     @Override public boolean isOperatorControl() { return enableOperatorControl || super.isOperatorControl(); }
 
