@@ -6,17 +6,21 @@ import ca._4976.steamworks.Robot;
 
 public class Winch {
 
-    boolean winchMotor = false;
-
     public Winch(Robot module) {
 
-        module.driver.Y.addListener(new ButtonListener() {
-            @Override
-            public void rising() {
-                winchMotor = !winchMotor;
-                module.outputs.winchMaster.set(winchMotor ? 1 : 0);
-                //turns winch on if true off if false
-                module.outputs.winchArm.output(true);
+        module.operator.Y.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 1 : 0);
+            }
+        });
+
+        module.operator.B.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
             }
         });
 
