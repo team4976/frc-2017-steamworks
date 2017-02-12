@@ -14,8 +14,8 @@ public class shooter_cock {
     private Robot module;
 
     public shooter_cock (Robot module) {
-        //NetworkTable table = NetworkTable.getTable("shooter");
-        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooter);// get numbers from midera
+        //NetworkTable table = NetworkTable.getTable("shooterMaster");
+        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster);// get numbers from midera
 
         this.module = module;
 
@@ -25,7 +25,7 @@ public class shooter_cock {
             public void falling() {
                 ShooterPid.setSetpoint(500);// get pid numbers from midura
                 linearAc = 0; //get values from vision
-                module.outputs.hood.set(linearAc);
+                module.outputs.shooterHood.set(linearAc);
                 ShooterPid.enable();
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//get number from grants code

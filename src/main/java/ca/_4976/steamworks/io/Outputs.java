@@ -8,23 +8,22 @@ import edu.wpi.first.wpilibj.VictorSP;
 
 public class Outputs {
 
-    //Motors for driving
     public VictorSP driveLeftFront;
     public VictorSP driveLeftRear;
     public VictorSP driveRightFront;
     public VictorSP driveRightRear;
 
-    public CANTalon HopperElevator;
-    public CANTalon ShooterElevator;
-    public CANTalon winchLeft;
-    public CANTalon winchRight;
+    public CANTalon hopperElevator;
+    public CANTalon shooterElevator;
 
-    public Solenoid door;
-    public Solenoid climb;
+    public CANTalon winchMaster;
+
+    public CANTalon shooterMaster;
+
+    public Solenoid gearDoor;
     public Solenoid winchArm;
 
-    public LinearActuator hood;
-    public CANTalon shooter;
+    public LinearActuator shooterHood;
 
     public Outputs(AsynchronousRobot module) {
 
@@ -33,16 +32,26 @@ public class Outputs {
         driveRightFront = new VictorSP(0);
         driveRightRear = new VictorSP(3);
 
-        HopperElevator = new CANTalon(2);
-        winchLeft = new CANTalon(6);
-        winchRight = new CANTalon(7);
-        ShooterElevator = new CANTalon(3);
-        shooter = new CANTalon(12);
+        hopperElevator = new CANTalon(2);
+        shooterElevator = new CANTalon(3);
 
-        hood = new LinearActuator(4);
+        shooterMaster = new CANTalon(11);
+        shooterMaster.changeControlMode(CANTalon.TalonControlMode.Speed);
+        shooterMaster.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 
-        winchArm = new Solenoid(module, 20, 3, 5);
-        door = new Solenoid(module, 20, 1, 6);
-        climb = new Solenoid(module, 20, 0, 7);
+        CANTalon shooterSlave = new CANTalon(12);
+        shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+        shooterSlave.set(shooterMaster.getDeviceID());
+
+        winchMaster = new CANTalon(6);
+
+        CANTalon winchSlave = new CANTalon(7);
+        winchSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+        winchSlave.set(winchMaster.getDeviceID());
+
+        gearDoor = new Solenoid(module, 20, 1, 6);
+        winchArm = new Solenoid(module, 20, 0, 7);
+
+        shooterHood = new LinearActuator(4);
     }
 }

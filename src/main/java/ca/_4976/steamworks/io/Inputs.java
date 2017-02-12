@@ -35,6 +35,5 @@ public class Inputs {
         TESTINGSWITCH = new Digital(module, 9);
         gearSense = new Digital(module, 7);
         winchSensor = new Digital(module, 8);
-
     }
 }

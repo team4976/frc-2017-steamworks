@@ -38,7 +38,7 @@ public class GearHandling extends AsynchronousRobot{
 
             public void rising() {
 
-                module.outputs.door.output(!door);
+                module.outputs.gearDoor.output(!door);
 
                 door = !door;
 
@@ -58,7 +58,7 @@ public class GearHandling extends AsynchronousRobot{
 
             public void rising() {
 
-                module.outputs.climb.output(!climber);
+                module.outputs.winchArm.output(!climber);
 
                 climber = !climber;
 
@@ -78,7 +78,7 @@ public class GearHandling extends AsynchronousRobot{
 
             public void rising() {
 
-                module.outputs.climb.output(true);
+                module.outputs.winchArm.output(true);
 
                 climber = true;
 
