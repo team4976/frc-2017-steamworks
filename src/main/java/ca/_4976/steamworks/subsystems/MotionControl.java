@@ -1,5 +1,6 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 
 import java.util.ArrayList;
@@ -12,24 +13,23 @@ public class MotionControl {
 
     private double kP = 0, kI = 0, kD = 0;
 
-    public MotionControl(Robot module) { this.module = module; }
-
-    public MotionControl(Robot module, double kP, double kI, double kD) {
+    public MotionControl(Robot module) {
 
         this.module = module;
-        this.kP = kP;
-        this.kI = kI;
-        this.kD = kD;
-    }
 
-    public MotionControl(Robot module, double kP, double kI, double kD, String name) {
+        module.addListener(new RobotStateListener() {
 
-        this.module = module;
-        this.kP = kP;
-        this.kI = kI;
-        this.kD = kD;
+            @Override public void autonomousInit() { play(); }
 
-        load(name);
+            @Override public void testInit() {
+
+                if (module.operator.BACK.get() || module.driver.BACK.get()) {
+
+                    module.enableOperatorControl();
+                    module.runNextLoop(() -> record());
+                }
+            }
+        });
     }
 
     private final double tickTiming = 1000000000 / 200;
