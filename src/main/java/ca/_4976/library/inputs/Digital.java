@@ -1,7 +1,6 @@
 package ca._4976.library.inputs;
 
 import ca._4976.library.AsynchronousRobot;
-import ca._4976.library.Evaluable;
 import edu.wpi.first.wpilibj.DigitalInput;
 import ca._4976.library.listeners.BooleanListener;
 
