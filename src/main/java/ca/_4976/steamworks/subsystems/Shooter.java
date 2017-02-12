@@ -4,7 +4,7 @@ import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.PIDController;
 
-public class shooter_cock {
+public class Shooter {
 
     boolean speed = false;
     boolean shooter_firing = false;
@@ -13,7 +13,7 @@ public class shooter_cock {
 
     private Robot module;
 
-    public shooter_cock (Robot module) {
+    public Shooter(Robot module) {
         //NetworkTable table = NetworkTable.getTable("shooterMaster");
         PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster);// get numbers from midera
 
