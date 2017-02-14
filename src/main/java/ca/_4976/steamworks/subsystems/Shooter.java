@@ -105,7 +105,7 @@ public class Shooter {
             @Override
             public void falling() {
                 module.elevator.stopMotors();
-                ShooterPid.disable();
+                module.outputs.shooterMaster.set(500);
                 System.out.println("mark its done");
             }
         });
