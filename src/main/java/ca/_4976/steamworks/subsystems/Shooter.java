@@ -18,7 +18,7 @@ public class Shooter {
     public Shooter(Robot module) {
 
 
-        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster);// get numbers from midera
+        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster); //test for values with finished shooter
         this.module = module;
 
         //ShooterPid.setPID(table.getNumber("p", 0), table.getNumber("i", 0), table.getNumber("d", 0));
@@ -26,9 +26,10 @@ public class Shooter {
             @Override
             public void falling() {
 
+                //module.visionClass.lazySusan();
                 module.outputs.shooterMaster.set(500);
                 module.elevator.cockingSetup();
-                turret_result = module.lazySusan.getVision_state();//get number from grants code
+                turret_result = module.lazySusan.getVision_state();//visionClass.getTargetState();
                 System.out.println("turret result = " + turret_result);
 
                 RPM = module.outputs.shooterMaster.getEncVelocity();
@@ -39,7 +40,7 @@ public class Shooter {
                 if (speed == true && turret_result == 2){
 
                     System.out.println("START THE RUMBLE!!!!!!!!");
-                    linearAc = 0; //get values from vision
+                    linearAc = 0; //linearAc = visionClass.getLinearAc();
                     module.outputs.shooterHood.set(linearAc);
 
                         module.runNextLoop(new Evaluable() {
@@ -112,4 +113,4 @@ public class Shooter {
     }
 
 }
-//TODO get min RPM values, Get pid numbers from midera.
+//TODO get min RPM values, Get pid numbers from miduraz.
