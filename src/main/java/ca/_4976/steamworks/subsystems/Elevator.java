@@ -15,7 +15,7 @@ public class Elevator extends AsynchronousRobot {
 
     //Declare Variables
     public int HECount = 0, SHECount = 0, maxHE = 6, maxSHE = 3;
-    public boolean ballsReady = false, autoToggle = true, cockingShooter = false;
+    public boolean ballsReady = false, elevatorOpControl = false, cockingShooter = false;
     private Outputs outputs;
     private Inputs inputs;
     private Robot module;
@@ -27,7 +27,7 @@ public class Elevator extends AsynchronousRobot {
         inputs = module.inputs;
         this.module = module;
 
-        if(!autoToggle && !cockingShooter) {
+        if(!elevatorOpControl && !cockingShooter) {
             module.inputs.bottomOfHE.addListener(new BooleanListener() {
                 @Override
                 public void rising() {
@@ -45,13 +45,7 @@ public class Elevator extends AsynchronousRobot {
                         runSHE(1);
                     }
 
-                    if (HECount <= 0 && SHECount <= 0) {
-                        module.runNextLoop(() -> {
-                            if (HECount <= 0 && SHECount <= 0) {
-                                stopMotors();
-                            }
-                        }, 5000);
-                    }
+                    motorPause();
 
                     if(SHECount >= maxSHE){
                         runSHE(0);
@@ -90,13 +84,7 @@ public class Elevator extends AsynchronousRobot {
                         runHE(0);
                     }
 
-                    if (HECount <= 0) {
-                        module.runNextLoop(() -> {
-                            if (HECount <= 0) {
-                                runHE(0);
-                            }
-                        }, 5000);
-                    }
+                    motorPause();
 
                     if (HECount < 0) {
                         runHE(0);
@@ -105,52 +93,44 @@ public class Elevator extends AsynchronousRobot {
                 }
             });
 
-
-            module.inputs.topOfSHE.addListener(new BooleanListener() {
-                @Override
-                public void rising() {
-                    //Decrease count in shooterMaster elevator as ball leaves
-                    System.out.println("HECount: " + HECount + " SHECount:" + SHECount);
-                    System.out.println("topOfShe rising");
-                    SHECount--;
-                }
-            });
-
             module.inputs.bottomOfSHE.addListener(new BooleanListener() {
                 @Override
                 public void falling() {
 
-                    if (HECount <= 0) {
-                        module.runNextLoop(() -> {
-                            if (HECount <= 0) {
-                                runHE(0);
-                            }
-                        }, 5000);
-                    }
+                    motorPause();
                 }
             });
 
             module.inputs.topOfSHE.addListener(new BooleanListener() {
                 @Override
                 public void falling() {
-                    System.out.println("topOfShe rising");
-                    if (HECount <= 0 && SHECount <= 0) {
-                        module.runNextLoop(() -> {
-                            if (HECount <= 0 && SHECount <= 0) {
-                                stopMotors();
-                            }
-                        }, 5000);
-                    }
+                        motorPause();
                 }
             });
 
         }
 
+        module.inputs.topOfSHE.addListener(new BooleanListener() {
+            @Override
+            public void rising() {
+                if(!elevatorOpControl && !cockingShooter) {
+                    //Decrease count in shooterMaster elevator as ball leaves
+                    System.out.println("HECount: " + HECount + " SHECount:" + SHECount);
+                    System.out.println("topOfShe rising");
+                    SHECount--;
+                } else {
+                    stopMotors();
+                    cockingShooter = false;
+                    elevatorOpControl = false;
+                }
+            }
+        });
+
         module.operator.LB.addListener(new ButtonListener() {
             @Override
             public void rising() {
                 runHE(1);
-                autoToggle = true;
+                elevatorOpControl = true;
             }
         });
 
@@ -158,7 +138,7 @@ public class Elevator extends AsynchronousRobot {
             @Override
             public void falling() {
                 runHE(0);
-                autoToggle = false;
+                elevatorOpControl = false;
             }
         });
 
@@ -166,7 +146,7 @@ public class Elevator extends AsynchronousRobot {
             @Override
             public void rising() {
                 runSHE(1);
-                autoToggle = true;
+                elevatorOpControl = true;
             }
         });
 
@@ -174,7 +154,7 @@ public class Elevator extends AsynchronousRobot {
             @Override
             public void falling() {
                 runSHE(0);
-                autoToggle = false;
+                elevatorOpControl = false;
             }
         });
     }
@@ -190,46 +170,59 @@ public class Elevator extends AsynchronousRobot {
     }
 
     public void fire() {
-        runHE(0.75);
-        runSHE(0.75);
+        runHE(1);
+        runSHE(1);
         cockingShooter = false;
-        autoToggle = true;
+        elevatorOpControl = true;
     }
 
     public void cockingSetup() {
-        System.out.println("Starting cockingSetup. autoToggle: " + autoToggle + " cockingShooter: " + cockingShooter);
-        autoToggle = true;
+        System.out.println("Starting cockingSetup. autoToggle: " + elevatorOpControl + " cockingShooter: " + cockingShooter);
+        elevatorOpControl = true;
         cockingShooter = true;
-        runHE(1);
 
+        if(!module.inputs.topOfSHE.get()){
+            runHE(1);
+            runSHE(1);
+        }
     }
 
-    public void loop(){
-        module.runNextLoop(new Evaluable() {
-            @Override
-            public void eval() {
-                System.out.println("cocking Shooter: " + cockingShooter);
-                if(cockingShooter == true){
-                    if (inputs.topOfSHE.get() == false) {
-                        runSHE(1);
-                    }
-                    if (inputs.topOfSHE.get() == true) {
-                        runSHE(0);
-                        cockingShooter = false;
-                        System.out.println("Top of shooterMaster sensor triggered");
-                    }
-                }
-                module.runNextLoop(()->loop());
-            }
-
-        });
-
-    }
+//    public void loop(){
+//        module.runNextLoop(new Evaluable() {
+//            @Override
+//            public void eval() {
+//                System.out.println("cocking Shooter: " + cockingShooter);
+//                if(cockingShooter == true){
+//                    if (inputs.topOfSHE.get() == false) {
+//                        runSHE(1);
+//                    }
+//                    if (inputs.topOfSHE.get() == true) {
+//                        runSHE(0);
+//                        cockingShooter = false;
+//                        System.out.println("Top of shooterMaster sensor triggered");
+//                    }
+//                }
+//                module.runNextLoop(()->loop());
+//            }
+//
+//        });
+//
+//    }
 
     public void stopMotors(){
         runHE(0);
         runSHE(0);
-      //  cockingShooter = false;
+        //  cockingShooter = false;
+    }
+
+    public void motorPause(){
+        if (!module.inputs.bottomOfHE.get()) {
+            module.runNextLoop(() -> {
+                if (!module.inputs.bottomOfHE.get()) {
+                    stopMotors();
+                }
+            }, 5000);
+        }
     }
 
 }
