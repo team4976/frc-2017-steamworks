@@ -45,8 +45,6 @@ public class Elevator extends AsynchronousRobot {
                         runSHE(1);
                     }
 
-                    motorPause();
-
                     if(SHECount >= maxSHE){
                         runSHE(0);
                     }
@@ -84,30 +82,12 @@ public class Elevator extends AsynchronousRobot {
                         runHE(0);
                     }
 
-                    motorPause();
-
                     if (HECount < 0) {
                         runHE(0);
                     }
 
                 }
             });
-
-            module.inputs.bottomOfSHE.addListener(new BooleanListener() {
-                @Override
-                public void falling() {
-
-                    motorPause();
-                }
-            });
-
-            module.inputs.topOfSHE.addListener(new BooleanListener() {
-                @Override
-                public void falling() {
-                        motorPause();
-                }
-            });
-
         }
 
         module.inputs.topOfSHE.addListener(new BooleanListener() {
@@ -123,6 +103,13 @@ public class Elevator extends AsynchronousRobot {
                     cockingShooter = false;
                     elevatorOpControl = false;
                 }
+            }
+        });
+
+        module.inputs.bottomOfHE.addListener(new BooleanListener() {
+            @Override
+            public void falling() {
+                motorPause();
             }
         });
 
@@ -216,9 +203,13 @@ public class Elevator extends AsynchronousRobot {
     }
 
     public void motorPause(){
+        System.out.println("Motor pause funciton called");
         if (!module.inputs.bottomOfHE.get()) {
+            System.out.println("inside first if loop");
             module.runNextLoop(() -> {
+                System.out.println("Inside timer loop");
                 if (!module.inputs.bottomOfHE.get()) {
+                    System.out.println("Inside second if loop");
                     stopMotors();
                 }
             }, 5000);

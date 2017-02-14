@@ -11,7 +11,7 @@ public class Shooter {
     boolean shooter_firing = false;
     double linearAc = 0;
     public int turret_result = 0, rumble = 0;
-    double RPM = 0;
+    double RPM = 500;
 
     private Robot module;
 
@@ -32,7 +32,7 @@ public class Shooter {
                 turret_result = module.lazySusan.getVision_state();//visionClass.getTargetState();
                 System.out.println("turret result = " + turret_result);
 
-                RPM = module.outputs.shooterMaster.getEncVelocity();
+                //RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM > 100){// get min rps values
                     speed = true;
                     System.out.println("speed = true");
@@ -83,7 +83,7 @@ public class Shooter {
         module.operator.B.addListener(new ButtonListener() {
             @Override
             public void rising() {
-                RPM = module.outputs.shooterMaster.getEncVelocity();
+                //RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM  > 100){
                     module.elevator.stopMotors();
                     module.elevator.fire();

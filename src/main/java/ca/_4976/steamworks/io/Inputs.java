@@ -10,7 +10,7 @@ public class Inputs {
     public Encoder driveRight;
     public Encoder shooter_encoder;
 
-    public Digital bottomOfHE, bottomOfSHE, topOfSHE, TESTINGSWITCH;
+    public Digital bottomOfHE, bottomOfSHE, topOfSHE;
     public Digital winchSensor;
     public Digital gearSense;
 
@@ -32,7 +32,6 @@ public class Inputs {
         bottomOfHE = new Digital(module, 4);
         bottomOfSHE = new Digital(module, 5);
         topOfSHE = new Digital(module, 6);
-        TESTINGSWITCH = new Digital(module, 9);
         gearSense = new Digital(module, 7);
         winchSensor = new Digital(module, 8);
     }
