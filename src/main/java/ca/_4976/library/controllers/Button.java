@@ -25,9 +25,9 @@ public class Button {
 
         else if (values[0] && !values[1]) listeners.forEach(ButtonListener::falling);
 
-        if (values[0] && !values[1] && onTime < 25) listeners.forEach(ButtonListener::held);
+        if (values[0] && !values[1] && onTime < 25)
 
-        else if (values[0] && !values[1]) listeners.forEach(ButtonListener::pressed);
+        if (onTime <= 25) listeners.forEach(ButtonListener::pressed);
 
         if (values[1]) onTime++;
 

@@ -70,7 +70,7 @@ public class Elevator extends AsynchronousRobot {
             module.inputs.bottomOfSHE.addListener(new BooleanListener() {
                 @Override
                 public void rising() {
-                    //Increasing count in shooter elevator as ball enters
+                    //Increasing count in shooterMaster elevator as ball enters
                     SHECount++;
                     //Decreasing count in hopper elevator as ball leaves
                     HECount--;
@@ -78,7 +78,7 @@ public class Elevator extends AsynchronousRobot {
                     if (SHECount >= maxSHE) {
                         //Stop motors
                         runSHE(0);
-                        //There are balls in the shooter elevator ready to shoot
+                        //There are balls in the shooterMaster elevator ready to shoot
                         ballsReady = true;
                     } else {
                         ballsReady = false;
@@ -109,7 +109,7 @@ public class Elevator extends AsynchronousRobot {
             module.inputs.topOfSHE.addListener(new BooleanListener() {
                 @Override
                 public void rising() {
-                    //Decrease count in shooter elevator as ball leaves
+                    //Decrease count in shooterMaster elevator as ball leaves
                     System.out.println("HECount: " + HECount + " SHECount:" + SHECount);
                     System.out.println("topOfShe rising");
                     SHECount--;
@@ -182,11 +182,11 @@ public class Elevator extends AsynchronousRobot {
 
 
     public void runHE(double speed) {
-        outputs.HopperElevator.pidWrite(speed);
+        outputs.hopperElevator.pidWrite(speed);
     }
 
     public void runSHE(double speed) {
-        outputs.ShooterElevator.pidWrite(speed);
+        outputs.shooterElevator.pidWrite(speed);
     }
 
     public void fire() {
@@ -216,7 +216,7 @@ public class Elevator extends AsynchronousRobot {
                     if (inputs.topOfSHE.get() == true) {
                         runSHE(0);
                         cockingShooter = false;
-                        System.out.println("Top of shooter sensor triggered");
+                        System.out.println("Top of shooterMaster sensor triggered");
                     }
                 }
                 module.runNextLoop(()->loop());

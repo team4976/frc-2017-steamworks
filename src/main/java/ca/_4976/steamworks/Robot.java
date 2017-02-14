@@ -17,35 +17,9 @@ public class Robot extends AsynchronousRobot {
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
     private GearHandling gearHandling = new GearHandling(this);
-    public LazySusan lazySusan = new LazySusan(this);
-    private shooter_cock Shooter_Cock= new shooter_cock(this);
+    private Shooter shooter = new Shooter(this);
     private Winch winch = new Winch(this);
+
     public Elevator elevator = new Elevator(this);
-
-    @Override public void robotInit() {
-    
-        System.out.println("Robot Initalized!");
-    }
-
-    @Override public void disabledInit() {  
-    
-        System.out.println("Robot was Disabled!");
-    }
-
-    @Override public void autonomousInit() { 
-    
-        System.out.println("Autonomous Initialized!");
-    }
-
-    @Override public void teleopInit() { 
-    
-        System.out.println("Operator Control Initialized!");
-    }
-
-    @Override public void testInit() {
-        
-        System.out.println("Test Initialized!");
-    }
-
-
+    public LazySusan lazySusan = new LazySusan(this);
 }

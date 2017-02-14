@@ -1,5 +1,6 @@
 package ca._4976.library;
 
+import ca._4976.library.listeners.RobotStateListener;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
@@ -9,23 +10,24 @@ import java.util.ArrayList;
 
 public class AsynchronousRobot extends RobotBase {
 
+    private ArrayList<RobotStateListener> listeners = new ArrayList<>();
     private ArrayList<Evaluable> constantEvaluables = new ArrayList<>();
     private ArrayList<Evaluable> evaluables = new ArrayList<>();
     private ArrayList<Long> evalTimes = new ArrayList<>();
 
-    private boolean disabledInizalized = false;
-    private boolean autonomousInizalized = false;
-    private boolean teleopInizalized = false;
-    private boolean testInizalized = false;
+    private boolean disabledInitialized = false;
+    private boolean autonomousInitialized = false;
+    private boolean telexInitialized = false;
+    private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
 
-    protected void enableOperatorControl() { enableOperatorControl = true; }
+    public void enableOperatorControl() { enableOperatorControl = true; }
 
     @Override public boolean isOperatorControl() { return enableOperatorControl || super.isOperatorControl(); }
 
     @Override public void startCompetition() {
 
-        robotInit();
+        listeners.forEach(RobotStateListener::robotInit);
 
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
         HAL.observeUserProgramStarting();
@@ -38,17 +40,17 @@ public class AsynchronousRobot extends RobotBase {
 
             if (isDisabled()) {
 
-                if (!disabledInizalized) {
+                if (!disabledInitialized) {
 
                     LiveWindow.setEnabled(false);
 
-                    disabledInizalized = true;
-                    autonomousInizalized = false;
-                    teleopInizalized = false;
-                    testInizalized = false;
+                    disabledInitialized = true;
+                    autonomousInitialized = false;
+                    telexInitialized = false;
+                    testInitialized = false;
                     enableOperatorControl = false;
 
-                    disabledInit();
+                    listeners.forEach(RobotStateListener::disabledInit);
                 }
 
                 HAL.observeUserProgramDisabled();
@@ -56,16 +58,16 @@ public class AsynchronousRobot extends RobotBase {
 
             } else if (isAutonomous()) {
 
-                if (!autonomousInizalized) {
+                if (!autonomousInitialized) {
 
                     LiveWindow.setEnabled(false);
 
-                    disabledInizalized = false;
-                    autonomousInizalized = true;
-                    teleopInizalized = false;
-                    testInizalized = false;
+                    disabledInitialized = false;
+                    autonomousInitialized = true;
+                    telexInitialized = false;
+                    testInitialized = false;
 
-                    autonomousInit();
+                    listeners.forEach(RobotStateListener::autonomousInit);
                 }
 
                 HAL.observeUserProgramAutonomous();
@@ -73,16 +75,16 @@ public class AsynchronousRobot extends RobotBase {
 
             } else if (isOperatorControl()) {
 
-                if (!teleopInizalized) {
+                if (!telexInitialized) {
 
                     LiveWindow.setEnabled(false);
 
-                    disabledInizalized = false;
-                    autonomousInizalized = false;
-                    teleopInizalized = true;
-                    testInizalized = false;
+                    disabledInitialized = false;
+                    autonomousInitialized = false;
+                    telexInitialized = true;
+                    testInitialized = false;
 
-                    teleopInit();
+                    listeners.forEach(RobotStateListener::teleopInit);
                 }
 
                 HAL.observeUserProgramTeleop();
@@ -90,16 +92,16 @@ public class AsynchronousRobot extends RobotBase {
 
             } else if (isTest()) {
 
-                if (!testInizalized) {
+                if (!testInitialized) {
 
                     LiveWindow.setEnabled(true);
 
-                    disabledInizalized = false;
-                    autonomousInizalized = false;
-                    teleopInizalized = false;
-                    testInizalized = true;
+                    disabledInitialized = false;
+                    autonomousInitialized = false;
+                    telexInitialized = false;
+                    testInitialized = true;
 
-                    testInit();
+                    listeners.forEach(RobotStateListener::testInit);
                 }
 
                 HAL.observeUserProgramTest();
@@ -121,6 +123,8 @@ public class AsynchronousRobot extends RobotBase {
 
     public void runNextLoop(Evaluable evaluable) { runNextLoop(evaluable, 0); }
 
+    public void addListener(RobotStateListener listener) { listeners.add(listener); }
+
     private void checkEvaluables() {
 
         constantEvaluables.forEach(Evaluable::eval);
@@ -137,12 +141,6 @@ public class AsynchronousRobot extends RobotBase {
                 }
             }
 
-        } else { System.out.println("what"); }
+        } else { throw new RuntimeException("Evaluables out of sync."); }
     }
-
-    protected void robotInit() { }
-    protected void disabledInit() { }
-    protected void autonomousInit() { }
-    protected void teleopInit() { }
-    protected void testInit() { }
 }

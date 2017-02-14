@@ -5,31 +5,33 @@ import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.PIDController;
 
-public class shooter_cock {
+public class Shooter {
 
     boolean speed = false;
     boolean shooter_firing = false;
-    double RPM = 500, linearAc = 0;
+    double linearAc = 0;
     public int turret_result = 0, rumble = 0;
+    double RPM = 0;
 
     private Robot module;
 
-    public shooter_cock (Robot module) {
-        //NetworkTable table = NetworkTable.getTable("shooter");
-        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooter);// get numbers from midera
+    public Shooter(Robot module) {
 
+
+        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster);// get numbers from midera
         this.module = module;
 
         //ShooterPid.setPID(table.getNumber("p", 0), table.getNumber("i", 0), table.getNumber("d", 0));
         module.operator.A.addListener(new ButtonListener() {
             @Override
             public void falling() {
-                ShooterPid.setSetpoint(500);// get pid numbers from midura
-                ShooterPid.enable();
+
+                module.outputs.shooterMaster.set(500);
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//get number from grants code
                 System.out.println("turret result = " + turret_result);
 
+                RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM > 100){// get min rps values
                     speed = true;
                     System.out.println("speed = true");
@@ -38,7 +40,7 @@ public class shooter_cock {
 
                     System.out.println("START THE RUMBLE!!!!!!!!");
                     linearAc = 0; //get values from vision
-                    module.outputs.hood.set(linearAc);
+                    module.outputs.shooterHood.set(linearAc);
 
                         module.runNextLoop(new Evaluable() {
 
@@ -80,6 +82,7 @@ public class shooter_cock {
         module.operator.B.addListener(new ButtonListener() {
             @Override
             public void rising() {
+                RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM  > 100){
                     module.elevator.stopMotors();
                     module.elevator.fire();
