@@ -29,22 +29,7 @@ public class LazySusan extends AsynchronousRobot{
 
         //call midura's code
 
-        module.operator.Y.addListener(new ButtonListener() {
-            @Override public void rising() {
-                if (getVision_state() == 0) {
 
-                    module.runNextLoop(() -> module.driver.setRumble(1), 0);
-
-                    module.runNextLoop(() -> module.operator.setRumble(1), 0);
-
-                    module.runNextLoop(() -> module.driver.setRumble(0), 3000);
-
-                    module.runNextLoop(() -> module.operator.setRumble(0), 3000);
-                }
-
-            }
-
-        });
     }
 
     public int getVision_state() {

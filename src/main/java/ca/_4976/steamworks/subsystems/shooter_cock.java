@@ -1,5 +1,6 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.PIDController;
@@ -24,8 +25,6 @@ public class shooter_cock {
             @Override
             public void falling() {
                 ShooterPid.setSetpoint(500);// get pid numbers from midura
-                linearAc = 0; //get values from vision
-                module.outputs.hood.set(linearAc);
                 ShooterPid.enable();
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//get number from grants code
@@ -36,17 +35,44 @@ public class shooter_cock {
                     System.out.println("speed = true");
                 }
                 if (speed == true && turret_result == 2){
+
                     System.out.println("START THE RUMBLE!!!!!!!!");
-                    for (int i = 0; i < 6; i++) {
+                    linearAc = 0; //get values from vision
+                    module.outputs.hood.set(linearAc);
 
-                        if (i % 2 == 0) module.runNextLoop(() -> module.operator.setRumble(1), 500 * i);
+                        module.runNextLoop(new Evaluable() {
 
-                        else module.runNextLoop(() -> module.operator.setRumble(0), 500 * i);
+                            @Override
 
-                        if (i % 2 == 0) module.runNextLoop(() -> module.driver.setRumble(1), 500 * i);
+                            public void eval() {
 
-                        else module.runNextLoop(() -> module.driver.setRumble(0), 500 * i);
-                    }
+                                for (int i = 0; i < 6; i++) {
+
+                                    if (i % 2 == 0) module.runNextLoop(() -> module.operator.setRumble(1), 500 * i);
+
+                                    else module.runNextLoop(() -> module.operator.setRumble(0), 500 * i);
+
+                                    if (i % 2 == 0) module.runNextLoop(() -> module.driver.setRumble(1), 500 * i);
+
+                                    else module.runNextLoop(() -> module.driver.setRumble(0), 500 * i);
+                                }
+
+                            }
+
+                        },3000);// get actual time for the linear acctuator
+                }
+                else if(turret_result == 0){
+
+
+                    module.runNextLoop(() -> module.driver.setRumble(1), 0);
+
+                    module.runNextLoop(() -> module.operator.setRumble(1), 0);
+
+                    module.runNextLoop(() -> module.driver.setRumble(0), 3000);
+
+                    module.runNextLoop(() -> module.operator.setRumble(0), 3000);
+
+
                 }
             }
         });
