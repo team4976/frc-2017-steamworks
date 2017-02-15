@@ -49,9 +49,9 @@ public class ElevatorBackUp {
         }
     }
 
-    public void runHE(double speed){outputs.HopperElevator.pidWrite(speed);}
+    public void runHE(double speed){outputs.hopperElevator.pidWrite(speed);}
 
-    public void runSHE(double speed){outputs.ShooterElevator.pidWrite(speed);}
+    public void runSHE(double speed){outputs.shooterElevator.pidWrite(speed);}
 
     public void stopMotors(){runHE(0); runSHE(0);}
 
