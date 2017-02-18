@@ -1,11 +1,19 @@
-*.xml
-*.class
-*.jar
-!gradle-wrapper.jar
-*.ipr
-*.iml
-*.iws
+## Build System (FORCE UPDATE ONLY) ##
 .gradle/
-build/
-run/
+gradle/
+build.gradle
+gradlew.bat
+gradlew
+
+## Intellij Idea ##
 .idea/
+*.ipr
+*.iws
+*.iml
+
+
+## Java ##
+*.jar
+
+## Mac OSX ##
+.DS_Store
