@@ -11,9 +11,11 @@ gradlew
 *.iws
 *.iml
 
-
 ## Java ##
 *.jar
 
 ## Mac OSX ##
 .DS_Store
+
+## Gradle ##
+build/

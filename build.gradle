@@ -26,6 +26,7 @@ frc {
 dependencies {
     compile wpilib()
     compile talonSrx()
+    compile navx()
 }
 
 def robotManifest = {
