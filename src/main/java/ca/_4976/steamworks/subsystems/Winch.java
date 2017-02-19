@@ -16,13 +16,13 @@ public class Winch {
             }
         });
 
-//        module.operator.B.addListener(new ButtonListener() {
-//
-//            @Override public void pressed() {
-//
-//                module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
-//            }
-//        });
+        module.operator.B.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
+            }
+        });
 
         module.inputs.winchSensor.addListener(new BooleanListener() {
             @Override

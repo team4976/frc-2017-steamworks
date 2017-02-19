@@ -4,13 +4,9 @@ import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 
-/**
- * Created by Grant on 2/2/2017.
- */
 public class LazySusan extends AsynchronousRobot{
     public int vision_state = 0;
     public LazySusan(Robot module){
-
 
         module.driver.BACK.addListener(new ButtonListener() {
             @Override

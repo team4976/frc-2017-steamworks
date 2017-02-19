@@ -8,9 +8,6 @@ import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 
-/**
- * Created by jackfountain on 2017-01-31.
- */
 public class Elevator extends AsynchronousRobot {
 
     //Declare Variables

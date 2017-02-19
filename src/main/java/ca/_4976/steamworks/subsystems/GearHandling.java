@@ -5,50 +5,41 @@ import ca._4976.library.listeners.BooleanListener;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 
-/**
- * Created by mjam2 on 2017-01-31.
- */
 public class GearHandling extends AsynchronousRobot{
 
-    public boolean door = false;   //false=closed
-    public boolean climber = false;    //false=upright
     public GearHandling(Robot module){
 
-        //B button opens and closes the doors
         module.driver.B.addListener(new ButtonListener() {
 
             @Override
 
             public void rising() {
-                module.outputs.gearDoor.output(!door);
-                door = !door;
-                System.out.println(door? "Door opened":"Door closed");
+                module.outputs.gearDoor.output(!module.outputs.gearDoor.isExtened());
+                System.out.print("<Gear Handling> The gear door was ");
+                System.out.println(module.outputs.gearDoor.isExtened() ? "opened" : "closed" + ".");
             }
 
         });
 
-        //A button changes the position of the climber so it is out or upright
         module.driver.A.addListener(new ButtonListener() {
 
             @Override
 
             public void rising() {
-                module.outputs.winchArm.output(!climber);
-                climber = !climber;
-                System.out.println(climber? "Climber forward":"Climber upright");
+                module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
+                System.out.print("<Gear Handling> The climber arm was");
+                System.out.println(module.outputs.winchArm.isExtened() ? "extended" : "retracted" + ".");
             }
 
         });
 
-        //gear sensing to close orifice when sensed
         module.inputs.gearSense.addListener(new BooleanListener() {
 
             @Override
 
             public void rising() {
                 module.outputs.winchArm.output(true);
-                climber = true;
-                System.out.println("Climber forward");
+                System.out.print("<Gear Handling> The climber arm was extended.");
             }
 
         });

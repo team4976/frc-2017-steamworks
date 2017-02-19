@@ -6,9 +6,6 @@ import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 
-/**
- * Created by jackfountain on 2017-02-11.
- */
 public class ElevatorBackUp {
 
     public boolean elevatorUserControl = false;

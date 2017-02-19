@@ -43,29 +43,30 @@ public class Shooter {
                     linearAc = 0; //linearAc = visionClass.getLinearAc();
                     module.outputs.shooterHood.set(linearAc);
 
-                        module.runNextLoop(new Evaluable() {
+                    module.runNextLoop(() -> {
 
-                            @Override
+                        for (int i = 0; i < 6; i++) {
 
-                            public void eval() {
+                            if (i % 2 == 0)
 
-                                for (int i = 0; i < 6; i++) {
+                                module.runNextLoop(() -> {
 
-                                    if (i % 2 == 0) module.runNextLoop(() -> module.operator.setRumble(1), 500 * i);
+                                    module.driver.setRumble(1);
+                                    module.operator.setRumble(1);
 
-                                    else module.runNextLoop(() -> module.operator.setRumble(0), 500 * i);
+                                }, 500 * i);
 
-                                    if (i % 2 == 0) module.runNextLoop(() -> module.driver.setRumble(1), 500 * i);
+                            else module.runNextLoop(() -> {
 
-                                    else module.runNextLoop(() -> module.driver.setRumble(0), 500 * i);
-                                }
+                                module.driver.setRumble(0);
+                                module.operator.setRumble(0);
 
-                            }
+                            }, 500 * i);
+                        }
 
-                        },3000);// get actual time for the linear acctuator
-                }
-                else if(turret_result == 0){
+                    }, 3000); //TODO Input actual Linear actuator travel time
 
+                } else if(turret_result == 0) {
 
                     module.runNextLoop(() -> module.driver.setRumble(1), 0);
 
@@ -75,15 +76,14 @@ public class Shooter {
 
                     module.runNextLoop(() -> module.operator.setRumble(0), 3000);
 
-
                 }
             }
         });
 
         module.operator.B.addListener(new ButtonListener() {
-            @Override
-            public void rising() {
-                //RPM = module.outputs.shooterMaster.getEncVelocity();
+
+            @Override public void rising() {
+
                 if (RPM < 10000 && RPM  > 100){
                     module.elevator.stopMotors();
                     module.elevator.fire();
@@ -98,7 +98,7 @@ public class Shooter {
             @Override
             public void falling() {
                 module.elevator.stopMotors();
-                System.out.println("not firing");
+                System.out.println("<Shooter> The shooter stopped firing");
             }
         });
 
@@ -107,7 +107,7 @@ public class Shooter {
             public void falling() {
                 module.elevator.stopMotors();
                 module.outputs.shooterMaster.set(500);
-                System.out.println("mark its done");
+                System.out.println("<Shooter> The shooter was disabled.");
             }
         });
     }
