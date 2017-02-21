@@ -12,6 +12,8 @@ public class Shooter {
     double linearAc = 0;
     public int turret_result = 0, rumble = 0;
     double RPM = 500;
+    double setSpeed = 500;
+    boolean pressed = false;
 
     private Robot module;
 
@@ -77,6 +79,21 @@ public class Shooter {
                     module.runNextLoop(() -> module.operator.setRumble(0), 3000);
 
                 }
+            }
+        });
+
+        module.operator.LT.addListener(value -> {
+            if(value >= 0.5 && pressed == false) {
+                pressed = true;
+                setSpeed = setSpeed + 100;
+                System.out.println("shooter speed +100");
+            }
+        });
+        module.operator.RT.addListener(value -> {
+            if(value >= 0.5 && pressed == false) {
+                pressed = true;
+                setSpeed = setSpeed - 100;
+                System.out.println("shooter speed -100");
             }
         });
 
