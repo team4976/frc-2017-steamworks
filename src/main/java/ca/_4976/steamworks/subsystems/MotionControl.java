@@ -2,6 +2,7 @@ package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class MotionControl {
 
     private ArrayList<Moment> moments = new ArrayList<>();
 
-    private double kP = 0, kI = 0, kD = 0;
+    private double kP = 1, kI = 0, kD = 0;
 
     public MotionControl(Robot module) {
 
@@ -65,7 +66,7 @@ public class MotionControl {
 
                     moments.add(new Moment(
                             module.outputs.driveLeftFront.get(),
-                            module.outputs.driveLeftFront.get(),
+                            module.outputs.driveRightFront.get(),
                             module.inputs.driveLeft.getDistance(),
                             module.inputs.driveRight.getDistance(),
                             module.inputs.driveLeft.getRate(),
@@ -149,6 +150,12 @@ public class MotionControl {
 
                     lastLeftError = leftError;
                     lastRightError = rightError;
+
+                    NetworkTable.getTable("status").putNumber("motion_error_output_left", moment.leftDriveOutput);
+                    NetworkTable.getTable("status").putNumber("motion_error_output_right", moment.rightDriveOutput);
+
+                    NetworkTable.getTable("status").putNumber("motion_error_left", leftError);
+                    NetworkTable.getTable("status").putNumber("motion_error_right", rightError);
 
                     tickCount++;
                     avgTickRate += System.nanoTime() - lastTickTime;
