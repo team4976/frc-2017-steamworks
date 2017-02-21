@@ -3,6 +3,7 @@ package ca._4976.steamworks.subsystems;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 
+import java.io.*;
 import java.util.ArrayList;
 
 public class MotionControl {
@@ -28,6 +29,8 @@ public class MotionControl {
                     module.enableOperatorControl();
                     module.runNextLoop(() -> record());
                 }
+
+                save("motion-" + System.currentTimeMillis());
             }
         });
     }
@@ -43,6 +46,9 @@ public class MotionControl {
             long lastTickTime = System.nanoTime();
             double avgTickRate = 0;
             int tickCount = 0;
+
+            module.inputs.driveLeft.reset();
+            module.inputs.driveRight.reset();
 
             while (module.isEnabled()) {
 
@@ -91,6 +97,9 @@ public class MotionControl {
 
             double lastLeftError = 0;
             double lastRightError = 0;
+
+            module.inputs.driveLeft.reset();
+            module.inputs.driveRight.reset();
 
             while (module.isEnabled() && tickCount < moments.size()) {
 
@@ -207,7 +216,64 @@ public class MotionControl {
 
     public synchronized void play() { new Thread(new Playback()).start(); }
 
-    public void save(String name) { } //TODO Add write to file
+    public void save(String name) {
 
-    public void load(String name) { } //TODO Add read from file
+        try {
+
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(name)));
+
+            for (Moment moment : moments) {
+
+                writer.write(moment.leftDriveOutput + ",");
+                writer.write(moment.rightDriveOutput + ",");
+                writer.write(moment.leftEncoderPosition + ",");
+                writer.write(moment.rightEncoderPosition + ",");
+                writer.write(moment.leftEncoderVelocity + ",");
+                writer.write(moment.rightEncoderVelocity + ",");
+
+                for (double axis : moment.driverAxes) writer.write(axis + ",");
+
+                for (boolean button : moment.driverButtons) writer.write(button + ",");
+
+                writer.newLine();
+            }
+
+            writer.close();
+
+        } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    public void load(String name) {
+
+        try {
+
+            moments.clear();
+
+            BufferedReader reader = new BufferedReader(new FileReader(new File(name)));
+
+            for (String line = reader.readLine(); !line.equals(""); line = reader.readLine()) {
+
+                String[] values = line.split(",");
+
+                boolean[] buttons = new boolean[module.driver.buttons.length];
+                double[] axes = new double[module.driver.axes.length];
+
+                for (int i = 6; i < buttons.length; i++) buttons[i - 6] = Boolean.parseBoolean(values[i]);
+
+                for (int i = 6 + buttons.length; i < axes.length; i++) axes[6 + buttons.length] = Double.parseDouble(values[i]);
+
+                moments.add(new Moment(
+                        Double.parseDouble(values[0]),
+                        Double.parseDouble(values[1]),
+                        Double.parseDouble(values[2]),
+                        Double.parseDouble(values[3]),
+                        Double.parseDouble(values[4]),
+                        Double.parseDouble(values[5]),
+                        buttons,
+                        axes
+                ));
+            }
+
+        } catch (IOException e) { e.printStackTrace(); }
+    }
 }
