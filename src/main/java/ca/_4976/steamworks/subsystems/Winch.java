@@ -10,7 +10,7 @@ public class Winch {
 
         module.operator.Y.addListener(new ButtonListener() {
 
-            @Override public void pressed() {
+            @Override public void falling() {
 
                 module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? -1 : 0);
             }
@@ -18,8 +18,8 @@ public class Winch {
 
         module.operator.BACK.addListener(new ButtonListener() {
             @Override
-            public void pressed() {
-                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 1:  0);
+            public void falling() {
+                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 0.1:  0);
             }
         });
 
@@ -27,7 +27,7 @@ public class Winch {
 
         module.operator.B.addListener(new ButtonListener() {
 
-            @Override public void pressed() {
+            @Override public void falling() {
 
                 module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
             }

@@ -7,6 +7,7 @@ import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.outputs.*;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -65,6 +66,8 @@ public class Outputs {
         gearDoor = new TimmedSolenoid(module, 20, 1, 6);
         winchArm = new TimmedSolenoid(module, 20, 0, 7);
 
+        agitator = new Tallon(5);
+
         shooterHood = new LinearActuator(4);
 
         Solenoid leds = new Solenoid(20, 5);
@@ -73,22 +76,27 @@ public class Outputs {
 
             @Override public void eval() {
 
-                leds.set(!leds.get());
+                leds.set(true);
 
-                module.runNextLoop(this, (int) (Math.random() * 800) + 100);
             }
         };
 
         module.runNextLoop(evaluable);
 
-        agitator = new Tallon(5);
-
         module.addListener(new RobotStateListener() {
 
             private Compressor compressor = new Compressor(20);
 
+            DigitalOutput ringlight = new DigitalOutput(9);
+
+            @Override public void teleopInit() {
+
+                this.ringlight.set(true);
+            }
+
             @Override public void disabledInit() {
 
+                this.ringlight.set(false);
                 compressor.setClosedLoopControl(false); }
 
             @Override public void testInit() { compressor.setClosedLoopControl(true); }

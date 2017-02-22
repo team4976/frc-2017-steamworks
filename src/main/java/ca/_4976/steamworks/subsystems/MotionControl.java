@@ -13,7 +13,7 @@ public class MotionControl {
 
     private ArrayList<Moment> moments = new ArrayList<>();
 
-    private double kP = 1, kI = 0, kD = 0;
+    private double kP = 20, kI = 0, kD = 0;
 
     public MotionControl(Robot module) {
 
@@ -61,6 +61,9 @@ public class MotionControl {
                     boolean[] driverButtons = new boolean[module.driver.buttons.length];
                     for (int i = 0; i < driverButtons.length; i++) driverButtons[i] = module.driver.buttons[i].get();
 
+                    boolean[] operatorButtons = new boolean[module.operator.buttons.length];
+                    for (int i = 0; i < operatorButtons.length; i++) operatorButtons[i] = module.operator.buttons[i].get();
+
                     double[] driverAxes = new double[module.driver.axes.length];
                     for (int i = 0; i < driverAxes.length; i++) driverAxes[i] = module.driver.axes[i].get();
 
@@ -72,7 +75,8 @@ public class MotionControl {
                             module.inputs.driveLeft.getRate(),
                             module.inputs.driveRight.getRate(),
                             driverButtons,
-                            driverAxes
+                            driverAxes,
+                            operatorButtons
                     ));
 
                     avgTickRate += System.nanoTime() - lastTickTime;
@@ -109,13 +113,13 @@ public class MotionControl {
                     lastTickTime = System.nanoTime();
 
                     Moment moment = moments.get(tickCount);
-                    Moment lastMoment = moments.get(tickCount > 0 ? tickCount : 0);
+                    Moment lastMoment = moments.get(tickCount > 0 ? tickCount - 1 : 0);
 
                     for (int i = 0; i < moment.driverButtons.length; i++) {
 
-                        if (moment.driverButtons[i] && !lastMoment.driverButtons[i]) module.driver.buttons[i].triggerFalling();
+                        if (moment.driverButtons[i] && !lastMoment.driverButtons[i]) module.driver.buttons[i].triggerRising();
 
-                        if (!moment.driverButtons[i] && lastMoment.driverButtons[i]) module.driver.buttons[i].triggerRising();
+                        if (!moment.driverButtons[i] && lastMoment.driverButtons[i]) module.driver.buttons[i].triggerFalling();
                     }
 
                     //TODO fix conflict
@@ -180,6 +184,7 @@ public class MotionControl {
         private final double rightEncoderVelocity;
 
         private final boolean[] driverButtons;
+        private final boolean[] operatorButtons;
 
         private final double[] driverAxes;
 
@@ -191,7 +196,8 @@ public class MotionControl {
                 double leftEncoderVelocity,
                 double rightEncoderVelocity,
                 boolean[] driverButtons,
-                double[] driverAxes
+                double[] driverAxes,
+                boolean[] operatorButtons
         ) {
             this.leftDriveOutput = leftDriveOutput;
             this.rightDriveOutput = rightDriveOutput;
@@ -202,6 +208,8 @@ public class MotionControl {
 
             this.driverButtons = driverButtons;
             this.driverAxes = driverAxes;
+
+            this.operatorButtons = operatorButtons;
         }
     }
 
@@ -277,7 +285,8 @@ public class MotionControl {
                         Double.parseDouble(values[4]),
                         Double.parseDouble(values[5]),
                         buttons,
-                        axes
+                        axes,
+                        buttons
                 ));
             }
 
