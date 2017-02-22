@@ -2,8 +2,11 @@ package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.ButtonListener;
+import ca._4976.library.listeners.DoubleListener;
+import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Shooter {
 
@@ -19,8 +22,24 @@ public class Shooter {
 
     public Shooter(Robot module) {
 
+        module.addListener(new RobotStateListener() {
 
-        PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster); //test for values with finished shooter
+            @Override public void robotInit() {
+
+                module.runNextLoop(() -> {
+
+                    NetworkTable.getTable("status").putNumber("shooter_rpm", module.outputs.shooterMaster.getSpeed());
+                    NetworkTable.getTable("status").putNumber("shooter_error", module.outputs.shooterMaster.getError());
+
+                }, -1);
+            }
+
+            @Override public void disabledInit() {
+                module.outputs.shooterMaster.set(0);
+            }
+        });
+
+        ///PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster); //test for values with finished shooter
         this.module = module;
 
         //ShooterPid.setPID(table.getNumber("p", 0), table.getNumber("i", 0), table.getNumber("d", 0));
@@ -29,7 +48,7 @@ public class Shooter {
             public void falling() {
 
                 //module.visionClass.lazySusan();
-                module.outputs.shooterMaster.set(500);
+                module.outputs.shooterMaster.set(3000);
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//visionClass.getTargetState();
                 System.out.println("turret result = " + turret_result);
@@ -45,30 +64,29 @@ public class Shooter {
                     linearAc = 0; //linearAc = visionClass.getLinearAc();
                     module.outputs.shooterHood.set(linearAc);
 
-                    module.runNextLoop(() -> {
+                        module.runNextLoop(new Evaluable() {
 
-                        for (int i = 0; i < 6; i++) {
+                            @Override
 
-                            if (i % 2 == 0)
+                            public void eval() {
 
-                                module.runNextLoop(() -> {
+                                for (int i = 0; i < 6; i++) {
 
-                                    module.driver.setRumble(1);
-                                    module.operator.setRumble(1);
+                                    if (i % 2 == 0) module.runNextLoop(() -> module.operator.setRumble(1), 500 * i);
 
-                                }, 500 * i);
+                                    else module.runNextLoop(() -> module.operator.setRumble(0), 500 * i);
 
-                            else module.runNextLoop(() -> {
+                                    if (i % 2 == 0) module.runNextLoop(() -> module.driver.setRumble(1), 500 * i);
 
-                                module.driver.setRumble(0);
-                                module.operator.setRumble(0);
+                                    else module.runNextLoop(() -> module.driver.setRumble(0), 500 * i);
+                                }
 
-                            }, 500 * i);
-                        }
+                            }
 
-                    }, 3000); //TODO Input actual Linear actuator travel time
+                        },3000);// get actual time for the linear acctuator
+                }
+                else if(turret_result == 0){
 
-                } else if(turret_result == 0) {
 
                     module.runNextLoop(() -> module.driver.setRumble(1), 0);
 
@@ -78,10 +96,12 @@ public class Shooter {
 
                     module.runNextLoop(() -> module.operator.setRumble(0), 3000);
 
+
                 }
             }
         });
 
+<<<<<<< HEAD
         module.operator.LT.addListener(value -> {
             if(value >= 0.5 && pressed == false) {
                 pressed = true;
@@ -100,7 +120,13 @@ public class Shooter {
         module.operator.B.addListener(new ButtonListener() {
 
             @Override public void rising() {
+=======
+>>>>>>> 7a77979a96d3ce707a83d88bcf48374285c968da
 
+        module.operator.B.addListener(new ButtonListener() {
+            @Override
+            public void rising() {
+                //RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM  > 100){
                     module.elevator.stopMotors();
                     module.elevator.fire();
@@ -115,7 +141,7 @@ public class Shooter {
             @Override
             public void falling() {
                 module.elevator.stopMotors();
-                System.out.println("<Shooter> The shooter stopped firing");
+                System.out.println("not firing");
             }
         });
 
@@ -123,11 +149,17 @@ public class Shooter {
             @Override
             public void falling() {
                 module.elevator.stopMotors();
-                module.outputs.shooterMaster.set(500);
-                System.out.println("<Shooter> The shooter was disabled.");
+                module.outputs.shooterMaster.set(0);
+                System.out.println("mark its done");
             }
         });
+
+        module.operator.LH.addListener((value -> {
+            module.outputs.turret.set(Math.abs(value) > 0.1 ? value * 0.2 : 0);
+        }));
     }
+
+
 
 }
 //TODO get min RPM values, Get pid numbers from miduraz.

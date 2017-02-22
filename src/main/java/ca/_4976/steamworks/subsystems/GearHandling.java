@@ -27,7 +27,7 @@ public class GearHandling extends AsynchronousRobot{
 
             public void rising() {
                 module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
-                System.out.print("<Gear Handling> The climber arm was");
+                System.out.print("<Gear Handling> The climber arm was ");
                 System.out.println(module.outputs.winchArm.isExtened() ? "extended" : "retracted" + ".");
             }
 

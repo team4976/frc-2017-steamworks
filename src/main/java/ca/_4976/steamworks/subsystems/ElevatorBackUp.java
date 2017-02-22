@@ -37,7 +37,7 @@ public class ElevatorBackUp {
         module.operator.LB.addListener(new ButtonListener() {
             @Override
             public void rising() {
-                runHE(1);
+                runHE(0.25);
                 elevatorUserControl = true;
             }
         });

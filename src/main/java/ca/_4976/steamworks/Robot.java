@@ -19,7 +19,8 @@ public class Robot extends AsynchronousRobot {
     private GearHandling gearHandling = new GearHandling(this);
     private Shooter shooter = new Shooter(this);
     private Winch winch = new Winch(this);
-
+    private Agitator agitator = new Agitator(this);
+    //public ElevatorBackUp elevatorBackUp = new ElevatorBackUp(this);
     public Elevator elevator = new Elevator(this);
     public LazySusan lazySusan = new LazySusan(this);
 }

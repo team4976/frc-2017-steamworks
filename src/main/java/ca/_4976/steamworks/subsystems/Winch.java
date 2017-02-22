@@ -12,9 +12,18 @@ public class Winch {
 
             @Override public void pressed() {
 
-                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 1 : 0);
+                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? -1 : 0);
             }
         });
+
+        module.operator.BACK.addListener(new ButtonListener() {
+            @Override
+            public void pressed() {
+                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 1:  0);
+            }
+        });
+
+
 
         module.operator.B.addListener(new ButtonListener() {
 
