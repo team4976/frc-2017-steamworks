@@ -48,7 +48,7 @@ public class Shooter {
             public void falling() {
 
                 //module.visionClass.lazySusan();
-                module.outputs.shooterMaster.set(3000);
+                module.outputs.shooterMaster.set(setSpeed);
                 module.elevator.cockingSetup();
                 turret_result = module.lazySusan.getVision_state();//visionClass.getTargetState();
                 System.out.println("turret result = " + turret_result);
@@ -101,7 +101,7 @@ public class Shooter {
             }
         });
 
-<<<<<<< HEAD
+
         module.operator.LT.addListener(value -> {
             if(value >= 0.5 && pressed == false) {
                 pressed = true;
@@ -120,8 +120,6 @@ public class Shooter {
         module.operator.B.addListener(new ButtonListener() {
 
             @Override public void rising() {
-=======
->>>>>>> 7a77979a96d3ce707a83d88bcf48374285c968da
 
         module.operator.B.addListener(new ButtonListener() {
             @Override
@@ -161,5 +159,5 @@ public class Shooter {
 
 
 
-}
+});
 //TODO get min RPM values, Get pid numbers from miduraz.
