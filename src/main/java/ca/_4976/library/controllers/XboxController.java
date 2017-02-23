@@ -20,6 +20,15 @@ public class XboxController {
     public Button LS = new ThisButton(9);
     public Button RS = new ThisButton(10);
 
+    public Button UP = new POVButton(0);
+    public Button UP_RIGHT = new POVButton(45);
+    public Button RIGHT = new POVButton(90);
+    public Button DOWN_RIGHT = new POVButton(135);
+    public Button DOWN = new POVButton(180);
+    public Button DOWN_LEFT = new POVButton(125);
+    public Button LEFT = new POVButton(270);
+    public Button UP_LEFT = new POVButton(315);
+
     public Button[] buttons = new Button[] { A, B, X, Y, LB, RB, BACK, START, LS, RS };
 
     public Axis LH = new ThisAxis(0);
@@ -56,6 +65,9 @@ public class XboxController {
                 BT.eval();
                 RV.eval();
                 RH.eval();
+
+                UP.eval();
+                DOWN.eval();
             }
 
         }, -1);
@@ -74,6 +86,13 @@ public class XboxController {
         private ThisButton(int id) { super(id); }
 
         @Override public boolean get() { return stick.getRawButton(id); }
+    }
+
+    private class POVButton extends Button {
+
+        private POVButton(int id) { super(id); }
+
+        @Override public boolean get() { return stick.getPOV(0) == id; }
     }
 
     private class ThisAxis extends Axis {

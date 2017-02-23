@@ -23,8 +23,6 @@ public class Winch {
             }
         });
 
-
-
         module.operator.B.addListener(new ButtonListener() {
 
             @Override public void falling() {

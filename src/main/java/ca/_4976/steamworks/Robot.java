@@ -5,6 +5,7 @@ import ca._4976.library.controllers.XboxController;
 import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.*;
+import ca._4976.steamworks.subsystems.profiler.MotionControl;
 
 public class Robot extends AsynchronousRobot {
 

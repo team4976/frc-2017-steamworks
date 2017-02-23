@@ -193,6 +193,12 @@ public class Elevator extends AsynchronousRobot {
 //
 //    }
 
+    public void runAll() { }
+
+    public void stop() { }
+
+    public boolean isRunning() { return false; }
+
     public void stopMotors(){
         runHE(0);
         runSHE(0);

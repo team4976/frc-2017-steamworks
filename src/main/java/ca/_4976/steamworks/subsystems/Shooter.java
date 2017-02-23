@@ -5,10 +5,16 @@ import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.DoubleListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Shooter {
+
+    private NetworkTable table = NetworkTable.getTable("Shooter");
+
+    private double targetRPM = table.getNumber("Setpoint (RPM)", 3100);
+    private double targetError = table.getNumber("Target Error (RPM)", 100);
 
     boolean speed = false;
     boolean shooter_firing = false;
@@ -18,41 +24,118 @@ public class Shooter {
     double setSpeed = 3400;
     boolean pressed = false;
 
-    private Robot module;
+    public Shooter(Robot robot) {
 
-    public Shooter(Robot module) {
+        robot.addListener(new RobotStateListener() {
 
-        module.addListener(new RobotStateListener() {
+            @Override public void robotInit() {
 
-            @Override
-            public void robotInit() {
+                robot.outputs.shooterMaster.disableControl();
 
-                module.runNextLoop(() -> {
+                robot.runNextLoop(() -> {
 
-                    NetworkTable.getTable("status").putNumber("shooter_rpm", module.outputs.shooterMaster.getSpeed());
-                    NetworkTable.getTable("status").putNumber("shooter_error", module.outputs.shooterMaster.getError());
+                    NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooterMaster.getSpeed());
+                    NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooterMaster.getError());
 
                 }, -1);
             }
 
-            @Override
-            public void disabledInit() {
-                module.outputs.shooterMaster.set(0);
+            @Override public void disabledInit() {
+                robot.outputs.shooterMaster.set(0);
             }
         });
 
-        ///PIDController ShooterPid = new PIDController((0.0002), (0), (0), module.inputs.shooter_encoder, module.outputs.shooterMaster); //test for values with finished shooter
-        this.module = module;
+        robot.driver.LB.addListener(new ButtonListener() {
 
-        //ShooterPid.setPID(table.getNumber("p", 0), table.getNumber("i", 0), table.getNumber("d", 0));
-        module.operator.A.addListener(new ButtonListener() {
+            @Override public void pressed() {
+
+                if (!robot.outputs.shooterMaster.isControlEnabled()) {
+
+                    robot.outputs.shooterMaster.enableControl();
+                    robot.outputs.shooterMaster.set(targetRPM);
+
+                } else {
+
+                    robot.outputs.shooterMaster.set(0);
+                    robot.outputs.shooterMaster.disableControl();
+                }
+            }
+        });
+
+
+        robot.driver.RB.addListener(new ButtonListener() { //TODO: Add targeting
+
+            @Override public void pressed() {
+
+                if (robot.outputs.shooterMaster.getError() < targetError) {
+
+                    System.out.println("<Shooter> Beginning to shoot.");
+
+                    robot.elevator.runAll();
+
+                    robot.runNextLoop(() -> { if (!robot.driver.RB.get()) robot.elevator.stop(); }, 500);
+                }
+            }
+
+            @Override public void held() {
+
+                if (robot.outputs.shooterMaster.getError() < targetError)
+                    System.out.println("<Shooter> Beginning to shoot.");
+
+                Evaluable evaluable = new Evaluable() {
+
+                    @Override public void eval() {
+
+                        if (robot.outputs.shooterMaster.getError() > targetError) {
+
+                            if (robot.elevator.isRunning())
+                                System.err.println("<Shooter> WARN: (RPM) too low to fire.");
+
+                            robot.elevator.stop();
+
+                        } else robot.elevator.runAll();
+
+                        if (robot.driver.RB.get()) robot.runNextLoop(this);
+                    }
+                };
+
+                evaluable.eval();
+            }
+
+            @Override public void falling() { robot.elevator.stop(); }
+        });
+
+
+        robot.operator.UP.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                targetRPM += 100;
+                System.out.println("<Shooter> Target (RPM) was set to " + (int) targetRPM + ".");
+
+                if (robot.outputs.shooterMaster.get() != 0) robot.outputs.shooterMaster.set(targetRPM);
+            }
+        });
+
+        robot.operator.DOWN.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                targetRPM -= 100;
+                System.out.println("<Shooter> Target (RPM) was set to " + (int) targetRPM + ".");
+
+                if (robot.outputs.shooterMaster.get() != 0) robot.outputs.shooterMaster.set(targetRPM);
+            }
+        });
+
+        robot.operator.A.addListener(new ButtonListener() {
             @Override
             public void falling() {
 
                 //module.visionClass.lazySusan();
-                module.outputs.shooterMaster.set(setSpeed);
-                module.elevator.cockingSetup();
-                turret_result = module.lazySusan.getVision_state();//visionClass.getTargetState();
+                robot.outputs.shooterMaster.set(setSpeed);
+                robot.elevator.cockingSetup();
+                turret_result = robot.lazySusan.getVision_state();//visionClass.getTargetState();
                 System.out.println("turret result = " + turret_result);
 
                 //RPM = module.outputs.shooterMaster.getEncVelocity();
@@ -64,92 +147,53 @@ public class Shooter {
 
                     System.out.println("START THE RUMBLE!!!!!!!!");
                     linearAc = 0; //linearAc = visionClass.getLinearAc();
-                    module.outputs.shooterHood.set(linearAc);
+                    robot.outputs.shooterHood.set(linearAc);
 
-                    module.runNextLoop(new Evaluable() {
 
-                        @Override
-
-                        public void eval() {
-
-                            for (int i = 0; i < 6; i++) {
-
-                                if (i % 2 == 0) module.runNextLoop(() -> module.operator.setRumble(1), 500 * i);
-
-                                else module.runNextLoop(() -> module.operator.setRumble(0), 500 * i);
-
-                                if (i % 2 == 0) module.runNextLoop(() -> module.driver.setRumble(1), 500 * i);
-
-                                else module.runNextLoop(() -> module.driver.setRumble(0), 500 * i);
-                            }
-
-                        }
-
-                    }, 3000);// get actual time for the linear acctuator
                 } else if (turret_result == 0) {
 
+                    robot.runNextLoop(() -> robot.driver.setRumble(1), 0);
 
-                    module.runNextLoop(() -> module.driver.setRumble(1), 0);
+                    robot.runNextLoop(() -> robot.operator.setRumble(1), 0);
 
-                    module.runNextLoop(() -> module.operator.setRumble(1), 0);
+                    robot.runNextLoop(() -> robot.driver.setRumble(0), 3000);
 
-                    module.runNextLoop(() -> module.driver.setRumble(0), 3000);
-
-                    module.runNextLoop(() -> module.operator.setRumble(0), 3000);
-
-
+                    robot.runNextLoop(() -> robot.operator.setRumble(0), 3000);
                 }
             }
         });
 
-
-        module.operator.LT.addListener(value -> {
-            if (value >= 0.5 && pressed == false) {
-                pressed = true;
-                setSpeed = setSpeed + 100;
-                System.out.println("shooter speed +100");
-            } else if (pressed) { pressed = false; }
-        });
-        module.operator.RT.addListener(value -> {
-            if (value >= 0.5 && pressed == false) {
-                pressed = true;
-                setSpeed = setSpeed - 100;
-                System.out.println("shooter speed -100");
-            } else if (pressed) { pressed = false; }
-        });
-
-        module.operator.B.addListener(new ButtonListener() {
+        robot.operator.B.addListener(new ButtonListener() {
             @Override
             public void rising() {
                 //RPM = module.outputs.shooterMaster.getEncVelocity();
                 if (RPM < 10000 && RPM > 100) {
-                    module.elevator.stopMotors();
-                    module.elevator.fire();
+                    robot.elevator.stopMotors();
+                    robot.elevator.fire();
                     System.out.println("Fire");
                 }
                 if (RPM > 10000 || RPM < 100) {
-                    module.elevator.stopMotors();
+                    robot.elevator.stopMotors();
                     System.out.println("no fire");
                 }
             }
 
             @Override
             public void falling() {
-                module.elevator.stopMotors();
+                robot.elevator.stopMotors();
                 System.out.println("not firing");
             }
         });
 
-        module.operator.X.addListener(new ButtonListener() {
+        robot.operator.X.addListener(new ButtonListener() {
             @Override
             public void falling() {
-                module.elevator.stopMotors();
-                module.outputs.shooterMaster.set(0);
+                robot.elevator.stopMotors();
+                robot.outputs.shooterMaster.set(0);
                 System.out.println("mark its done");
             }
         });
 
-        module.operator.LH.addListener((value -> module.outputs.turret.set(Math.abs(value) > 0.1 ? value * 0.2 : 0)));
+        robot.operator.LH.addListener((value -> robot.outputs.turret.set(Math.abs(value) > 0.1 ? value * -0.2 : 0)));
     }
 }
-//TODO get min RPM values, Get pid numbers from miduraz.
