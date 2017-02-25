@@ -3,7 +3,7 @@ package ca._4976.library.outputs;
 import ca._4976.library.AsynchronousRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
-public class TimmedSolenoid {
+public class TimedSolenoid {
 
     private AsynchronousRobot module;
 
@@ -12,7 +12,7 @@ public class TimmedSolenoid {
     private boolean extened = false;
     private int offDelay = 600;
 
-    public TimmedSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
+    public TimedSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
 
         this.module = module;
         solenoid = new edu.wpi.first.wpilibj.DoubleSolenoid(pcmId, outPin, inPin);

@@ -5,24 +5,11 @@ import ca._4976.steamworks.Robot;
 
 public class Agitator {
 
-    public Agitator(Robot robot) {
+    private Robot robot;
 
-        robot.addListener(new RobotStateListener() {
+    public Agitator(Robot robot) { this.robot = robot; }
 
-            @Override public void disabledInit() {
+    void run() { robot.outputs.agitator.set(-1); }
 
-                robot.outputs.agitator.set(0);
-            }
-
-            @Override public void autonomousInit() {
-
-                robot.outputs.agitator.set(-1);
-            }
-
-            @Override public void teleopInit() {
-
-                robot.outputs.agitator.set(-1);
-            }
-        });
-    }
+    void stop() { robot.outputs.agitator.set(0); }
 }

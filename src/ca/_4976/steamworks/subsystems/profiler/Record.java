@@ -52,8 +52,8 @@ class Record implements Runnable {
                         robot.inputs.driveRight.getDistance(),
                         robot.inputs.driveLeft.getRate(),
                         robot.inputs.driveRight.getRate(),
-                        null,
-                        null
+                        null//,
+//                        null
                 ));
 
                 avgTickRate += System.nanoTime() - lastTickTime;

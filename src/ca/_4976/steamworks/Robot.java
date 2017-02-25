@@ -17,11 +17,10 @@ public class Robot extends AsynchronousRobot {
 
     private DriveTrain drive = new DriveTrain(this);
     private MotionControl profile = new MotionControl(this);
-    private GearHandling gearHandling = new GearHandling(this);
+    private GearHandler gearHandling = new GearHandler(this);
     private Shooter shooter = new Shooter(this);
     private Winch winch = new Winch(this);
-    private Agitator agitator = new Agitator(this);
-    //public ElevatorBackUp elevatorBackUp = new ElevatorBackUp(this);
+
+    public Agitator agitator = new Agitator(this);
     public Elevator elevator = new Elevator(this);
-    public LazySusan lazySusan = new LazySusan(this);
 }

@@ -6,35 +6,35 @@ import ca._4976.steamworks.Robot;
 
 public class Winch {
 
-    public Winch(Robot module) {
+    public Winch(Robot robot) {
 
-        module.operator.Y.addListener(new ButtonListener() {
+        robot.operator.Y.addListener(new ButtonListener() {
 
             @Override public void falling() {
 
-                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? -1 : 0);
+                robot.outputs.winchMaster.set(robot.outputs.winchMaster.get() == 0 ? -1 : 0);
             }
         });
 
-        module.operator.BACK.addListener(new ButtonListener() {
+        robot.operator.BACK.addListener(new ButtonListener() {
             @Override
             public void falling() {
-                module.outputs.winchMaster.set(module.outputs.winchMaster.get() == 0 ? 0.1:  0);
+                robot.outputs.winchMaster.set(robot.outputs.winchMaster.get() == 0 ? 0.1:  0);
             }
         });
 
-        module.operator.B.addListener(new ButtonListener() {
+        robot.operator.B.addListener(new ButtonListener() {
 
             @Override public void falling() {
 
-                module.outputs.winchArm.output(!module.outputs.winchArm.isExtened());
+                robot.outputs.winchArch.output(!robot.outputs.winchArch.isExtened());
             }
         });
 
-        module.inputs.winchSensor.addListener(new BooleanListener() {
+        robot.inputs.winchSensor.addListener(new BooleanListener() {
             @Override
             public void changed() {
-                module.outputs.winchMaster.set(0);
+                robot.outputs.winchMaster.set(0);
             }
         });
     }

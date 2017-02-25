@@ -38,7 +38,6 @@ public class XboxController {
     public Axis LT = new ThisAxis(2);
     public Axis RT = new ThisAxis(3);
     public Axis BT = new ThisAxis(3, 2);
-
     public Axis[] axes = new Axis[] { LH, LV, RH, RV, LT, BT };
 
     public XboxController(AsynchronousRobot module, int port) {

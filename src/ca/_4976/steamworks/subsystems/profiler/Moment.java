@@ -1,7 +1,7 @@
 package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.library.Evaluable;
-import ca._4976.library.listeners.EvalType;
+//import ca._4976.library.listeners.EvalType;
 
 class Moment {
 
@@ -15,7 +15,7 @@ class Moment {
     final double rightEncoderVelocity;
 
     final Evaluable[] evaluables;
-    final EvalType[] evalAs;
+    //final EvalType[] evalAs;
 
     Moment(
             double leftDriveOutput,
@@ -24,8 +24,8 @@ class Moment {
             double rightEncoderPosition,
             double leftEncoderVelocity,
             double rightEncoderVelocity,
-            Evaluable[] evaluables,
-            EvalType[] evalAs
+            Evaluable[] evaluables//,
+      //      EvalType[] evalAs
     ) {
         this.leftDriveOutput = leftDriveOutput;
         this.rightDriveOutput = rightDriveOutput;
@@ -35,6 +35,6 @@ class Moment {
         this.rightEncoderVelocity = rightEncoderVelocity;
 
         this.evaluables = evaluables;
-        this.evalAs = evalAs;
+        //this.evalAs = evalAs;
     }
 }

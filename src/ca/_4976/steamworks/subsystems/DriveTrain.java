@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class DriveTrain {
 
-    public DriveTrain(Robot module) {
+    public DriveTrain(Robot robot) {
 
         Vector2D targetVelocity = new Vector2D(0, 0);
         Vector2D setVelocity = new Vector2D(0, 0);
@@ -56,17 +56,17 @@ public class DriveTrain {
                 NetworkTable.getTable("status").putNumber("drive_linear", setVelocity.getX());
                 NetworkTable.getTable("status").putNumber("drive_rotational", setVelocity.getY());
 
-                module.outputs.driveLeftFront.set(setVelocity.getY() + setVelocity.getX());
-                module.outputs.driveLeftRear.set(setVelocity.getY() + setVelocity.getX());
-                module.outputs.driveRightFront.set(setVelocity.getY() - setVelocity.getX());
-                module.outputs.driveRightRear.set(setVelocity.getY() - setVelocity.getX());
+                robot.outputs.driveLeftFront.set(setVelocity.getY() + setVelocity.getX());
+                robot.outputs.driveLeftRear.set(setVelocity.getY() + setVelocity.getX());
+                robot.outputs.driveRightFront.set(setVelocity.getY() - setVelocity.getX());
+                robot.outputs.driveRightRear.set(setVelocity.getY() - setVelocity.getX());
 
                 //if (setVelocity.getY() != targetVelocity.getY() || setVelocity.getX() != targetVelocity.getX())
-                    module.runNextLoop(this);
+                    robot.runNextLoop(this);
             }
         };
 
-        module.driver.LH.addListener(value -> {
+        robot.driver.LH.addListener(value -> {
 
            // if (setVelocity.getY() != targetVelocity.getY()) {
 
@@ -76,7 +76,7 @@ public class DriveTrain {
            // } else targetVelocity.setY(value > 0 ? value * value : value * -value);
         });
 
-        module.driver.BT.addListener(value -> {
+        robot.driver.BT.addListener(value -> {
 
             //if (setVelocity.getX() != targetVelocity.getX()) {
 
@@ -86,6 +86,6 @@ public class DriveTrain {
             //} else targetVelocity.setX(value);
         });
 
-        module.runNextLoop(updateDrive);
+        robot.runNextLoop(updateDrive);
     }
 }
