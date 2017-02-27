@@ -36,7 +36,6 @@ public class XboxController {
     public Axis RV = new Axis(5);
     public Axis LT = new Axis(2);
     public Axis RT = new Axis(3);
-    public Axis[] axes = new Axis[] { LH, LV, RH, RV, LT, BT };
 
     public XboxController(int port) { stick = new Joystick(port); }
 
