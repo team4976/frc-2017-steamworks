@@ -1,9 +1,6 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-import ca._4976.library.controllers.Axis;
-import ca._4976.library.controllers.Button;
 import ca._4976.steamworks.Robot;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 class Playback implements Runnable {
 

@@ -1,8 +1,6 @@
 package ca._4976.steamworks.subsystems.profiler;
 
 
-import ca._4976.library.controllers.Button;
-
 public class Config {
 
     final double kP = 20, kI = 0, kD = 0;

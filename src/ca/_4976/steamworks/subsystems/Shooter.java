@@ -23,8 +23,8 @@ public class Shooter {
 
                 robot.runNextLoop(() -> {
 
-                    NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooterMaster.getSpeed());
-                    NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooterMaster.getError());
+                    //NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooterMaster.getSpeed());
+                    //NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooterMaster.getError());
 
                 }, -1);
             }

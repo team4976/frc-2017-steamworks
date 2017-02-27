@@ -59,6 +59,8 @@ public class Outputs {
         winchSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         winchSlave.set(winchMaster.getDeviceID());
 
+        gearRoller = new CANTalon(2);
+
         gearActuator = new TimedSolenoid(module, 20, 1, 6);
         winchArch = new TimedSolenoid(module, 20, 0, 7);
 
