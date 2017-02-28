@@ -37,8 +37,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 		VisionThread visionThread = new VisionThread(camera, this, VisionTracker::track);
 		visionThread.start();
 
-		// TODO: change module.outputs.turret to whatever it is
-		pidController = new PIDController(0.007, 0, 0.004, this, module.outputs.turret);
+		pidController = new PIDController(0.007, 0, 0.004, this, module.outputs.pivot);
 		pidController.setSetpoint(80);
 	}
 
