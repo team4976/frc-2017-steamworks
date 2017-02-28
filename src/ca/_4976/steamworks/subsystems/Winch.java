@@ -27,14 +27,7 @@ public class Winch {
 
             @Override public void falling() {
 
-                robot.outputs.winchArch.output(!robot.outputs.winchArch.isExtened());
-            }
-        });
-
-        robot.inputs.winchSensor.addListener(new BooleanListener() {
-            @Override
-            public void changed() {
-                robot.outputs.winchMaster.set(0);
+                robot.outputs.arch.output(!robot.outputs.arch.isExtened());
             }
         });
     }

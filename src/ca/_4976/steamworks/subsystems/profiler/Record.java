@@ -1,7 +1,8 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-import ca._4976.library.controllers.Axis;
-import ca._4976.library.controllers.Button;
+import ca._4976.library.Evaluable;
+import ca._4976.library.controllers.components.Boolean;
+import ca._4976.library.controllers.components.Double;
 import ca._4976.steamworks.Robot;
 
 import java.util.ArrayList;
@@ -11,16 +12,20 @@ class Record implements Runnable {
     private Robot robot;
 
     private Config config = Config.getInstance();
-    private Button[] buttons = new Button[0];
-    private Axis[] axes = new Axis[0];
+
+    private Boolean[] buttons = new Boolean[0];
+    private Double[] axes = new Double[0];
 
     Record(Robot robot) { this.robot = robot; }
 
-    private Moment[] moments;
+    ArrayList<Moment> moments = new ArrayList<>();
+
+    synchronized void addControllerInput(Object[] evaluables, Object[] states) {
+
+        moments.get(moments.size() - 1).addControllerInputs(evaluables, states);
+    }
 
     @Override public void run() {
-
-        ArrayList<Moment> moments = new ArrayList<>();
 
         long lastTickTime = System.nanoTime();
         double avgTickRate = 0;
@@ -29,6 +34,35 @@ class Record implements Runnable {
         robot.inputs.driveLeft.reset();
         robot.inputs.driveRight.reset();
 
+        Evaluable evaluable = new Evaluable() {
+
+            @Override public void eval() {
+
+                ArrayList<Object[]> listeners = new ArrayList<>();
+                ArrayList<Object> states = new ArrayList<>();
+
+                for (Boolean button : buttons)
+                    if (button.getState() != Boolean.EVAL_STATE.NON) {
+
+                        listeners.add(button.getListeners());
+                        states.add(button.getState());
+                    }
+
+                for (Double axis : axes)
+                    if (axis.getState() != Double.EVAL_STATE.NON) {
+
+                        listeners.add(axis.getListeners());
+                        states.add(axis.getState());
+                    }
+
+                addControllerInput(listeners.toArray(), states.toArray());
+
+                if (robot.isEnabled()) robot.runNextLoop(this);
+            }
+        };
+
+        evaluable.eval();
+
         while (robot.isEnabled()) {
 
             if (System.nanoTime() - lastTickTime >= config.tickTime) {
@@ -36,14 +70,7 @@ class Record implements Runnable {
                 lastTickTime = System.nanoTime();
                 tickCount++;
 
-                boolean[] driverButtons = new boolean[robot.driver.buttons.length];
-                for (int i = 0; i < driverButtons.length; i++) driverButtons[i] = robot.driver.buttons[i].get();
-
-                boolean[] operatorButtons = new boolean[robot.operator.buttons.length];
-                for (int i = 0; i < operatorButtons.length; i++) operatorButtons[i] = robot.operator.buttons[i].get();
-
-                double[] driverAxes = new double[robot.driver.axes.length];
-                for (int i = 0; i < driverAxes.length; i++) driverAxes[i] = robot.driver.axes[i].get();
+                robot.drive.update();
 
                 moments.add(new Moment(
                         robot.outputs.driveLeftFront.get(),
@@ -51,9 +78,7 @@ class Record implements Runnable {
                         robot.inputs.driveLeft.getDistance(),
                         robot.inputs.driveRight.getDistance(),
                         robot.inputs.driveLeft.getRate(),
-                        robot.inputs.driveRight.getRate(),
-                        null//,
-//                        null
+                        robot.inputs.driveRight.getRate()
                 ));
 
                 avgTickRate += System.nanoTime() - lastTickTime;
@@ -65,9 +90,9 @@ class Record implements Runnable {
         System.out.printf(" %%%.1f", config.tickTime / avgTickRate);
     }
 
-    Moment[] getProfile() { return moments; }
+    Moment[] getProfile() { return moments.toArray(new Moment[moments.size()]); }
 
-    void changeControllerRecordPresets(Button[] buttons) { this.buttons = buttons; }
+    void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }
 
-    void changeControllerRecordPresets(Axis[] axes) { this.axes = axes; }
+    void changeControllerRecordPresets(Double[] axes) { this.axes = axes; }
 }

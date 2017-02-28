@@ -19,18 +19,18 @@ public class Shooter {
 
             @Override public void robotInit() {
 
-                robot.outputs.shooterMaster.disableControl();
+                robot.outputs.shooter.disableControl();
 
                 robot.runNextLoop(() -> {
 
-                    //NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooterMaster.getSpeed());
-                    //NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooterMaster.getError());
+                    //NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooter.getSpeed());
+                    //NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooter.getError());
 
                 }, -1);
             }
 
             @Override public void disabledInit() {
-                robot.outputs.shooterMaster.set(0);
+                robot.outputs.shooter.set(0);
             }
         });
 
@@ -38,15 +38,15 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (!robot.outputs.shooterMaster.isControlEnabled()) {
+                if (!robot.outputs.shooter.isControlEnabled()) {
 
-                    robot.outputs.shooterMaster.enableControl();
-                    robot.outputs.shooterMaster.set(targetRPM);
+                    robot.outputs.shooter.enableControl();
+                    robot.outputs.shooter.set(targetRPM);
 
                 } else {
 
-                    robot.outputs.shooterMaster.set(0);
-                    robot.outputs.shooterMaster.disableControl();
+                    robot.outputs.shooter.set(0);
+                    robot.outputs.shooter.disableControl();
                 }
             }
         });
@@ -56,7 +56,7 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (robot.outputs.shooterMaster.getError() < targetError) {
+                if (robot.outputs.shooter.getError() < targetError) {
 
                     System.out.println("<Shooter> Beginning to shoot.");
 
@@ -68,14 +68,14 @@ public class Shooter {
 
             @Override public void held() {
 
-                if (robot.outputs.shooterMaster.getError() < targetError)
+                if (robot.outputs.shooter.getError() < targetError)
                     System.out.println("<Shooter> Beginning to shoot.");
 
                 Evaluable evaluable = new Evaluable() {
 
                     @Override public void eval() {
 
-                        if (robot.outputs.shooterMaster.getError() > targetError) {
+                        if (robot.outputs.shooter.getError() > targetError) {
 
                             if (robot.elevator.isRunning())
                                 System.err.println("<Shooter> WARN: (RPM) too low to fire.");
@@ -98,8 +98,8 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                robot.outputs.shooterMaster.set(0);
-                robot.outputs.shooterMaster.disableControl();
+                robot.outputs.shooter.set(0);
+                robot.outputs.shooter.disableControl();
 
                 System.out.println("<Shooter> Stopping the shooter.");
             }
@@ -112,7 +112,7 @@ public class Shooter {
                 targetRPM += 100;
                 System.out.println("<Shooter> Target (RPM) was set to " + (int) targetRPM + ".");
 
-                if (robot.outputs.shooterMaster.get() != 0) robot.outputs.shooterMaster.set(targetRPM);
+                if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(targetRPM);
             }
         });
 
@@ -123,10 +123,10 @@ public class Shooter {
                 targetRPM -= 100;
                 System.out.println("<Shooter> Target (RPM) was set to " + (int) targetRPM + ".");
 
-                if (robot.outputs.shooterMaster.get() != 0) robot.outputs.shooterMaster.set(targetRPM);
+                if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(targetRPM);
             }
         });
 
-        robot.operator.LH.addListener((value -> robot.outputs.shooterPivot.set(Math.abs(value) > 0.1 ? value * -0.2 : 0)));
+        robot.operator.LH.addListener((value -> robot.outputs.pivot.set(Math.abs(value) > 0.1 ? value * -0.2 : 0)));
     }
 }

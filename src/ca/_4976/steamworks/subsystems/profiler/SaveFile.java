@@ -1,8 +1,8 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-public class SaveFile {
+class SaveFile { //TODO: Complete Save system.
 
     void save(String name, Moment[] moments) { }
 
-    void load(String name) { }
+    Moment[] load(String name) { return null; }
 }

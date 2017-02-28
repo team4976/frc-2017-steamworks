@@ -2,7 +2,6 @@ package ca._4976.steamworks.io;
 
 import ca._4976.library.AsynchronousRobot;
 
-import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.outputs.*;
 import com.ctre.CANTalon;
@@ -19,17 +18,17 @@ public class Outputs {
     public VictorSP driveRightRear;
 
     public CANTalon elevator;
-    public CANTalon gearRoller;
+    public CANTalon roller;
     public CANTalon winchMaster;
-    public CANTalon shooterMaster;
-    public CANTalon shooterPivot;
+    public CANTalon shooter;
+    public CANTalon pivot;
 
-    public TimedSolenoid gearActuator;
-    public TimedSolenoid winchArch;
+    public TimedSolenoid gear;
+    public TimedSolenoid arch;
     
-    public LinearActuator shooterHood;
+    public LinearActuator hood;
 
-    public Tallon agitator;
+    public Taloon agitator;
 
     public Outputs(AsynchronousRobot module) {
 
@@ -40,17 +39,17 @@ public class Outputs {
 
         elevator = new CANTalon(3);
 
-        shooterMaster = new CANTalon(12);
-        shooterMaster.changeControlMode(CANTalon.TalonControlMode.Speed);
-        shooterMaster.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-        shooterMaster.reverseSensor(true);
-        shooterMaster.configEncoderCodesPerRev(48);
+        shooter = new CANTalon(12);
+        shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+        shooter.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+        shooter.reverseSensor(true);
+        shooter.configEncoderCodesPerRev(48);
 
-        shooterPivot = new CANTalon(4);
+        pivot = new CANTalon(4);
 
         CANTalon shooterSlave = new CANTalon(13);
         shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
-        shooterSlave.set(shooterMaster.getDeviceID());
+        shooterSlave.set(shooter.getDeviceID());
 
         winchMaster = new CANTalon(6);
         winchMaster.reverseOutput(true);
@@ -59,14 +58,14 @@ public class Outputs {
         winchSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         winchSlave.set(winchMaster.getDeviceID());
 
-        gearRoller = new CANTalon(2);
+        roller = new CANTalon(2);
 
-        gearActuator = new TimedSolenoid(module, 20, 1, 6);
-        winchArch = new TimedSolenoid(module, 20, 0, 7);
+        gear = new TimedSolenoid(module, 20, 1, 6);
+        arch = new TimedSolenoid(module, 20, 0, 7);
 
-        agitator = new Tallon(5);
+        agitator = new Taloon(5);
 
-        shooterHood = new LinearActuator(4);
+        hood = new LinearActuator(4);
 
         module.addListener(new RobotStateListener() {
 

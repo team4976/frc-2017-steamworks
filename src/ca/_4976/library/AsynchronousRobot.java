@@ -11,13 +11,16 @@ import java.util.ArrayList;
 public class AsynchronousRobot extends RobotBase {
 
     private ArrayList<RobotStateListener> listeners = new ArrayList<>();
-    private ArrayList<Evaluable> constantEvaluables = new ArrayList<>();
+
+    private Evaluable[] userInput;
+    private Evaluable[] hardwareInput;
+
     private ArrayList<Evaluable> evaluables = new ArrayList<>();
     private ArrayList<Long> evalTimes = new ArrayList<>();
 
     private boolean disabledInitialized = false;
     private boolean autonomousInitialized = false;
-    private boolean telexInitialized = false;
+    private boolean teleopInitialized = false;
     private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
 
@@ -29,12 +32,15 @@ public class AsynchronousRobot extends RobotBase {
 
         listeners.forEach(RobotStateListener::robotInit);
 
+        userInput = Initialization.USER_INPUT_EVALS.toArray(userInput);
+        hardwareInput = Initialization.HARDWARE_INPUT_EVALS.toArray(hardwareInput);
+
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
         HAL.observeUserProgramStarting();
 
         LiveWindow.setEnabled(false);
 
-        while (constantEvaluables.size() > 0) {
+        while (m_ds.isSysActive()) {
 
             m_ds.waitForData();
 
@@ -46,7 +52,7 @@ public class AsynchronousRobot extends RobotBase {
 
                     disabledInitialized = true;
                     autonomousInitialized = false;
-                    telexInitialized = false;
+                    teleopInitialized = false;
                     testInitialized = false;
                     enableOperatorControl = false;
 
@@ -64,30 +70,33 @@ public class AsynchronousRobot extends RobotBase {
 
                     disabledInitialized = false;
                     autonomousInitialized = true;
-                    telexInitialized = false;
+                    teleopInitialized = false;
                     testInitialized = false;
 
                     listeners.forEach(RobotStateListener::autonomousInit);
                 }
 
                 HAL.observeUserProgramAutonomous();
+                for (Evaluable evaluable : hardwareInput) evaluable.eval();
                 checkEvaluables();
 
             } else if (isOperatorControl()) {
 
-                if (!telexInitialized) {
+                if (!teleopInitialized) {
 
                     LiveWindow.setEnabled(false);
 
                     disabledInitialized = false;
                     autonomousInitialized = false;
-                    telexInitialized = true;
+                    teleopInitialized = true;
                     testInitialized = false;
 
                     listeners.forEach(RobotStateListener::teleopInit);
                 }
 
                 HAL.observeUserProgramTeleop();
+                for (Evaluable evaluable : hardwareInput) evaluable.eval();
+                for (Evaluable evaluable : userInput) evaluable.eval();
                 checkEvaluables();
 
             } else if (isTest()) {
@@ -98,13 +107,14 @@ public class AsynchronousRobot extends RobotBase {
 
                     disabledInitialized = false;
                     autonomousInitialized = false;
-                    telexInitialized = false;
+                    teleopInitialized = false;
                     testInitialized = true;
 
                     listeners.forEach(RobotStateListener::testInit);
                 }
 
                 HAL.observeUserProgramTest();
+                for (Evaluable evaluable : hardwareInput) evaluable.eval();
                 checkEvaluables();
             }
         }
@@ -112,13 +122,8 @@ public class AsynchronousRobot extends RobotBase {
 
     public void runNextLoop(Evaluable evaluable, int delay) {
 
-        if (delay == -1) constantEvaluables.add(evaluable);
-
-        else {
-
-            evaluables.add(evaluable);
-            evalTimes.add(System.currentTimeMillis() + delay);
-        }
+        evaluables.add(evaluable);
+        evalTimes.add(System.currentTimeMillis() + delay);
     }
 
     public void runNextLoop(Evaluable evaluable) { runNextLoop(evaluable, 0); }
@@ -126,8 +131,6 @@ public class AsynchronousRobot extends RobotBase {
     public void addListener(RobotStateListener listener) { listeners.add(listener); }
 
     private void checkEvaluables() {
-
-        constantEvaluables.forEach(Evaluable::eval);
 
         if (evalTimes.size() == evaluables.size()) {
 
@@ -141,6 +144,6 @@ public class AsynchronousRobot extends RobotBase {
                 }
             }
 
-        } else { throw new RuntimeException("Evaluables out of sync."); }
+        } else { throw new RuntimeException("Out of sync."); }
     }
 }

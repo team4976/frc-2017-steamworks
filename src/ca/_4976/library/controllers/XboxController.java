@@ -1,6 +1,5 @@
 package ca._4976.library.controllers;
 
-import ca._4976.library.AsynchronousRobot;
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -30,12 +29,12 @@ public class XboxController {
     public Boolean LEFT = new POV(270);
     public Boolean UP_LEFT = new POV(315);
 
-    public Axis LH = new Axis(0);
-    public Axis LV = new Axis(1);
-    public Axis RH = new Axis(4);
-    public Axis RV = new Axis(5);
-    public Axis LT = new Axis(2);
-    public Axis RT = new Axis(3);
+    public Double LH = new Axis(0);
+    public Double LV = new Axis(1);
+    public Double RH = new Axis(4);
+    public Double RV = new Axis(5);
+    public Double LT = new Axis(2);
+    public Double RT = new Axis(3);
 
     public XboxController(int port) { stick = new Joystick(port); }
 
@@ -43,6 +42,13 @@ public class XboxController {
 
         stick.setRumble(GenericHID.RumbleType.kLeftRumble, strength);
         stick.setRumble(GenericHID.RumbleType.kRightRumble, strength);
+    }
+
+    private class Axis extends Double {
+
+        private Axis(int id) { super(id); }
+
+        @Override public double get() { return stick.getRawAxis(id); }
     }
 
     private class Button extends Boolean {
@@ -57,12 +63,5 @@ public class XboxController {
         private POV(int id) { super(id); }
 
         @Override public boolean get() { return stick.getPOV(0) == id; }
-    }
-
-    private class Axis extends Double {
-
-        private Axis(int id) { super(id); }
-
-        @Override public double get() { return stick.getRawAxis(id); }
     }
 }
