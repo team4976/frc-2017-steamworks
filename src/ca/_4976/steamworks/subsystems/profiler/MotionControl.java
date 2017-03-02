@@ -76,7 +76,9 @@ public class MotionControl {
                 robot.inputs.driveLeft.reset();
                 robot.inputs.driveRight.reset();
 
-                synchronized (this) { new Thread(record).run(); }
+                robot.enableOperatorControl();
+
+                synchronized (this) { new Thread(record).start(); }
             }
         });
     }

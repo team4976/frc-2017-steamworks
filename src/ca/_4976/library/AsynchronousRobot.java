@@ -32,15 +32,18 @@ public class AsynchronousRobot extends RobotBase {
 
         listeners.forEach(RobotStateListener::robotInit);
 
-        userInput = Initialization.USER_INPUT_EVALS.toArray(userInput);
-        hardwareInput = Initialization.HARDWARE_INPUT_EVALS.toArray(hardwareInput);
+        userInput = new Evaluable[Initialization.USER_INPUT_EVALS.size()];
+        for (int i = 0; i < userInput.length; i++) userInput[i] = Initialization.USER_INPUT_EVALS.get(i);
+
+        hardwareInput = new Evaluable[Initialization.HARDWARE_INPUT_EVALS.size()];
+        for (int i = 0; i < hardwareInput.length; i++) hardwareInput[i] = Initialization.HARDWARE_INPUT_EVALS.get(i);
 
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
         HAL.observeUserProgramStarting();
 
         LiveWindow.setEnabled(false);
 
-        while (m_ds.isSysActive()) {
+        while (true) {
 
             m_ds.waitForData();
 
@@ -114,6 +117,8 @@ public class AsynchronousRobot extends RobotBase {
                 }
 
                 HAL.observeUserProgramTest();
+
+                if (enableOperatorControl) for (Evaluable evaluable : hardwareInput) evaluable.eval();
                 for (Evaluable evaluable : hardwareInput) evaluable.eval();
                 checkEvaluables();
             }

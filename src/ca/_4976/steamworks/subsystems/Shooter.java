@@ -40,11 +40,13 @@ public class Shooter {
 
                 if (!robot.outputs.shooter.isControlEnabled()) {
 
+                    robot.vision.unpause();
                     robot.outputs.shooter.enableControl();
                     robot.outputs.shooter.set(targetRPM);
 
                 } else {
 
+                    robot.vision.pause();
                     robot.outputs.shooter.set(0);
                     robot.outputs.shooter.disableControl();
                 }

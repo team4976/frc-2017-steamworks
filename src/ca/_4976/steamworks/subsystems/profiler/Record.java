@@ -5,6 +5,7 @@ import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.steamworks.Robot;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 class Record implements Runnable {
@@ -20,9 +21,13 @@ class Record implements Runnable {
 
     ArrayList<Moment> moments = new ArrayList<>();
 
-    synchronized void addControllerInput(Object[] evaluables, Object[] states) {
+    synchronized void addControllerInput(ArrayList<Object[]> evaluables, Object[] states) {
 
-        moments.get(moments.size() - 1).addControllerInputs(evaluables, states);
+        Object[][] evals = new Object[evaluables.size()][];
+
+        for (int i = 0; i < evals.length; i++) { evals[i] = evaluables.get(i); }
+
+        if (moments.size() > 0) moments.get(moments.size() - 1).addControllerInputs(evals, states);
     }
 
     @Override public void run() {
@@ -30,6 +35,8 @@ class Record implements Runnable {
         long lastTickTime = System.nanoTime();
         double avgTickRate = 0;
         int tickCount = 0;
+
+        moments.clear();
 
         robot.inputs.driveLeft.reset();
         robot.inputs.driveRight.reset();
@@ -55,7 +62,7 @@ class Record implements Runnable {
                         states.add(axis.getState());
                     }
 
-                addControllerInput(listeners.toArray(), states.toArray());
+                addControllerInput(listeners, states.toArray());
 
                 if (robot.isEnabled()) robot.runNextLoop(this);
             }
@@ -87,10 +94,17 @@ class Record implements Runnable {
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);
-        System.out.printf(" %%%.1f", config.tickTime / avgTickRate);
+        System.out.printf(" %.1f%%%n", config.tickTime / avgTickRate);
     }
 
-    Moment[] getProfile() { return moments.toArray(new Moment[moments.size()]); }
+    Moment[] getProfile() {
+
+        Moment[] profile = new Moment[moments.size()];
+
+        for (int i = 0; i < moments.size(); i++) { profile[i] = moments.get(i); }
+
+        return profile;
+    }
 
     void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }
 

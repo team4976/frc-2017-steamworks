@@ -25,7 +25,11 @@ public class DriveTrain {
 
             targetVelocity.setY(value > 0 ? value * value : value * -value);
 
-            if (!robot.isTest()) output();
+            if (!robot.isTest()) {
+
+                setVelocity.setY(value > 0 ? value * value : value * -value);
+                output();
+            }
         });
 
         robot.driver.LT.addListener(value -> {
@@ -33,7 +37,11 @@ public class DriveTrain {
             leftTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (!robot.isTest()) output();
+            if (!robot.isTest()) {
+
+                setVelocity.setX(rightTrigger - leftTrigger);
+                output();
+            }
         });
 
         robot.driver.RT.addListener(value -> {
@@ -41,7 +49,11 @@ public class DriveTrain {
             rightTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (!robot.isTest()) output();
+            if (!robot.isTest()) {
+
+                setVelocity.setX(rightTrigger - leftTrigger);
+                output();
+            }
         });
     }
 

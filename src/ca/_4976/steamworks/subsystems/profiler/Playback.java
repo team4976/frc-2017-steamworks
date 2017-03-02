@@ -1,5 +1,9 @@
 package ca._4976.steamworks.subsystems.profiler;
 
+import ca._4976.library.controllers.components.Boolean;
+import ca._4976.library.controllers.components.Double;
+import ca._4976.library.listeners.ButtonListener;
+import ca._4976.library.listeners.DoubleListener;
 import ca._4976.steamworks.Robot;
 
 class Playback implements Runnable {
@@ -31,6 +35,31 @@ class Playback implements Runnable {
                 lastTickTime = System.nanoTime();
 
                 Moment moment = moments[tickCount];
+
+                if (moment.evaluables != null) {
+
+                    new Thread(() -> {
+
+                        for (int i = 0; i < moment.states.length; i++) {
+
+                            if (moment.states[i] instanceof Double.EVAL_STATE) {
+
+                                Double.EVAL_STATE state = (Double.EVAL_STATE) moment.states[i];
+
+                                //if (state == Double.EVAL_STATE.CHANGED)
+                                //for (Object o : moment.evaluables[i]) { ((DoubleListener) o).changed();  }
+
+                            } else {
+
+                                Boolean.EVAL_STATE state = (Boolean.EVAL_STATE) moment.states[i];
+
+                                if (state == Boolean.EVAL_STATE.PRESSED)
+                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).pressed();
+                            }
+                        }
+
+                    }).start();
+                }
 
                 double actualLeftPosition = robot.inputs.driveLeft.getDistance();
                 double actualRightPosition = robot.inputs.driveRight.getDistance();
@@ -72,7 +101,7 @@ class Playback implements Runnable {
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);
-        System.out.printf(" %%%.1f", config.tickTime / avgTickRate);
+        System.out.printf(" %.1f%%%n", config.tickTime / avgTickRate);
     }
 
     void setProfile(Moment[] moments) { this.moments = moments; }

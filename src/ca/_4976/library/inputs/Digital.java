@@ -27,8 +27,6 @@ public class Digital {
             values[0] = values[1];
             values[1] = get();
 
-            if (values[0] != values[1]) for (BooleanListener listener : listeners) listener.changed();
-
             if (!values[0] && values[1]) for (BooleanListener listener : listeners) listener.rising();
 
             if (values[0] && !values[1]) for (BooleanListener listener : listeners) listener.falling();

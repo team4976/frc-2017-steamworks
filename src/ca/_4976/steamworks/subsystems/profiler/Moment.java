@@ -17,8 +17,8 @@ class Moment {
     final double leftEncoderVelocity;
     final double rightEncoderVelocity;
 
-    Evaluable[] evaluables;
-    Object[] states;
+    Object[][] evaluables = null;
+    Object[] states = null;
 
     Moment(
             double leftDriveOutput,
@@ -39,9 +39,10 @@ class Moment {
         this.states = states;
     }
 
-    public void addControllerInputs(Object[] evaluables, Object[] states) {
+    public void addControllerInputs(Object[][] evaluables, Object[] states) {
 
         this.evaluables = evaluables;
+
         this.states = states;
     }
 }
