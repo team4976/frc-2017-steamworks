@@ -20,9 +20,13 @@ public class GearHandler {
 
                 if (robot.outputs.roller.getOutputCurrent() > 5) {
 
-                    robot.outputs.roller.set(0);
-                    robot.outputs.gear.output(true);
-                    System.out.println("<Gear Handler> Gear roller over current perhaps we have a gear.");
+                    robot.runNextLoop(() -> {
+
+                        robot.outputs.roller.set(-0.1);
+                        robot.outputs.gear.output(true);
+                        System.out.println("<Gear Handler> Gear roller over current perhaps we have a gear.");
+
+                    }, 300);
                 }
 
                 if (robot.outputs.roller.get() < 0) robot.runNextLoop(this);
