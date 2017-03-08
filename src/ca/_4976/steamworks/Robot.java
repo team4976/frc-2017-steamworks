@@ -10,12 +10,12 @@ import ca._4976.steamworks.subsystems.profiler.MotionControl;
 public class Robot extends AsynchronousRobot {
 
     public XboxController driver = new XboxController(0);
-    public XboxController operator = driver;
+    public XboxController operator =  new XboxController(1);
 
     public Inputs inputs = new Inputs(this);
     public Outputs outputs = new Outputs(this);
 
-    private MotionControl profile = new MotionControl(this);
+    private MotionControl profiler = new MotionControl(this);
     private GearHandler gearHandler = new GearHandler(this);
     private Shooter shooter = new Shooter(this);
     private Winch winch = new Winch(this);

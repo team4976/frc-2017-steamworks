@@ -21,13 +21,16 @@ class Record implements Runnable {
 
     ArrayList<Moment> moments = new ArrayList<>();
 
-    synchronized void addControllerInput(ArrayList<Object[]> evaluables, Object[] states) {
+    synchronized void addControllerInput(ArrayList<Object[]> evaluables, ArrayList<Integer> ids, Object[] states) {
 
         Object[][] evals = new Object[evaluables.size()][];
+        int[] iDs = new int[ids.size()];
 
         for (int i = 0; i < evals.length; i++) { evals[i] = evaluables.get(i); }
 
-        if (moments.size() > 0) moments.get(moments.size() - 1).addControllerInputs(evals, states);
+        for (int i = 0; i < iDs.length; i++) { iDs[i] = ids.get(i); }
+
+        if (moments.size() > 0) moments.get(moments.size() - 1).addControllerInputs(evals, iDs, states, null);
     }
 
     @Override public void run() {
@@ -46,23 +49,26 @@ class Record implements Runnable {
             @Override public void eval() {
 
                 ArrayList<Object[]> listeners = new ArrayList<>();
+                ArrayList<Integer> ids = new ArrayList<>();
                 ArrayList<Object> states = new ArrayList<>();
 
-                for (Boolean button : buttons)
-                    if (button.getState() != Boolean.EVAL_STATE.NON) {
+                for (int i = 0; i < buttons.length; i++)
+                    if (buttons[i].getState() != Boolean.EVAL_STATE.NON) {
 
-                        listeners.add(button.getListeners());
-                        states.add(button.getState());
+                    ids.add(i);
+                    listeners.add(buttons[i].getListeners());
+                    states.add(buttons[i].getState());
+                }
+
+                for (int i = 0; i < axes.length; i++)
+                    if (axes[i].getState() != Double.EVAL_STATE.NON) {
+
+                        ids.add(i + 100);
+                        listeners.add(axes[i].getListeners());
+                        states.add(axes[i].getState());
                     }
 
-                for (Double axis : axes)
-                    if (axis.getState() != Double.EVAL_STATE.NON) {
-
-                        listeners.add(axis.getListeners());
-                        states.add(axis.getState());
-                    }
-
-                addControllerInput(listeners, states.toArray());
+                addControllerInput(listeners, ids, states.toArray());
 
                 if (robot.isEnabled()) robot.runNextLoop(this);
             }
@@ -91,6 +97,12 @@ class Record implements Runnable {
                 avgTickRate += System.nanoTime() - lastTickTime;
             }
         }
+
+        Moment[] staticMoments = new Moment[moments.size()];
+
+        for (int i = 0; i < staticMoments.length; i++) staticMoments[i] = moments.get(i);
+
+        new SaveFile().save(System.currentTimeMillis() / 1000 + "", staticMoments);
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);

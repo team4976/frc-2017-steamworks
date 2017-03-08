@@ -1,11 +1,5 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-import ca._4976.library.Evaluable;
-import ca._4976.library.controllers.components.Double;
-
-import java.util.Objects;
-//import ca._4976.library.listeners.EvalType;
-
 class Moment {
 
     final double leftDriveOutput;
@@ -18,7 +12,9 @@ class Moment {
     final double rightEncoderVelocity;
 
     Object[][] evaluables = null;
+    int[] ids = null;
     Object[] states = null;
+    Object[] data = null;
 
     Moment(
             double leftDriveOutput,
@@ -34,15 +30,13 @@ class Moment {
         this.rightEncoderPosition = rightEncoderPosition;
         this.leftEncoderVelocity = leftEncoderVelocity;
         this.rightEncoderVelocity = rightEncoderVelocity;
-
-        this.evaluables = evaluables;
-        this.states = states;
     }
 
-    public void addControllerInputs(Object[][] evaluables, Object[] states) {
+    void addControllerInputs(Object[][] evaluables, int[] ids, Object[] states, Object[] data) {
 
         this.evaluables = evaluables;
-
+        this.ids = ids;
         this.states = states;
+        this.data = data;
     }
 }

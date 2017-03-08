@@ -14,8 +14,8 @@ public class Inputs {
         driveRight = new Encoder(0, 1);
         driveLeft = new Encoder(2, 3);
 
-        driveLeft.setReverseDirection(true);
-        driveRight.setReverseDirection(true);
+        driveLeft.setReverseDirection(false);
+        driveRight.setReverseDirection(false);
 
         driveLeft.setDistancePerPulse(0.00031179492);
         driveRight.setDistancePerPulse(0.00031179492);

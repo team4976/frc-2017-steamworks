@@ -42,12 +42,9 @@ public class MotionControl {
         });
 
         record.changeControllerRecordPresets(new Double[] {
-                robot.driver.LH,
                 robot.driver.LV,
                 robot.driver.RH,
                 robot.driver.RV,
-                robot.driver.LT,
-                robot.driver.RT,
                 robot.operator.LH,
                 robot.operator.LV,
                 robot.operator.RH,

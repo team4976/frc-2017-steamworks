@@ -11,7 +11,7 @@ public class Elevator {
     void run() {
 
         robot.agitator.run();
-        robot.outputs.elevator.set(0.75);
+        robot.outputs.elevator.set(-0.50);
     }
 
     void stop() {

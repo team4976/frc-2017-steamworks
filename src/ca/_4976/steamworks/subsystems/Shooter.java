@@ -1,32 +1,37 @@
 package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.Evaluable;
+import ca._4976.library.Initialization;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Shooter {
 
     private NetworkTable table = NetworkTable.getTable("Shooter");
 
-    private double targetRPM = table.getNumber("Setpoint (RPM)", 3100);
+    private double targetRPM = table.getNumber("Target (RPM)", 3100);
     private double targetError = table.getNumber("Target Error (RPM)", 100);
 
     public Shooter(Robot robot) {
+
+        table.putNumber("Target (RPM)", targetRPM);
+        table.putNumber("Target Error (RPM)", targetError);
 
         robot.addListener(new RobotStateListener() {
 
             @Override public void robotInit() {
 
-                robot.outputs.shooter.disableControl();
+                //robot.outputs.shooter.disableControl();
 
-                robot.runNextLoop(() -> {
+                Initialization.HARDWARE_INPUT_EVALS.add(() -> {
 
-                    //NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooter.getSpeed());
-                    //NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooter.getError());
+                    NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooter.getSpeed());
+                    NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooter.getError());
 
-                }, -1);
+                });
             }
 
             @Override public void disabledInit() {
@@ -38,23 +43,27 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (!robot.outputs.shooter.isControlEnabled()) {
+                if (robot.outputs.shooter.get() == 0) {
+
+                    System.out.println("<Shooter> Priming the Shooter.");
 
                     robot.vision.unpause();
-                    robot.outputs.shooter.enableControl();
+                    robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                     robot.outputs.shooter.set(targetRPM);
 
                 } else {
 
+                    System.out.println("<Shooter> Stopping the Shooter.");
+
                     robot.vision.pause();
+                    robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                     robot.outputs.shooter.set(0);
-                    robot.outputs.shooter.disableControl();
                 }
             }
         });
 
 
-        robot.operator.B.addListener(new ButtonListener() { //TODO: Add targeting
+        robot.operator.B.addListener(new ButtonListener() {
 
             @Override public void pressed() {
 
@@ -64,7 +73,7 @@ public class Shooter {
 
                     robot.elevator.run();
 
-                    robot.runNextLoop(() -> { if (!robot.driver.RB.get()) robot.elevator.stop(); }, 500);
+                    robot.runNextLoop(() -> { if (!robot.driver.RB.get()) robot.elevator.stop(); }, 100);
                 }
             }
 
@@ -101,7 +110,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 robot.outputs.shooter.set(0);
-                robot.outputs.shooter.disableControl();
+
 
                 System.out.println("<Shooter> Stopping the shooter.");
             }

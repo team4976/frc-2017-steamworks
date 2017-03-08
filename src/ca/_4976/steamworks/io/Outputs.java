@@ -40,16 +40,15 @@ public class Outputs {
         elevator = new CANTalon(3);
 
         shooter = new CANTalon(12);
-        shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
         shooter.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-        shooter.reverseSensor(true);
+        shooter.reverseSensor(false);
         shooter.configEncoderCodesPerRev(48);
 
         pivot = new CANTalon(4);
 
         CANTalon shooterSlave = new CANTalon(13);
         shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
-        shooterSlave.set(shooter.getDeviceID());
+        shooterSlave.set(12);
 
         winchMaster = new CANTalon(6);
         winchMaster.reverseOutput(true);
@@ -74,7 +73,13 @@ public class Outputs {
             DigitalOutput ringlight = new DigitalOutput(9);
             Solenoid underGlow = new Solenoid(20, 5);
 
-            @Override public void robotInit() { underGlow.set(true); }
+            @Override public void robotInit() {
+
+                shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+                shooter.set(0);
+
+                underGlow.set(true);
+            }
 
             @Override public void teleopInit() { this.ringlight.set(true); }
 

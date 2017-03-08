@@ -3,8 +3,8 @@ package ca._4976.steamworks.subsystems.profiler;
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
-import ca._4976.library.listeners.DoubleListener;
 import ca._4976.steamworks.Robot;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 class Playback implements Runnable {
 
@@ -64,8 +64,8 @@ class Playback implements Runnable {
                 double actualLeftPosition = robot.inputs.driveLeft.getDistance();
                 double actualRightPosition = robot.inputs.driveRight.getDistance();
 
-                double leftError = moment.leftEncoderPosition - actualLeftPosition;
-                double rightError = moment.rightEncoderPosition - actualRightPosition;
+                double leftError = actualLeftPosition - moment.leftEncoderPosition;
+                double rightError = actualRightPosition - moment.rightEncoderPosition;
 
                 leftIntegral += leftError * config.tickTime;
                 rightIntegral += rightError * config.tickTime;
@@ -73,17 +73,17 @@ class Playback implements Runnable {
                 double leftDerivative = (leftError - lastLeftError) / config.tickTime - moment.leftEncoderVelocity;
                 double rightDerivative = (rightError - lastRightError) / config.tickTime - moment.rightEncoderVelocity;
 
+                System.out.println(moment.leftDriveOutput + " " + leftError);
+
                 double leftDrive =
                         moment.leftDriveOutput
-                                + config.kP * leftError
-                                + config.kI * leftIntegral
-                                + config.kD * leftDerivative;
+                                + (config.kP * leftError)
+                        ;
 
                 double rightDrive =
                         moment.rightDriveOutput
-                                + config.kP * rightError
-                                + config.kI * rightIntegral
-                                + config.kD * rightDerivative;
+                                + (config.kP * rightError)
+                          ;
 
                 robot.outputs.driveLeftFront.set(leftDrive);
                 robot.outputs.driveLeftRear.set(leftDrive);
@@ -94,10 +94,16 @@ class Playback implements Runnable {
                 lastLeftError = leftError;
                 lastRightError = rightError;
 
+                NetworkTable.getTable("motion").putNumber("leftTarget", moment.leftEncoderPosition);
+                NetworkTable.getTable("motion").putNumber("rightTarget", moment.rightEncoderPosition);
+                NetworkTable.getTable("motion").putNumber("leftError", leftError);
+                NetworkTable.getTable("motion").putNumber("rightError", rightError);
+
                 tickCount++;
                 avgTickRate += System.nanoTime() - lastTickTime;
             }
         }
+
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);

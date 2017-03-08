@@ -1,5 +1,8 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.library.Evaluable;
+import ca._4976.library.Initialization;
+import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.math.Vector2D;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -9,8 +12,8 @@ public class DriveTrain {
     private Vector2D targetVelocity = new Vector2D(0, 0);
     private Vector2D setVelocity = new Vector2D(0, 0);
 
-    private Vector2D linearRamp = new Vector2D(0.04, 0.06);
-    private Vector2D rotationalRamp = new Vector2D(0.08, 0.1);
+    private Vector2D linearRamp = new Vector2D(1 / 200, 0.9 / 200);
+    private Vector2D rotationalRamp = new Vector2D(0.8 / 200, 0.7 / 200);
 
     private double leftTrigger = 0;
     private double rightTrigger = 0;
@@ -20,6 +23,17 @@ public class DriveTrain {
     public DriveTrain(Robot robot) {
 
         this.robot = robot;
+
+        robot.addListener(new RobotStateListener() {
+            @Override
+            public void disabledInit() {
+
+                robot.outputs.driveLeftFront.set(0);
+                robot.outputs.driveRightFront.set(0);
+                robot.outputs.driveLeftRear.set(0);
+                robot.outputs.driveRightRear.set(0);
+            }
+        });
 
         robot.driver.LH.addListener(value -> {
 
