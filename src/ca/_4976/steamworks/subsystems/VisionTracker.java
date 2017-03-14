@@ -10,18 +10,22 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.vision.VisionPipeline;
 
 import edu.wpi.first.wpilibj.vision.VisionThread;
 import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.*;
+import sun.nio.ch.Net;
 
 public class VisionTracker implements VisionPipeline, PIDSource {
 
 	private Goal goal = null;
 
 	private PIDController pidController;
+
+	private NetworkTable table = NetworkTable.getTable("Vision");
 
 	private boolean pause = true;
 
@@ -37,8 +41,10 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 		VisionThread visionThread = new VisionThread(camera, this, VisionTracker::track);
 		visionThread.start();
 
+		table.putNumber("Setpoint", table.getNumber("Setpoint", 80));
+
 		pidController = new PIDController(0.007, 0, 0.004, this, module.outputs.pivot);
-		pidController.setSetpoint(80);
+		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 	}
 
 	public void pause() {
@@ -46,6 +52,8 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	}
 
 	public void unpause() {
+
+		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 		pause = false;
 	}
 
@@ -87,10 +95,14 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public double pidGet() {
-		if (goal != null)
+		if (goal != null) {
+
+			NetworkTable.getTable("Status").putNumber("Vision Error (Units)", goal.centerX);
+
 			return goal.centerX;
-		else
-			return 80;
+
+		} else
+			return table.getNumber("Setpoint", 80);
 	}
 
 	private class Goal {
@@ -110,6 +122,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 			leftEdge = x;
 			rightEdge = x + width;
 			bottomEdge = y;
+			topEdge = y + height;
 			topEdge = y + height;
 
 			centerX = x + (width / 2);

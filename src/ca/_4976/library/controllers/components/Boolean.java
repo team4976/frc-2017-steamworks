@@ -61,7 +61,11 @@ public abstract class Boolean implements Evaluable {
             } else state = EVAL_STATE.FALLING;
         }
 
-        if (onTime == 15) for (ButtonListener listener : listeners) listener.held();
+        if (onTime == 15) for (ButtonListener listener : listeners) {
+
+            state = EVAL_STATE.HELD;
+            listener.held();
+        }
 
         onTime = values[1] ? onTime + 1 : 0;
     }

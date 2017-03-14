@@ -12,8 +12,8 @@ public class DriveTrain {
     private Vector2D targetVelocity = new Vector2D(0, 0);
     private Vector2D setVelocity = new Vector2D(0, 0);
 
-    private Vector2D linearRamp = new Vector2D(1 / 200, 0.9 / 200);
-    private Vector2D rotationalRamp = new Vector2D(0.8 / 200, 0.7 / 200);
+    private Vector2D linearRamp = new Vector2D(0 / 200, 0 / 200);
+    private Vector2D rotationalRamp = new Vector2D(0 / 200, 0 / 200);
 
     private double leftTrigger = 0;
     private double rightTrigger = 0;
@@ -39,7 +39,7 @@ public class DriveTrain {
 
             targetVelocity.setY(value > 0 ? value * value : value * -value);
 
-            if (!robot.isTest()) {
+            if (robot.isTest()) {
 
                 setVelocity.setY(value > 0 ? value * value : value * -value);
                 output();
@@ -51,7 +51,7 @@ public class DriveTrain {
             leftTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (!robot.isTest()) {
+            if (robot.isTest()) {
 
                 setVelocity.setX(rightTrigger - leftTrigger);
                 output();
@@ -63,7 +63,7 @@ public class DriveTrain {
             rightTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (!robot.isTest()) {
+            if (robot.isTest()) {
 
                 setVelocity.setX(rightTrigger - leftTrigger);
                 output();
@@ -73,10 +73,10 @@ public class DriveTrain {
 
     private void output() {
 
-        robot.outputs.driveLeftFront.set(setVelocity.getY() + setVelocity.getX());
-        robot.outputs.driveLeftRear.set(setVelocity.getY() + setVelocity.getX());
-        robot.outputs.driveRightFront.set(setVelocity.getY() - setVelocity.getX());
-        robot.outputs.driveRightRear.set(setVelocity.getY() - setVelocity.getX());
+        robot.outputs.driveLeftFront.set(targetVelocity.getY() + targetVelocity.getX());
+        robot.outputs.driveLeftRear.set(targetVelocity.getY() + targetVelocity.getX());
+        robot.outputs.driveRightFront.set(targetVelocity.getY() - targetVelocity.getX());
+        robot.outputs.driveRightRear.set(targetVelocity.getY() - targetVelocity.getX());
     }
 
     public void update() {
@@ -84,7 +84,7 @@ public class DriveTrain {
         double diffX = targetVelocity.getX() - setVelocity.getX();
         double diffY = targetVelocity.getY() - setVelocity.getY();
 
-        if ((setVelocity.getX() >= 0 && targetVelocity.getX() > setVelocity.getX()) ||
+        /*if ((setVelocity.getX() >= 0 && targetVelocity.getX() > setVelocity.getX()) ||
                 (setVelocity.getX() <= 0 && targetVelocity.getX() < setVelocity.getX()))
 
             if (Math.abs(diffX) <= linearRamp.getX()) setVelocity.setX(targetVelocity.getX());
@@ -115,9 +115,9 @@ public class DriveTrain {
 
         else setVelocity.setY(setVelocity.getY() - rotationalRamp.getY());
 
-        output();
+        output();*/
 
-        NetworkTable.getTable("status").putNumber("drive_linear", setVelocity.getX());
-        NetworkTable.getTable("status").putNumber("drive_rotational", setVelocity.getY());
+        NetworkTable.getTable("Status").putNumber("drive_linear", setVelocity.getX());
+        NetworkTable.getTable("Status").putNumber("drive_rotational", setVelocity.getY());
     }
 }

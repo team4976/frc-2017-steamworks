@@ -18,7 +18,7 @@ public class MotionControl {
 
         NetworkTable table = NetworkTable.getTable("Motion Control");
 
-        record.changeControllerRecordPresets(new Boolean[] {
+        Boolean[] buttoms = new Boolean[] {
                 robot.driver.A,
                 robot.driver.B,
                 robot.driver.X,
@@ -39,9 +39,12 @@ public class MotionControl {
                 robot.operator.START,
                 robot.operator.LS,
                 robot.operator.RS
-        });
+        };
 
-        record.changeControllerRecordPresets(new Double[] {
+        record.changeControllerRecordPresets(buttoms);
+        saveFile.changeControllerRecordPresets(buttoms);
+
+        Double[] axes = new Double[] {
                 robot.driver.LV,
                 robot.driver.RH,
                 robot.driver.RV,
@@ -51,7 +54,12 @@ public class MotionControl {
                 robot.operator.RV,
                 robot.operator.LT,
                 robot.operator.RT,
-        });
+        };
+
+        record.changeControllerRecordPresets(axes);
+        saveFile.changeControllerRecordPresets(axes);
+
+        table.putString("load_table", table.getString("load_table", ""));
 
         robot.addListener(new RobotStateListener() {
 

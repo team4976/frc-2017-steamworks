@@ -55,6 +55,15 @@ class Playback implements Runnable {
 
                                 if (state == Boolean.EVAL_STATE.PRESSED)
                                     for (Object o : moment.evaluables[i]) ((ButtonListener) o).pressed();
+
+                                if (state == Boolean.EVAL_STATE.HELD)
+                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).held();
+
+                                if (state == Boolean.EVAL_STATE.RISING)
+                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).rising();
+
+                                if (state == Boolean.EVAL_STATE.FALLING)
+                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).falling();
                             }
                         }
 
@@ -72,8 +81,6 @@ class Playback implements Runnable {
 
                 double leftDerivative = (leftError - lastLeftError) / config.tickTime - moment.leftEncoderVelocity;
                 double rightDerivative = (rightError - lastRightError) / config.tickTime - moment.rightEncoderVelocity;
-
-                System.out.println(moment.leftDriveOutput + " " + leftError);
 
                 double leftDrive =
                         moment.leftDriveOutput
