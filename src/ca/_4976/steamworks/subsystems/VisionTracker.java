@@ -47,6 +47,8 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 	}
 
+	public boolean isPaused() { return pause; }
+
 	public void pause() {
 		pause = true;
 	}
@@ -97,13 +99,13 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	public double pidGet() {
 		if (goal != null) {
 
-			NetworkTable.getTable("Status").putNumber("Vision Error (Units)", goal.centerX);
-
 			return goal.centerX;
 
 		} else
 			return table.getNumber("Setpoint", 80);
 	}
+
+	double getError() { return pidController.getError(); }
 
 	private class Goal {
 

@@ -1,54 +1,29 @@
 package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.Evaluable;
-import ca._4976.library.Initialization;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-
-import java.lang.annotation.Target;
+import edu.wpi.first.wpilibj.tables.ITable;
 
 public class Shooter {
 
-    private static NetworkTable table = NetworkTable.getTable("Shooter");
+    private Config config = new Config();
+    private Robot robot;
 
-    public static double targetRPM = table.getSubTable("Shot One").getNumber("Target (RPM)", 3100);
-    private double targetError = table.getSubTable("Shot One").getNumber("Target Error (RPM)", 100);
-    private double increment = table.getNumber("Change Increment", 10);
-    private double hood = table.getSubTable("Shot One").getNumber("Hood Position (%)", 0.5);
-
-    private boolean shooting = false;
+    private int selection = 0;
 
     public Shooter(Robot robot) {
 
-        table.getSubTable("Shot One").putNumber("Target (RPM)", targetRPM);
-        table.getSubTable("Shot One").putNumber("Target Error (RPM)", targetError);
-        table.getSubTable("Shot One").putNumber("Hood Position (%)", hood);
-
-        table.getSubTable("Shot Two").putNumber("Target (RPM)", table.getSubTable("Shot Two").getNumber("Target (RPM)", 3100));
-        table.getSubTable("Shot Two").putNumber("Target Error (RPM)", table.getSubTable("Shot Two").getNumber("Target Error (RPM)", 100));
-        table.getSubTable("Shot Two").putNumber("Hood Position (%)", table.getSubTable("Shot Two").getNumber("Hood Position (%)", 0.5));
-
-        table.getSubTable("Shot Three").putNumber("Target (RPM)", table.getSubTable("Shot Three").getNumber("Target (RPM)", 3100));
-        table.getSubTable("Shot Three").putNumber("Target Error (RPM)", table.getSubTable("Shot Three").getNumber("Target Error (RPM)", 100));
-        table.getSubTable("Shot Three").putNumber("Hood Position (%)", table.getSubTable("Shot Three").getNumber("Hood Position (%)", 0.5));
+        this.robot = robot;
 
         robot.addListener(new RobotStateListener() {
 
-            @Override public void robotInit() {
-
-                Initialization.HARDWARE_INPUT_EVALS.add(() -> {
-
-                    NetworkTable.getTable("Status").putNumber("Shooter Speed (RPM)", robot.outputs.shooter.getSpeed());
-                    NetworkTable.getTable("Status").putNumber("Shooter Error (RPM)", robot.outputs.shooter.getError());
-                });
-            }
+            @Override public void robotInit() { }
 
             @Override public void disabledInit() {
-
-                shooting = false;
 
                 robot.vision.pause();
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
@@ -60,9 +35,7 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (!shooting) {
-
-                    shooting = true;
+                if (robot.outputs.shooter.get() == 0) {
 
                     System.out.println("<Shooter> Priming the Shooter.");
 
@@ -70,11 +43,14 @@ public class Shooter {
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                     robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
                     robot.outputs.shooterSlave.set(12);
-                    robot.outputs.shooter.set(targetRPM);
+                    robot.outputs.shooter.set(config.targetSpeed[selection]);
+
+                } else if (robot.vision.isPaused()) {
+
+                    System.out.println("<Shooter> Looking for target.");
+                    robot.vision.unpause();
 
                 } else {
-
-                    shooting = false;
 
                     System.out.println("<Shooter> Stopping the Shooter.");
 
@@ -89,7 +65,7 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (robot.outputs.shooter.getError() < targetError) {
+                if (robot.outputs.shooter.getError() < config.targetError[selection]) {
 
                     System.out.println("<Shooter> Beginning to shoot.");
 
@@ -101,15 +77,15 @@ public class Shooter {
 
             @Override public void held() {
 
-                if (robot.outputs.shooter.getError() < targetError) System.out.println("<Shooter> Beginning to shoot.");
+                if (robot.outputs.shooter.getError() < config.targetError[selection]) System.out.println("<Shooter> Beginning to shoot.");
 
                 else System.err.println("<Shooter> WARN: (RPM) too low to fire.");
 
-                Evaluable evaluable = new Evaluable() {
+                new Evaluable() {
 
                     @Override public void eval() {
 
-                        if (robot.outputs.shooter.getError() > targetError) {
+                        if (robot.outputs.shooter.getError() > config.targetError[selection]) {
 
                             if (robot.elevator.isRunning())
                                 System.err.println("<Shooter> WARN: (RPM) too low to fire.");
@@ -120,9 +96,8 @@ public class Shooter {
 
                         if (robot.driver.RB.get()) robot.runNextLoop(this);
                     }
-                };
 
-                evaluable.eval();
+                }.eval();
             }
 
             @Override public void falling() {
@@ -137,8 +112,9 @@ public class Shooter {
 
             @Override public void pressed() {
 
+                robot.vision.pause();
+                robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
-
 
                 System.out.println("<Shooter> Stopping the shooter.");
             }
@@ -148,19 +124,8 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                targetRPM = table.getSubTable("Shot One").getNumber("Target (RPM)", 3100);
-                targetError = table.getSubTable("Shot One").getNumber("Target Error (RPM)", 100);
-                hood = table.getSubTable("Shot One").getNumber("Hood Position (%)", 0.5);
-                increment = table.getNumber("Change Increment", 10);
-
-                robot.outputs.hood.set(hood);
-
-                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
-                System.out.println("<Shooter> Setting the Hood Position (%) to " + hood);
-
-                table.getSubTable("Shot One").putNumber("Target (RPM)", targetRPM);
-                table.getSubTable("Shot One").putNumber("Target Error (RPM)", targetError);
-                table.getSubTable("Shot One").putNumber("Change Increment", increment);
+                selection = 0;
+                config.update();
             }
         });
 
@@ -168,18 +133,8 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                targetRPM = table.getSubTable("Shot Two").getNumber("Target (RPM)", 3100);
-                targetError = table.getSubTable("Shot Two").getNumber("Target Error (RPM)", 100);
-                hood = table.getSubTable("Shot Two").getNumber("Hood Position (%)", 0.5);
-                increment = table.getNumber("Change Increment", 10);
-
-                robot.outputs.hood.set(hood);
-
-                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
-
-                table.getSubTable("Shot Two").putNumber("Target (RPM)", targetRPM);
-                table.getSubTable("Shot Two").putNumber("Target Error (RPM)", targetError);
-                table.getSubTable("Shot Two").putNumber("Change Increment", increment);
+                selection  = 1;
+                config.update();
             }
         });
 
@@ -187,37 +142,200 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                targetRPM = table.getSubTable("Shot Three").getNumber("Target (RPM)", 3100);
-                targetError = table.getSubTable("Shot Three").getNumber("Target Error (RPM)", 100);
-                hood = table.getSubTable("Shot Three").getNumber("Hood Position (%)", 0.5);
-                increment = table.getNumber("Change Increment", 10);
-
-                robot.outputs.hood.set(hood);
-
-                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
-
-                table.getSubTable("Shot Three").putNumber("Target (RPM)", targetRPM);
-                table.getSubTable("Shot Three").putNumber("Target Error (RPM)", targetError);
-                table.getSubTable("Shot Three").putNumber("Change Increment", increment);
+                selection = 2;
+                config.update();
             }
         });
 
-        robot.operator.LH.addListener(value -> robot.outputs.pivot.set(Math.abs(value) > 0.4 ? value * -0.2 : 0));
+        robot.operator.DOWN.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                selection = 3;
+                config.update();
+            }
+        });
+
+        robot.operator.LH.addListener(value -> robot.outputs.pivot.set(Math.abs(value) > 0.4 ? value * -0.3 : 0));
 
         robot.operator.LV.addListener(value -> new Evaluable() {
 
             @Override public void eval() {
 
-                if (Math.abs(robot.operator.LV.get()) > 0.4 && value == robot.operator.LV.get()) {
+                if (value == robot.operator.LV.get() && value != 0) {
 
-                    targetRPM += increment * (value < 0 ? 1 : -1);
-                    if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(targetRPM);
-                    System.out.println("<Shooter> The Target Speed (RPM) was set to " + (int) targetRPM);
+                    config.targetSpeed[selection] = config.targetSpeed[selection] - value;
 
-                    robot.runNextLoop(this, (int) (600 / Math.abs(robot.operator.LV.get())));
+                    robot.runNextLoop(this);
+
+                } else if (value == 0) {
+
+                    config.targetSpeed[selection] = ((int) config.targetSpeed[selection] / 10) * 10;
                 }
             }
 
         }.eval());
+    }
+
+    private class Config {
+
+        private NetworkTable table = NetworkTable.getTable("Shooter");
+
+        private double kP, kI, kD, kF, kRamp;
+        private int kIZone, kProfile;
+
+        private double[] targetSpeed = new double[4];
+        private double[] targetError = new double[4];
+        private double[] hoodPosition = new double[4];
+        private double[] turretPosition = new double[4];
+
+        private Config() {
+
+            ITable pid = table.getSubTable("PID");
+
+            if (pid.containsKey("kP")) kP = pid.getNumber("kP", 0);
+
+            else {
+
+                kP = 0;
+                pid.putNumber("kP", 0);
+            }
+
+            if (pid.containsKey("kI")) kI = pid.getNumber("kI", 0);
+
+            else {
+
+                kI = 0;
+                pid.putNumber("kI", 0);
+            }
+
+            if (pid.containsKey("kD")) kD = pid.getNumber("kD", 0);
+
+            else {
+
+                kD = 0;
+                pid.putNumber("kD", 0);
+            }
+
+            if (pid.containsKey("kF")) kF = pid.getNumber("kF", 0);
+
+            else {
+
+                kF = 0;
+                pid.putNumber("kF", 0);
+            }
+
+            if (pid.containsKey("kIZone")) kIZone = (int) pid.getNumber("kIZone", 0);
+
+            else {
+
+                kIZone = 0;
+                pid.putNumber("kIZone", 0);
+            }
+
+            if (pid.containsKey("kRamp")) kRamp = pid.getNumber("kRamp", 0);
+
+            else {
+
+                kRamp = 0;
+                pid.putNumber("kRamp", 0);
+            }
+
+            if (pid.containsKey("kProfile")) kProfile = (int) pid.getNumber("kProfile", 0);
+
+            else {
+
+                kProfile = 0;
+                pid.putNumber("kProfile", 0);
+            }
+
+            pid.addTableListener((source, key, value, isNew) -> {
+
+                switch (key) {
+
+                    case "kP":kP = (double) value; break;
+                    case "kI": kI = (double) value; break;
+                    case "kD": kD = (double) value; break;
+                    case "kF": kF = (double) value; break;
+                    case "kIZone": kIZone = (int) (double) value; break;
+                    case "kRamp": kRamp = (double) value; break;
+                    case "kProfile": kProfile = (int) (double) value; break;
+                }
+
+                robot.outputs.shooter.setPID(kP, kI, kD, kF, kIZone, kRamp, kProfile);
+            });
+
+            for (int i = 0;  i < 4; i++) {
+
+                ITable subTable = table.getSubTable("Shot " + i);
+
+                if (subTable.containsKey("Target Speed (RPM)"))
+                    targetSpeed[i] = subTable.getNumber("Target Speed (RPM)", 3100);
+
+                else {
+
+                    subTable.putNumber("Target Speed (RPM)", 3100);
+                    targetSpeed[i] = 3100;
+                }
+
+                if (subTable.containsKey("Target Error (RPM)"))
+                    targetError[i] = subTable.getNumber("Target Error (RPM)", 25);
+
+                else {
+
+                    subTable.putNumber("Target Error (RPM)", 25);
+                    targetError[i] = 25;
+                }
+
+                if (subTable.containsKey("Hood Position (%)"))
+                    hoodPosition[i] = subTable.getNumber("Hood Position (%)", 0.2);
+
+                else {
+
+                    subTable.putNumber("Hood Position (%)", 0.2);
+                    hoodPosition[i] = 0.2;
+                }
+
+                if (subTable.containsKey("Turret Position (ANGLE)"))
+                    turretPosition[i] = subTable.getNumber("Turret Position (ANGLE)", 0);
+
+                else {
+
+                    subTable.putNumber("Turret Position (ANGLE)", 0);
+                    turretPosition[i] = 0;
+                }
+
+                int finalized = i;
+
+                subTable.addTableListener((source, key, value, isNew) -> {
+
+                    switch (key) {
+                        case "Target Speed (RPM)": targetSpeed[finalized] = (double) value;
+                        case "Target Error (RPM)": targetError[finalized] = (double) value;
+                        case "Hood Position (%)": hoodPosition[finalized] = (double) value;
+                        case "Turret Position (ANGLE)": turretPosition[finalized] = (double) value;
+                    }
+
+                    if (finalized == selection) update();
+                });
+            }
+        }
+
+        private void update() {
+
+            System.out.println("<Shooter> Setting Target Speed (RPM): " + targetSpeed[selection]);
+            System.out.println("<Shooter> Setting Hood Position (%): " + hoodPosition[selection]);
+            System.out.println("<Shooter> Setting Turret Position (ANGLE): " + turretPosition[selection]);
+
+            if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(targetSpeed[selection]);
+
+            robot.outputs.hood.set(hoodPosition[selection]);
+
+            if (robot.vision.isPaused()) {
+
+                robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
+                robot.outputs.pivot.set(turretPosition[selection]);
+            }
+        }
     }
 }

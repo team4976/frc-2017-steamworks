@@ -1,6 +1,5 @@
 package ca._4976.steamworks.subsystems;
 
-import ca._4976.library.listeners.BooleanListener;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
 
@@ -17,8 +16,9 @@ public class Winch {
         });
 
         robot.operator.BACK.addListener(new ButtonListener() {
-            @Override
-            public void falling() {
+
+            @Override public void falling() {
+
                 robot.outputs.winchMaster.set(robot.outputs.winchMaster.get() == 0 ? 0.1:  0);
             }
         });

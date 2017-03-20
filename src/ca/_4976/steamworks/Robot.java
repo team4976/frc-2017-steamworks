@@ -15,11 +15,12 @@ public class Robot extends AsynchronousRobot {
     public Inputs inputs = new Inputs(this);
     public Outputs outputs = new Outputs(this);
 
+    private Status status = new Status(this);
     private MotionControl profiler = new MotionControl(this);
     private GearHandler gearHandler = new GearHandler(this);
     private Winch winch = new Winch(this);
+    private Shooter shooter = new Shooter(this);
 
-    public Shooter shooter = new Shooter(this);
     public DriveTrain drive = new DriveTrain(this);
     public Agitator agitator = new Agitator(this);
     public Elevator elevator = new Elevator(this);

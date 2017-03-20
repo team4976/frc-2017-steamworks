@@ -10,7 +10,7 @@ public class DriveTrain {
     private Vector2D targetVelocity = new Vector2D(0, 0);
     private Vector2D setVelocity = new Vector2D(0, 0);
 
-    private Config config = Config.getInstance();
+    private Config config = new Config();
 
     private double leftTrigger = 0;
     private double rightTrigger = 0;
@@ -84,37 +84,94 @@ public class DriveTrain {
         if ((setVelocity.getX() >= 0 && targetVelocity.getX() > setVelocity.getX()) ||
                 (setVelocity.getX() <= 0 && targetVelocity.getX() < setVelocity.getX()))
 
-            if (Math.abs(diffX) <= config.drive.linearRamp.getX()) setVelocity.setX(targetVelocity.getX());
+            if (Math.abs(diffX) <= config.linearRamp.getX()) setVelocity.setX(targetVelocity.getX());
 
-            else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.drive.linearRamp.getX());
+            else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.linearRamp.getX());
 
-            else setVelocity.setX(setVelocity.getX() - config.drive.linearRamp.getX());
+            else setVelocity.setX(setVelocity.getX() - config.linearRamp.getX());
 
-        else if (Math.abs(diffX) <= config.drive.linearRamp.getY()) setVelocity.setX(targetVelocity.getX());
+        else if (Math.abs(diffX) <= config.linearRamp.getY()) setVelocity.setX(targetVelocity.getX());
 
-        else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.drive.linearRamp.getY());
+        else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.linearRamp.getY());
 
-        else setVelocity.setX(setVelocity.getX() - config.drive.linearRamp.getY());
+        else setVelocity.setX(setVelocity.getX() - config.linearRamp.getY());
 
 
         if ((setVelocity.getY() >= 0 && targetVelocity.getY() > setVelocity.getY()) ||
                 (setVelocity.getY() <= 0 && targetVelocity.getY() < setVelocity.getY()))
 
-            if (Math.abs(diffY) <= config.drive.rotationalRamp.getX()) setVelocity.setY(targetVelocity.getY());
+            if (Math.abs(diffY) <= config.rotationalRamp.getX()) setVelocity.setY(targetVelocity.getY());
 
-            else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.drive.rotationalRamp.getX());
+            else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.rotationalRamp.getX());
 
-            else setVelocity.setY(setVelocity.getY() - config.drive.rotationalRamp.getX());
+            else setVelocity.setY(setVelocity.getY() - config.rotationalRamp.getX());
 
-        else if (Math.abs(diffY) <= config.drive.rotationalRamp.getY()) setVelocity.setY(targetVelocity.getY());
+        else if (Math.abs(diffY) <= config.rotationalRamp.getY()) setVelocity.setY(targetVelocity.getY());
 
-        else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.drive.rotationalRamp.getY());
+        else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.rotationalRamp.getY());
 
-        else setVelocity.setY(setVelocity.getY() - config.drive.rotationalRamp.getY());
+        else setVelocity.setY(setVelocity.getY() - config.rotationalRamp.getY());
 
         output();
 
         NetworkTable.getTable("Status").putNumber("drive_linear", setVelocity.getX());
         NetworkTable.getTable("Status").putNumber("drive_rotational", setVelocity.getY());
+    }
+
+    private class Config {
+
+        private NetworkTable table = NetworkTable.getTable("Drive");
+
+        private Vector2D linearRamp = new Vector2D(0, 0);
+        private Vector2D rotationalRamp = new Vector2D(0, 0);
+
+        private Config() {
+
+            if (table.containsKey("Linear Ramp")) {
+
+                Double[] values = table.getNumberArray("Linear Ramp", new Double[2]);
+                linearRamp.setX(values[0] / 200.0);
+                linearRamp.setY(values[1] / 200.0);
+
+            } else {
+
+                table.putNumberArray("Linear Ramp", new Double[] { 1.0, 1.0 });
+                linearRamp.setX(1.0 / 200.0);
+                linearRamp.setY(1.0/ 200.0);
+            }
+
+            if (table.containsKey("Rotational Ramp")) {
+
+                Double[] values = table.getNumberArray("Rotational Ramp", new Double[2]);
+                rotationalRamp.setX(values[0] / 200.0);
+                rotationalRamp.setY(values[1] / 200.0);
+
+            } else {
+
+                table.putNumberArray("Rotational Ramp", new Double[] { 1.0, 1.0 });
+                rotationalRamp.setX(1 / 200.0);
+                rotationalRamp.setY(1 / 200.0);
+            }
+
+            table.addTableListener((source, key, value, isNew) -> {
+
+                switch (key) {
+
+                    case "Linear Ramp":
+
+                        linearRamp.setX(((Double[]) value)[0] / 200.0);
+                        linearRamp.setY(((Double[]) value)[1] / 200.0);
+
+                        break;
+
+                    case "Rotational Ramp":
+
+                        rotationalRamp.setX(((Double[]) value)[0] / 200.0);
+                        rotationalRamp.setY(((Double[]) value)[1] / 200.0);
+
+                        break;
+                }
+            });
+        }
     }
 }
