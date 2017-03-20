@@ -8,14 +8,11 @@ import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class GearHandler {
 
-    private Robot robot;
     private Config config = new Config();
 
     private int state = 0;
 
     public GearHandler(Robot robot){
-
-        this.robot = robot;
 
         robot.addListener(new RobotStateListener() {
 
