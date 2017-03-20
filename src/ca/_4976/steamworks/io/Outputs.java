@@ -21,6 +21,7 @@ public class Outputs {
     public CANTalon roller;
     public CANTalon winchMaster;
     public CANTalon shooter;
+    public CANTalon shooterSlave;
     public CANTalon pivot;
 
     public TimedSolenoid gear;
@@ -28,7 +29,7 @@ public class Outputs {
     
     public LinearActuator hood;
 
-    public Taloon agitator;
+    public CANTalon agitator;
 
     public Outputs(AsynchronousRobot module) {
 
@@ -46,7 +47,7 @@ public class Outputs {
 
         pivot = new CANTalon(4);
 
-        CANTalon shooterSlave = new CANTalon(13);
+        shooterSlave = new CANTalon(13);
         shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         shooterSlave.set(12);
 
@@ -57,12 +58,12 @@ public class Outputs {
         winchSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         winchSlave.set(winchMaster.getDeviceID());
 
-        roller = new CANTalon(2);
+        roller = new CANTalon(15);
 
         gear = new TimedSolenoid(module, 20, 1, 6);
         arch = new TimedSolenoid(module, 20, 0, 7);
 
-        agitator = new Taloon(5);
+        agitator = new CANTalon(2);
 
         hood = new LinearActuator(4);
 
@@ -75,18 +76,26 @@ public class Outputs {
 
             @Override public void robotInit() {
 
+
+                pivot.setFeedbackDevice(CANTalon.FeedbackDevice.CtreMagEncoder_Absolute);
                 shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                 shooter.set(0);
 
                 underGlow.set(true);
             }
 
-            @Override public void teleopInit() { this.ringlight.set(true); }
+            @Override public void teleopInit() {
+
+                compressor.setClosedLoopControl(true);
+
+
+                this.ringlight.set(true); }
 
             @Override public void disabledInit() {
 
                 this.ringlight.set(false);
-                compressor.setClosedLoopControl(false);
+                //compressor.setClosedLoopControl(false);
+
             }
 
             @Override public void testInit() { compressor.setClosedLoopControl(true); }

@@ -13,7 +13,11 @@ public class GearHandler {
 
         robot.addListener(new RobotStateListener() {
 
-            @Override public void disabledInit() { robot.outputs.roller.set(0); }
+            @Override public void disabledInit() {
+
+                isTryingToIntakeGear = false;
+                robot.outputs.roller.set(0);
+            }
         });
 
         Evaluable currentControl = new Evaluable() {
@@ -53,13 +57,15 @@ public class GearHandler {
                     robot.runNextLoop(currentControl, 5);
 
                     System.out.println("<Gear Handler> Attempting to intake a gear.");
-            }
+                }
             }
         });
 
         robot.driver.B.addListener(new ButtonListener() {
 
             @Override public void pressed() {
+
+                isTryingToIntakeGear = false;
 
                 robot.outputs.roller.set(0.5);
                 robot.outputs.gear.output(false);
@@ -68,6 +74,19 @@ public class GearHandler {
                 robot.runNextLoop(() -> robot.outputs.gear.output(true), 1500);
 
                 System.out.println("<Gear Handler> Releasing gear.");
+            }
+        });
+
+        robot.driver.X.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                isTryingToIntakeGear = false;
+
+                robot.outputs.roller.set(0);
+                robot.outputs.gear.output(true);
+
+                System.out.println("<Gear Handler> Raising gear.");
             }
         });
     }

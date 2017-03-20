@@ -1,7 +1,5 @@
 package ca._4976.steamworks.subsystems;
 
-import ca._4976.library.Evaluable;
-import ca._4976.library.Initialization;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.math.Vector2D;
 import ca._4976.steamworks.Robot;
@@ -12,8 +10,7 @@ public class DriveTrain {
     private Vector2D targetVelocity = new Vector2D(0, 0);
     private Vector2D setVelocity = new Vector2D(0, 0);
 
-    private Vector2D linearRamp = new Vector2D(0 / 200, 0 / 200);
-    private Vector2D rotationalRamp = new Vector2D(0 / 200, 0 / 200);
+    private Config config = Config.getInstance();
 
     private double leftTrigger = 0;
     private double rightTrigger = 0;
@@ -39,7 +36,7 @@ public class DriveTrain {
 
             targetVelocity.setY(value > 0 ? value * value : value * -value);
 
-            if (robot.isTest()) {
+            if (!robot.isTest()) {
 
                 setVelocity.setY(value > 0 ? value * value : value * -value);
                 output();
@@ -51,7 +48,7 @@ public class DriveTrain {
             leftTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (robot.isTest()) {
+            if (!robot.isTest()) {
 
                 setVelocity.setX(rightTrigger - leftTrigger);
                 output();
@@ -63,7 +60,7 @@ public class DriveTrain {
             rightTrigger = value;
             targetVelocity.setX(rightTrigger - leftTrigger);
 
-            if (robot.isTest()) {
+            if (!robot.isTest()) {
 
                 setVelocity.setX(rightTrigger - leftTrigger);
                 output();
@@ -84,38 +81,38 @@ public class DriveTrain {
         double diffX = targetVelocity.getX() - setVelocity.getX();
         double diffY = targetVelocity.getY() - setVelocity.getY();
 
-        /*if ((setVelocity.getX() >= 0 && targetVelocity.getX() > setVelocity.getX()) ||
+        if ((setVelocity.getX() >= 0 && targetVelocity.getX() > setVelocity.getX()) ||
                 (setVelocity.getX() <= 0 && targetVelocity.getX() < setVelocity.getX()))
 
-            if (Math.abs(diffX) <= linearRamp.getX()) setVelocity.setX(targetVelocity.getX());
+            if (Math.abs(diffX) <= config.drive.linearRamp.getX()) setVelocity.setX(targetVelocity.getX());
 
-            else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + linearRamp.getX());
+            else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.drive.linearRamp.getX());
 
-            else setVelocity.setX(setVelocity.getX() - linearRamp.getX());
+            else setVelocity.setX(setVelocity.getX() - config.drive.linearRamp.getX());
 
-        else if (Math.abs(diffX) <= linearRamp.getY()) setVelocity.setX(targetVelocity.getX());
+        else if (Math.abs(diffX) <= config.drive.linearRamp.getY()) setVelocity.setX(targetVelocity.getX());
 
-        else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + linearRamp.getY());
+        else if (setVelocity.getX() < targetVelocity.getX()) setVelocity.setX(setVelocity.getX() + config.drive.linearRamp.getY());
 
-        else setVelocity.setX(setVelocity.getX() - linearRamp.getY());
+        else setVelocity.setX(setVelocity.getX() - config.drive.linearRamp.getY());
 
 
         if ((setVelocity.getY() >= 0 && targetVelocity.getY() > setVelocity.getY()) ||
                 (setVelocity.getY() <= 0 && targetVelocity.getY() < setVelocity.getY()))
 
-            if (Math.abs(diffY) <= rotationalRamp.getX()) setVelocity.setY(targetVelocity.getY());
+            if (Math.abs(diffY) <= config.drive.rotationalRamp.getX()) setVelocity.setY(targetVelocity.getY());
 
-            else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + rotationalRamp.getX());
+            else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.drive.rotationalRamp.getX());
 
-            else setVelocity.setY(setVelocity.getY() - rotationalRamp.getX());
+            else setVelocity.setY(setVelocity.getY() - config.drive.rotationalRamp.getX());
 
-        else if (Math.abs(diffY) <= rotationalRamp.getY()) setVelocity.setY(targetVelocity.getY());
+        else if (Math.abs(diffY) <= config.drive.rotationalRamp.getY()) setVelocity.setY(targetVelocity.getY());
 
-        else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + rotationalRamp.getY());
+        else if (setVelocity.getY() < targetVelocity.getY()) setVelocity.setY(setVelocity.getY() + config.drive.rotationalRamp.getY());
 
-        else setVelocity.setY(setVelocity.getY() - rotationalRamp.getY());
+        else setVelocity.setY(setVelocity.getY() - config.drive.rotationalRamp.getY());
 
-        output();*/
+        output();
 
         NetworkTable.getTable("Status").putNumber("drive_linear", setVelocity.getX());
         NetworkTable.getTable("Status").putNumber("drive_rotational", setVelocity.getY());

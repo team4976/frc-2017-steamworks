@@ -2,8 +2,13 @@ package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
+import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import ca._4976.steamworks.subsystems.Shooter;
+import com.ctre.CANTalon;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class MotionControl {
@@ -17,6 +22,22 @@ public class MotionControl {
         SaveFile saveFile = new SaveFile();
 
         NetworkTable table = NetworkTable.getTable("Motion Control");
+
+
+        Boolean fake = new Boolean(0) {
+            @Override public boolean get() { return false; }
+        };
+
+        fake.addListener(new ButtonListener() {
+            @Override
+            public void rising() {
+
+                robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+                robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+                robot.outputs.shooterSlave.set(12);
+                robot.outputs.shooter.set(Shooter.targetRPM);
+            }
+        });
 
         Boolean[] buttoms = new Boolean[] {
                 robot.driver.A,
@@ -38,7 +59,8 @@ public class MotionControl {
                 robot.operator.BACK,
                 robot.operator.START,
                 robot.operator.LS,
-                robot.operator.RS
+                robot.operator.RS,
+                fake
         };
 
         record.changeControllerRecordPresets(buttoms);

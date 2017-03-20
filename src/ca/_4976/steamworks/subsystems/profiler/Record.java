@@ -52,20 +52,20 @@ class Record implements Runnable {
                 ArrayList<Integer> ids = new ArrayList<>();
                 ArrayList<Object> states = new ArrayList<>();
 
-                for (int i = 0; i < buttons.length; i++)
-                    if (buttons[i].getState() != Boolean.EVAL_STATE.NON) {
-
-                    ids.add(i);
-                    listeners.add(buttons[i].getListeners());
-                    states.add(buttons[i].getState());
-                }
-
                 for (int i = 0; i < axes.length; i++)
                     if (axes[i].getState() != Double.EVAL_STATE.NON) {
 
                         ids.add(i + 100);
                         listeners.add(axes[i].getListeners());
                         states.add(axes[i].getState());
+                    }
+
+                for (int i = 0; i < buttons.length; i++)
+                    if (buttons[i].getState() != Boolean.EVAL_STATE.NON) {
+
+                        ids.add(i);
+                        listeners.add(buttons[i].getListeners());
+                        states.add(buttons[i].getState());
                     }
 
                 addControllerInput(listeners, ids, states.toArray());
@@ -102,7 +102,7 @@ class Record implements Runnable {
 
         for (int i = 0; i < staticMoments.length; i++) staticMoments[i] = moments.get(i);
 
-        new SaveFile().save(System.currentTimeMillis() / 1000 + "", staticMoments);
+        new SaveFile().save(System.currentTimeMillis() / 1000 % 100000 + "", staticMoments);
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);

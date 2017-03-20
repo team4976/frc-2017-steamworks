@@ -23,7 +23,7 @@ public class Winch {
             }
         });
 
-        robot.operator.B.addListener(new ButtonListener() {
+        robot.operator.RB.addListener(new ButtonListener() {
 
             @Override public void falling() {
 

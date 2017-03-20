@@ -12,17 +12,28 @@ import java.lang.annotation.Target;
 
 public class Shooter {
 
-    private NetworkTable table = NetworkTable.getTable("Shooter");
+    private static NetworkTable table = NetworkTable.getTable("Shooter");
 
-    private double targetRPM = table.getSubTable("Shot One").getNumber("Target (RPM)", 3100);
+    public static double targetRPM = table.getSubTable("Shot One").getNumber("Target (RPM)", 3100);
     private double targetError = table.getSubTable("Shot One").getNumber("Target Error (RPM)", 100);
-    private double increment = table.getSubTable("Shot One").getNumber("Change Increment", 50);
+    private double increment = table.getNumber("Change Increment", 10);
+    private double hood = table.getSubTable("Shot One").getNumber("Hood Position (%)", 0.5);
+
+    private boolean shooting = false;
 
     public Shooter(Robot robot) {
 
         table.getSubTable("Shot One").putNumber("Target (RPM)", targetRPM);
         table.getSubTable("Shot One").putNumber("Target Error (RPM)", targetError);
-        table.getSubTable("Shot One").putNumber("Change Increment", increment);
+        table.getSubTable("Shot One").putNumber("Hood Position (%)", hood);
+
+        table.getSubTable("Shot Two").putNumber("Target (RPM)", table.getSubTable("Shot Two").getNumber("Target (RPM)", 3100));
+        table.getSubTable("Shot Two").putNumber("Target Error (RPM)", table.getSubTable("Shot Two").getNumber("Target Error (RPM)", 100));
+        table.getSubTable("Shot Two").putNumber("Hood Position (%)", table.getSubTable("Shot Two").getNumber("Hood Position (%)", 0.5));
+
+        table.getSubTable("Shot Three").putNumber("Target (RPM)", table.getSubTable("Shot Three").getNumber("Target (RPM)", 3100));
+        table.getSubTable("Shot Three").putNumber("Target Error (RPM)", table.getSubTable("Shot Three").getNumber("Target Error (RPM)", 100));
+        table.getSubTable("Shot Three").putNumber("Hood Position (%)", table.getSubTable("Shot Three").getNumber("Hood Position (%)", 0.5));
 
         robot.addListener(new RobotStateListener() {
 
@@ -36,6 +47,11 @@ public class Shooter {
             }
 
             @Override public void disabledInit() {
+
+                shooting = false;
+
+                robot.vision.pause();
+                robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
             }
         });
@@ -44,15 +60,21 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (robot.outputs.shooter.get() == 0) {
+                if (!shooting) {
+
+                    shooting = true;
 
                     System.out.println("<Shooter> Priming the Shooter.");
 
                     robot.vision.unpause();
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+                    robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+                    robot.outputs.shooterSlave.set(12);
                     robot.outputs.shooter.set(targetRPM);
 
                 } else {
+
+                    shooting = false;
 
                     System.out.println("<Shooter> Stopping the Shooter.");
 
@@ -128,9 +150,13 @@ public class Shooter {
 
                 targetRPM = table.getSubTable("Shot One").getNumber("Target (RPM)", 3100);
                 targetError = table.getSubTable("Shot One").getNumber("Target Error (RPM)", 100);
-                increment = table.getSubTable("Shot One").getNumber("Change Increment", 50);
+                hood = table.getSubTable("Shot One").getNumber("Hood Position (%)", 0.5);
+                increment = table.getNumber("Change Increment", 10);
 
-                System.out.println("<Shooter> Setting the Target Speed (ROM) to " + targetRPM);
+                robot.outputs.hood.set(hood);
+
+                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
+                System.out.println("<Shooter> Setting the Hood Position (%) to " + hood);
 
                 table.getSubTable("Shot One").putNumber("Target (RPM)", targetRPM);
                 table.getSubTable("Shot One").putNumber("Target Error (RPM)", targetError);
@@ -144,9 +170,12 @@ public class Shooter {
 
                 targetRPM = table.getSubTable("Shot Two").getNumber("Target (RPM)", 3100);
                 targetError = table.getSubTable("Shot Two").getNumber("Target Error (RPM)", 100);
-                increment = table.getSubTable("Shot Two").getNumber("Change Increment", 50);
+                hood = table.getSubTable("Shot Two").getNumber("Hood Position (%)", 0.5);
+                increment = table.getNumber("Change Increment", 10);
 
-                System.out.println("<Shooter> Setting the Target Speed (ROM) to " + targetRPM);
+                robot.outputs.hood.set(hood);
+
+                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
 
                 table.getSubTable("Shot Two").putNumber("Target (RPM)", targetRPM);
                 table.getSubTable("Shot Two").putNumber("Target Error (RPM)", targetError);
@@ -160,9 +189,12 @@ public class Shooter {
 
                 targetRPM = table.getSubTable("Shot Three").getNumber("Target (RPM)", 3100);
                 targetError = table.getSubTable("Shot Three").getNumber("Target Error (RPM)", 100);
-                increment = table.getSubTable("Shot Three").getNumber("Change Increment", 50);System.out.println("<Shooter> Setting the Target Speed (ROM) to " + targetRPM);
+                hood = table.getSubTable("Shot Three").getNumber("Hood Position (%)", 0.5);
+                increment = table.getNumber("Change Increment", 10);
 
-                System.out.println("<Shooter> Setting the Target Speed (ROM) to " + targetRPM);
+                robot.outputs.hood.set(hood);
+
+                System.out.println("<Shooter> Setting the Target Speed (RPM) to " + targetRPM);
 
                 table.getSubTable("Shot Three").putNumber("Target (RPM)", targetRPM);
                 table.getSubTable("Shot Three").putNumber("Target Error (RPM)", targetError);
@@ -170,19 +202,19 @@ public class Shooter {
             }
         });
 
-        robot.operator.LH.addListener(value -> robot.outputs.pivot.set(Math.abs(value) > 0.3 ? value * -0.2 : 0));
+        robot.operator.LH.addListener(value -> robot.outputs.pivot.set(Math.abs(value) > 0.4 ? value * -0.2 : 0));
 
         robot.operator.LV.addListener(value -> new Evaluable() {
 
             @Override public void eval() {
 
-                if (Math.abs(robot.operator.LV.get()) > 0.1 && value == robot.operator.LV.get()) {
+                if (Math.abs(robot.operator.LV.get()) > 0.4 && value == robot.operator.LV.get()) {
 
-                    targetRPM += increment * value < 0 ? 1 : -1;
+                    targetRPM += increment * (value < 0 ? 1 : -1);
                     if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(targetRPM);
                     System.out.println("<Shooter> The Target Speed (RPM) was set to " + (int) targetRPM);
 
-                    robot.runNextLoop(this, (int) (400 / robot.operator.LV.get()));
+                    robot.runNextLoop(this, (int) (600 / Math.abs(robot.operator.LV.get())));
                 }
             }
 

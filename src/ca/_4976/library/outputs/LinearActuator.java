@@ -11,7 +11,7 @@ public class LinearActuator {
         servo = new Servo(pin);
     }
 
-    public void set(double length) { servo.set(length * 2 - 1); }
+    public void set(double length) { servo.set(length); }
 
     public double get() { return servo.get(); }
 }

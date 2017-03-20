@@ -10,7 +10,7 @@ public class TimedSolenoid {
     private DoubleSolenoid solenoid;
     private long setTime = 0;
     private boolean extened = false;
-    private int offDelay = 600;
+    private int offDelay = 1000;
 
     public TimedSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
 
