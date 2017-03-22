@@ -1,5 +1,6 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -17,6 +18,19 @@ public class Elevator {
 
             @Override public void disabledInit() { stop(); }
         });
+
+        robot.operator.RB.addListener(new ButtonListener() {
+
+            @Override public void falling() { stop(); }
+
+            @Override public void rising() { runReversed(); }
+        });
+    }
+
+    private void runReversed() {
+
+        robot.agitator.runReversed();
+        robot.outputs.elevator.set(config.speed);
     }
 
     void run() {

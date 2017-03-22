@@ -2,8 +2,12 @@ package ca._4976.steamworks.subsystems.profiler;
 
 
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.tables.ITable;
 
-public class Config {
+class Config {
+
+    private NetworkTable table = NetworkTable.getTable("Motion Control");
+    private ITable subTable = table.getSubTable("PID");
 
     double kP = -10, kI = 0, kD = 0;
 
@@ -11,17 +15,48 @@ public class Config {
 
     private final static Config config = new Config();
 
-    static Config getInstance() {
+    static Config getInstance() { return config; }
 
-        //config.kP = NetworkTable.getTable("Motion Control").getSubTable("PID").getNumber("kP", -10);
-        //NetworkTable.getTable("Motion Control").getSubTable("PID").putNumber("kP", config.kP);
+    private Config() {
 
-        config.kI = NetworkTable.getTable("Motion Control").getSubTable("PID").getNumber("kI", 0);
-        NetworkTable.getTable("Motion Control").getSubTable("PID").putNumber("kP", config.kI);
+        if (subTable.containsKey("kP")) {
 
-        config.kD = NetworkTable.getTable("Motion Control").getSubTable("PID").getNumber("kD", 0);
-        NetworkTable.getTable("Motion Control").getSubTable("PID").putNumber("kP", config.kD);
+            kP = table.getNumber("kP", 0);
 
-        return config;
+        } else {
+
+            table.putNumber("kP", 0);
+            kP = 0;
+        }
+
+        if (subTable.containsKey("kI")) {
+
+            kI = table.getNumber("kI", 0);
+
+        } else {
+
+            table.putNumber("kI", 0);
+            kI = 0;
+        }
+
+        if (subTable.containsKey("kD")) {
+
+            kD = table.getNumber("kD", 0);
+
+        } else {
+
+            table.putNumber("kI", 0);
+            kD = 0;
+        }
+
+        subTable.addTableListener((source, key, value, isNew) -> {
+
+            switch (key) {
+
+                case "kP": kP = (double) value; break;
+                case "kI": kI = (double) value; break;
+                case "kD": kD = (double) value; break;
+            }
+        });
     }
 }

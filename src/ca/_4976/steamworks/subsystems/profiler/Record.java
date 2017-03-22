@@ -5,7 +5,6 @@ import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.steamworks.Robot;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 class Record implements Runnable {

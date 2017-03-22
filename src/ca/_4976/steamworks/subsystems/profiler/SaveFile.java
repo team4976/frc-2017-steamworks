@@ -2,11 +2,12 @@ package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 import java.io.*;
 import java.util.ArrayList;
 
-class SaveFile { //TODO: Complete Save system.
+class SaveFile {
 
     private Boolean[] buttons = new Boolean[0];
     private Double[] axes = new Double[0];
@@ -21,7 +22,9 @@ class SaveFile { //TODO: Complete Save system.
 
             System.out.println("<Motion Control> Writing auto to file. (" + new File(name).getAbsolutePath() + ")");
 
-            for (Moment moment : moments) {
+            for (int x = 0; x < moments.length; x++) {
+
+                Moment moment = moments[x];
 
                 writer.write(moment.leftDriveOutput + ",");
                 writer.write(moment.rightDriveOutput + ",");
@@ -32,14 +35,21 @@ class SaveFile { //TODO: Complete Save system.
 
                 if (moment.ids != null) {
 
-                    writer.write(",");
-
                     for (int i = 0; i < moment.ids.length; i++) {
 
-                        writer.write(moment.ids[i] + ".");
+                        writer.write("," + moment.ids[i] + ".");
                         writer.write(moment.states[i] + "");
 
-                        if (i + 1 < moment.ids.length) writer.write(",");
+                    }
+                }
+
+                if (x == 0) {
+
+                    String start_params = NetworkTable.getTable("Motion Control").getString("start_params", "");
+
+                    if (!start_params.equals("")) {
+
+                        writer.write("," + start_params);
                     }
                 }
 
@@ -77,7 +87,7 @@ class SaveFile { //TODO: Complete Save system.
                         java.lang.Double.parseDouble(split[5])
                 ));
 
-//                System.out.print(split[0] + " " + moments.get(moments.size() - 1).leftDriveOutput);
+//                System.out.print(split[0] + "  " + moments.get(moments.size() - 1).leftDriveOutput);
 //                System.out.print(" ");
 //                System.out.println(split[0] + " " + moments.get(moments.size() - 1).rightDriveOutput);
 

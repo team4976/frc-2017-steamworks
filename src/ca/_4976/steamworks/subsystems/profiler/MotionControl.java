@@ -24,9 +24,7 @@ public class MotionControl {
         NetworkTable table = NetworkTable.getTable("Motion Control");
 
 
-        Boolean fake = new Boolean(0) {
-            @Override public boolean get() { return false; }
-        };
+        Boolean fake = new Boolean(0) { @Override public boolean get() { return false; }};
 
         fake.addListener(new ButtonListener() {
             @Override
@@ -35,7 +33,7 @@ public class MotionControl {
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                 robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
                 robot.outputs.shooterSlave.set(12);
-                robot.outputs.shooter.set(Shooter.targetRPM);
+                robot.outputs.shooter.set(robot.shooter.config.targetSpeed[robot.shooter.selection]);
             }
         });
 
@@ -60,7 +58,15 @@ public class MotionControl {
                 robot.operator.START,
                 robot.operator.LS,
                 robot.operator.RS,
-                fake
+                fake,
+                robot.operator.UP,
+                robot.operator.UP_LEFT,
+                robot.operator.UP_RIGHT,
+                robot.operator.LEFT,
+                robot.operator.RIGHT,
+                robot.operator.DOWN,
+                robot.operator.DOWN_LEFT,
+                robot.operator.DOWN_RIGHT
         };
 
         record.changeControllerRecordPresets(buttoms);

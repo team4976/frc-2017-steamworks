@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj.tables.ITable;
 
 public class Shooter {
 
-    private Config config = new Config();
+    public Config config = new Config();
     private Robot robot;
 
-    private int selection = 0;
+    public int selection = 0;
 
     public Shooter(Robot robot) {
 
@@ -39,7 +39,10 @@ public class Shooter {
 
                     System.out.println("<Shooter> Priming the Shooter.");
 
-                    robot.vision.unpause();
+                    if (robot.status.pivotEncoderFunctional) robot.vision.unpause();
+
+                    else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
+
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                     robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
                     robot.outputs.shooterSlave.set(12);
@@ -47,8 +50,12 @@ public class Shooter {
 
                 } else if (robot.vision.isPaused()) {
 
-                    System.out.println("<Shooter> Looking for target.");
-                    robot.vision.unpause();
+                    if (robot.status.pivotEncoderFunctional) {
+
+                        System.out.println("<Shooter> Looking for target.");
+                        robot.vision.unpause();
+
+                    } else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
 
                 } else {
 
@@ -67,7 +74,7 @@ public class Shooter {
 
                 if (robot.outputs.shooter.getError() < config.targetError[selection]) {
 
-                    System.out.println("<Shooter> Beginning to shoot.");
+                    System.out.println("<Shooter> Taking a shot.");
 
                     robot.elevator.run();
 
@@ -156,19 +163,23 @@ public class Shooter {
             }
         });
 
-        robot.operator.LH.addListener(value -> robot.outputs.pivot.set(Math.abs(value) > 0.4 ? value * -0.3 : 0));
+        robot.operator.LH.addListener(value -> {
+
+            robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+            robot.outputs.pivot.set(Math.abs(value) > 0.4 ? value * -0.3 : 0);
+        });
 
         robot.operator.LV.addListener(value -> new Evaluable() {
 
             @Override public void eval() {
 
-                if (value == robot.operator.LV.get() && value != 0) {
+                if (value == robot.operator.LV.get() && value != 0 && Math.abs(value) > 0.4) {
 
                     config.targetSpeed[selection] = config.targetSpeed[selection] - value;
 
                     robot.runNextLoop(this);
 
-                } else if (value == 0) {
+                } else if (Math.abs(value) <= 0.4) {
 
                     config.targetSpeed[selection] = ((int) config.targetSpeed[selection] / 10) * 10;
                 }
@@ -177,14 +188,14 @@ public class Shooter {
         }.eval());
     }
 
-    private class Config {
+    public class Config {
 
         private NetworkTable table = NetworkTable.getTable("Shooter");
 
         private double kP, kI, kD, kF, kRamp;
         private int kIZone, kProfile;
 
-        private double[] targetSpeed = new double[4];
+        public double[] targetSpeed = new double[4];
         private double[] targetError = new double[4];
         private double[] hoodPosition = new double[4];
         private double[] turretPosition = new double[4];
@@ -333,8 +344,12 @@ public class Shooter {
 
             if (robot.vision.isPaused()) {
 
-                robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
-                robot.outputs.pivot.set(turretPosition[selection]);
+                if (robot.status.pivotEncoderFunctional) {
+
+                    robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
+                    robot.outputs.pivot.set(turretPosition[selection]);
+
+                } else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
             }
         }
     }

@@ -7,7 +7,7 @@ public class Winch {
 
     public Winch(Robot robot) {
 
-        robot.operator.Y.addListener(new ButtonListener() {
+        robot.driver.Y.addListener(new ButtonListener() {
 
             @Override public void falling() {
 
@@ -15,19 +15,16 @@ public class Winch {
             }
         });
 
-        robot.operator.BACK.addListener(new ButtonListener() {
+        robot.operator.RV.addListener(value -> {
 
-            @Override public void falling() {
+            if (Math.abs(value) < 0.1) robot.outputs.winchMaster.set(0);
 
-                robot.outputs.winchMaster.set(robot.outputs.winchMaster.get() == 0 ? 0.1:  0);
-            }
+            else robot.outputs.winchMaster.set(value);
         });
 
-        robot.operator.RB.addListener(new ButtonListener() {
+        robot.operator.Y.addListener(new ButtonListener() {
 
-            @Override public void falling() {
-
-                robot.outputs.arch.output(!robot.outputs.arch.isExtened());
+            @Override public void falling() { robot.outputs.arch.output(!robot.outputs.arch.isExtened());
             }
         });
     }

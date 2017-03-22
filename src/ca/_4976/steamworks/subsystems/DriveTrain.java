@@ -3,6 +3,7 @@ package ca._4976.steamworks.subsystems;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.math.Vector2D;
 import ca._4976.steamworks.Robot;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class DriveTrain {
@@ -34,9 +35,11 @@ public class DriveTrain {
 
         robot.driver.LH.addListener(value -> {
 
-            targetVelocity.setY(value > 0 ? value * value : value * -value);
+            targetVelocity.setY((value > 0 ? value * value : value * -value) * 0.9);
 
             if (!robot.isTest()) {
+
+                System.out.println("hello");
 
                 setVelocity.setY(value > 0 ? value * value : value * -value);
                 output();
@@ -46,7 +49,7 @@ public class DriveTrain {
         robot.driver.LT.addListener(value -> {
 
             leftTrigger = value;
-            targetVelocity.setX(rightTrigger - leftTrigger);
+            targetVelocity.setX((rightTrigger - leftTrigger) * 0.9);
 
             if (!robot.isTest()) {
 
@@ -58,7 +61,7 @@ public class DriveTrain {
         robot.driver.RT.addListener(value -> {
 
             rightTrigger = value;
-            targetVelocity.setX(rightTrigger - leftTrigger);
+            targetVelocity.setX((rightTrigger - leftTrigger) * 0.9);
 
             if (!robot.isTest()) {
 
@@ -70,13 +73,14 @@ public class DriveTrain {
 
     private void output() {
 
-        robot.outputs.driveLeftFront.set(targetVelocity.getY() + targetVelocity.getX());
-        robot.outputs.driveLeftRear.set(targetVelocity.getY() + targetVelocity.getX());
-        robot.outputs.driveRightFront.set(targetVelocity.getY() - targetVelocity.getX());
-        robot.outputs.driveRightRear.set(targetVelocity.getY() - targetVelocity.getX());
+        robot.outputs.driveLeftFront.set(setVelocity.getY() + setVelocity.getX());
+        robot.outputs.driveLeftRear.set(setVelocity.getY() + setVelocity.getX());
+        robot.outputs.driveRightFront.set(setVelocity.getY() - setVelocity.getX());
+        robot.outputs.driveRightRear.set(setVelocity.getY() - setVelocity.getX());
     }
 
     public void update() {
+
 
         double diffX = targetVelocity.getX() - setVelocity.getX();
         double diffY = targetVelocity.getY() - setVelocity.getY();
@@ -113,17 +117,14 @@ public class DriveTrain {
         else setVelocity.setY(setVelocity.getY() - config.rotationalRamp.getY());
 
         output();
-
-        NetworkTable.getTable("Status").putNumber("drive_linear", setVelocity.getX());
-        NetworkTable.getTable("Status").putNumber("drive_rotational", setVelocity.getY());
     }
 
     private class Config {
 
         private NetworkTable table = NetworkTable.getTable("Drive");
 
-        private Vector2D linearRamp = new Vector2D(0, 0);
-        private Vector2D rotationalRamp = new Vector2D(0, 0);
+        private Vector2D linearRamp = new Vector2D(1.0 / 200, 1.0 / 200);
+        private Vector2D rotationalRamp = new Vector2D(1.0 / 200, 1.0 / 200);
 
         private Config() {
 
@@ -142,7 +143,7 @@ public class DriveTrain {
 
             if (table.containsKey("Rotational Ramp")) {
 
-                Double[] values = table.getNumberArray("Rotational Ramp", new Double[2]);
+                Double[] values = table.getNumberArray("Rotational Ramp", new Double[] { 1.0, 1.0 });
                 rotationalRamp.setX(values[0] / 200.0);
                 rotationalRamp.setY(values[1] / 200.0);
 
