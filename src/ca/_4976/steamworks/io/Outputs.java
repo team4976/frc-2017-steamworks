@@ -17,7 +17,7 @@ public class Outputs {
     public VictorSP driveRightFront;
     public VictorSP driveRightRear;
 
-    public CANTalon elevator;
+    public Taloon elevator;
     public CANTalon roller;
     public CANTalon winchMaster;
     public CANTalon shooter;
@@ -31,6 +31,8 @@ public class Outputs {
 
     public CANTalon agitator;
 
+    public Solenoid visionLight;
+
     public Outputs(AsynchronousRobot module) {
 
         driveLeftFront = new VictorSP(0);
@@ -38,11 +40,11 @@ public class Outputs {
         driveRightFront = new VictorSP(2);
         driveRightRear = new VictorSP(3);
 
-        elevator = new CANTalon(3);
+        elevator = new Taloon(5);
 
         shooter = new CANTalon(12);
         shooter.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-        shooter.reverseSensor(false);
+        shooter.reverseSensor(true);
         shooter.configEncoderCodesPerRev(48);
 
         pivot = new CANTalon(4);
@@ -67,14 +69,23 @@ public class Outputs {
 
         hood = new LinearActuator(4);
 
+        visionLight = new Solenoid(20, 4);
+
         module.addListener(new RobotStateListener() {
 
             private Compressor compressor = new Compressor(20);
 
-            DigitalOutput ringlight = new DigitalOutput(9);
             Solenoid underGlow = new Solenoid(20, 5);
 
             @Override public void robotInit() {
+
+                //System.out.println(pivot.getEncPosition());
+
+//                //pivot.setForwardSoftLimit(pivot.getEncPosition() + 300);
+//                //pivot.setReverseSoftLimit(pivot.getEncPosition() - 300);
+//
+//                pivot.enableForwardSoftLimit(true);
+//                pivot.enableReverseSoftLimit(true);
 
 
                 pivot.setFeedbackDevice(CANTalon.FeedbackDevice.CtreMagEncoder_Absolute);
@@ -88,15 +99,8 @@ public class Outputs {
 
                 compressor.setClosedLoopControl(true);
 
-
-                this.ringlight.set(true); }
-
-            @Override public void disabledInit() {
-
-                this.ringlight.set(false);
-                //compressor.setClosedLoopControl(false);
-
             }
+
 
             @Override public void testInit() { compressor.setClosedLoopControl(true); }
         });

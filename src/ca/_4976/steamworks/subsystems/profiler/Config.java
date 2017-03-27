@@ -1,14 +1,10 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
-import edu.wpi.first.wpilibj.tables.ITable;
 
 class Config {
 
     private NetworkTable table = NetworkTable.getTable("Motion Control");
-    private ITable subTable = table.getSubTable("PID");
-
     double kP = -10, kI = 0, kD = 0;
 
     final double tickTime = 1000000000 / 200;
@@ -19,7 +15,7 @@ class Config {
 
     private Config() {
 
-        if (subTable.containsKey("kP")) {
+        if (table.containsKey("kP")) {
 
             kP = table.getNumber("kP", 0);
 
@@ -29,7 +25,7 @@ class Config {
             kP = 0;
         }
 
-        if (subTable.containsKey("kI")) {
+        if (table.containsKey("kI")) {
 
             kI = table.getNumber("kI", 0);
 
@@ -39,7 +35,7 @@ class Config {
             kI = 0;
         }
 
-        if (subTable.containsKey("kD")) {
+        if (table.containsKey("kD")) {
 
             kD = table.getNumber("kD", 0);
 
@@ -49,9 +45,11 @@ class Config {
             kD = 0;
         }
 
-        subTable.addTableListener((source, key, value, isNew) -> {
+        table.addTableListener((source, key, value, isNew) -> {
 
-            switch (key) {
+            if (key.equals("load_table")) System.out.println("<Motion Control> Autonomous mode selected.");
+
+           switch (key) {
 
                 case "kP": kP = (double) value; break;
                 case "kI": kI = (double) value; break;

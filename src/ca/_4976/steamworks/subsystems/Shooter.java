@@ -26,6 +26,7 @@ public class Shooter {
             @Override public void disabledInit() {
 
                 robot.vision.pause();
+                robot.outputs.visionLight.set(false);
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
             }
@@ -35,11 +36,17 @@ public class Shooter {
 
             @Override public void pressed() {
 
+                if (!robot.outputs.visionLight.get()) robot.outputs.visionLight.set(true);
+
                 if (robot.outputs.shooter.get() == 0) {
 
                     System.out.println("<Shooter> Priming the Shooter.");
 
-                    if (robot.status.pivotEncoderFunctional) robot.vision.unpause();
+                    if (robot.status.pivotEncoderFunctional) {
+
+                        robot.outputs.visionLight.set(true);
+                        robot.vision.unpause();
+                    }
 
                     else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
 
@@ -53,6 +60,7 @@ public class Shooter {
                     if (robot.status.pivotEncoderFunctional) {
 
                         System.out.println("<Shooter> Looking for target.");
+                        robot.outputs.visionLight.set(true);
                         robot.vision.unpause();
 
                     } else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
@@ -62,6 +70,7 @@ public class Shooter {
                     System.out.println("<Shooter> Stopping the Shooter.");
 
                     robot.vision.pause();
+                    robot.outputs.visionLight.set(false);
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                     robot.outputs.shooter.set(0);
                 }
@@ -72,7 +81,9 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                if (robot.outputs.shooter.getError() < config.targetError[selection]) {
+                System.out.println(robot.outputs.shooter.getClosedLoopError() + " " + config.targetError[selection]);
+
+                if (Math.abs(config.targetSpeed[selection] - robot.outputs.shooter.getSpeed()) < config.targetError[selection]) {
 
                     System.out.println("<Shooter> Taking a shot.");
 
@@ -84,7 +95,7 @@ public class Shooter {
 
             @Override public void held() {
 
-                if (robot.outputs.shooter.getError() < config.targetError[selection]) System.out.println("<Shooter> Beginning to shoot.");
+                if (Math.abs(config.targetSpeed[selection] - robot.outputs.shooter.getSpeed()) > config.targetError[selection]) System.out.println("<Shooter> Beginning to shoot.");
 
                 else System.err.println("<Shooter> WARN: (RPM) too low to fire.");
 
@@ -92,7 +103,7 @@ public class Shooter {
 
                     @Override public void eval() {
 
-                        if (robot.outputs.shooter.getError() > config.targetError[selection]) {
+                        if (Math.abs(config.targetSpeed[selection] - robot.outputs.shooter.getSpeed()) > config.targetError[selection]) {
 
                             if (robot.elevator.isRunning())
                                 System.err.println("<Shooter> WARN: (RPM) too low to fire.");
@@ -120,6 +131,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 robot.vision.pause();
+                robot.outputs.visionLight.set(false);
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
 
@@ -182,6 +194,8 @@ public class Shooter {
                 } else if (Math.abs(value) <= 0.4) {
 
                     config.targetSpeed[selection] = ((int) config.targetSpeed[selection] / 10) * 10;
+
+                    System.out.println("<Shooter> Target Speed Set to: " + config.targetSpeed[selection]);
                 }
             }
 

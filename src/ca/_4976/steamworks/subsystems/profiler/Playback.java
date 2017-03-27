@@ -32,6 +32,8 @@ class Playback implements Runnable {
 
             if (System.nanoTime() - lastTickTime >= config.tickTime) {
 
+                System.out.println(config.kP);
+
                 lastTickTime = System.nanoTime();
 
                 Moment moment = moments[tickCount];
@@ -52,6 +54,8 @@ class Playback implements Runnable {
                             } else {
 
                                 Boolean.EVAL_STATE state = (Boolean.EVAL_STATE) moment.states[i];
+
+                                System.out.println("<Motion Control> Triggering button: " + moment.ids[i] + "." + state);
 
                                 if (state == Boolean.EVAL_STATE.PRESSED)
                                     for (Object o : moment.evaluables[i]) ((ButtonListener) o).pressed();
@@ -111,6 +115,11 @@ class Playback implements Runnable {
             }
         }
 
+        robot.outputs.driveLeftFront.set(0);
+        robot.outputs.driveLeftRear.set(0);
+
+        robot.outputs.driveRightFront.set(0);
+        robot.outputs.driveRightRear.set(0);
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);

@@ -30,13 +30,14 @@ public class Elevator {
     private void runReversed() {
 
         robot.agitator.runReversed();
-        robot.outputs.elevator.set(config.speed);
+        robot.outputs.elevator.set(-config.speed);
     }
 
     void run() {
 
         robot.agitator.run();
-        robot.outputs.elevator.set(-config.speed);
+        System.out.println(config.speed);
+        robot.outputs.elevator.set(config.speed);
     }
 
     void stop() {

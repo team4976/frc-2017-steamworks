@@ -16,7 +16,7 @@ public class Agitator {
     void run() {
 
         robot.outputs.agitator.changeControlMode(CANTalon.TalonControlMode.Current);
-        robot.outputs.agitator.set(1);
+        robot.outputs.agitator.set(10000);
     }
 
     void stop() {
@@ -27,7 +27,7 @@ public class Agitator {
 
     void runReversed() {
 
-        robot.outputs.agitator.changeControlMode(CANTalon.TalonControlMode.Current);
+        robot.outputs.agitator.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         robot.outputs.agitator.set(-1);
     }
 }

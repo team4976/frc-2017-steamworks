@@ -48,7 +48,7 @@ public class MotionControl {
                 robot.driver.START,
                 robot.driver.LS,
                 robot.driver.RS,
-                robot.operator.A,
+                robot.operator. A,
                 robot.operator.B,
                 robot.operator.X,
                 robot.operator.Y,
@@ -89,7 +89,23 @@ public class MotionControl {
 
         table.putString("load_table", table.getString("load_table", ""));
 
+        robot.driver.BACK.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                robot.inputs.driveLeft.reset();
+                robot.inputs.driveRight.reset();
+
+                synchronized (this) { new Thread(record).start(); }
+            }
+        });
+
         robot.addListener(new RobotStateListener() {
+
+            @Override public void disabledInit() {
+
+                table.putStringArray("table", new SaveFile().getFileNames());
+            }
 
             @Override public void autonomousInit() {
 

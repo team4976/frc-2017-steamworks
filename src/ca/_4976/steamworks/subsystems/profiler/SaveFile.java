@@ -153,6 +153,13 @@ class SaveFile {
         return finalMoments;
     }
 
+    String[] getFileNames() {
+
+        File dir = new File("/home/lvuser/motion");
+
+        return dir.list();
+    }
+
     void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }
 
     void changeControllerRecordPresets(Double[] axes) { this.axes = axes; }

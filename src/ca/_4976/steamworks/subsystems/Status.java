@@ -28,10 +28,14 @@ public class Status {
             table.putNumber("Left Drive Output (%)", robot.outputs.driveLeftFront.get());
             table.putNumber("Right Drive Output (%)", robot.outputs.driveRightFront.get());
 
-            table.putNumber("Vision Error (PIXELS)", robot.vision.getError());
+            table.putNumber("Left Drive Encoder (METERS)", robot.inputs.driveLeft.getDistance());
+            table.putNumber("Right Drive Encoder (METERS)", robot.inputs.driveRight.getDistance());
 
-            if (Math.abs(robot.outputs.pivot.getOutputVoltage()) > 1)
-                pivotEncoderFunctional = robot.outputs.pivot.getSpeed() != 0;
+            table.putNumber("Vision Error (PIXELS)", robot.vision.getError());
+            table.putBoolean("Vision Light (BOOLEAN)", robot.outputs.visionLight.get());
+
+            //if (Math.abs(robot.outputs.pivot.getOutputVoltage()) > 1)
+            //    pivotEncoderFunctional = robot.outputs.pivot.getSpeed() != 0;
         });
     }
 }

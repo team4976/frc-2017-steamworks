@@ -39,8 +39,6 @@ public class DriveTrain {
 
             if (!robot.isTest()) {
 
-                System.out.println("hello");
-
                 setVelocity.setY(value > 0 ? value * value : value * -value);
                 output();
             }

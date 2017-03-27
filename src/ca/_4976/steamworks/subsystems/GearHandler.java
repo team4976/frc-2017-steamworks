@@ -73,12 +73,15 @@ public class GearHandler {
                 robot.outputs.roller.set(config.releaseSpeed);
                 robot.outputs.gear.output(false);
 
-                robot.runNextLoop(() -> { if (state == 3) {
+                robot.runNextLoop(() -> {  {
 
                     robot.outputs.roller.set(0);
 
                 }}, config.releaseTime);
-                robot.runNextLoop(() -> { if (state == 3) {
+
+                System.out.println(config.releaseTime);
+
+                robot.runNextLoop(() -> { {
 
                     robot.outputs.gear.output(true);
                     state = 0;
@@ -162,7 +165,7 @@ public class GearHandler {
 
             if (table.containsKey("Raise Delay (MILLIS)")) {
 
-                raiseDelay = (int) table.getNumber("Raise Delay (MILLIS) (%)", 0);
+                raiseDelay = (int) table.getNumber("Raise Delay (MILLIS)", 0);
 
             } else {
 
@@ -172,7 +175,7 @@ public class GearHandler {
 
             if (table.containsKey("Release Time (MILLIS)")) {
 
-                releaseTime = (int) table.getNumber("Release Time (MILLIS) (%)", 0);
+                releaseTime = (int) table.getNumber("Release Time (MILLIS)", 0);
 
             } else {
 

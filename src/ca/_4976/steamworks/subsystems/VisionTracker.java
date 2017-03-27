@@ -27,10 +27,15 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	private NetworkTable table = NetworkTable.getTable("Vision");
 
-	private boolean pause = true;
+	private boolean pause = false;
 
 	public VisionTracker(Robot module) {
-		UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+
+		UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
+		UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture(1);
+
+		UsbCamera camera = (camera0.getDescription().toLowerCase().contains("lifecam") ? camera0 : camera1);
+
 		camera.setResolution(160, 120);
 		camera.setFPS(30);
 		camera.setExposureManual(0);
@@ -50,7 +55,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	public boolean isPaused() { return pause; }
 
 	public void pause() {
-		pause = true;
+		//pause = true;
 	}
 
 	public void unpause() {
@@ -146,8 +151,10 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public void process(Mat source0) {
-		if (!pause) {
+		//if (!pause) {
 			// Step CV_dilate0:
+
+			System.out.println(pause);
 			Mat cvDilateSrc = source0;
 			Mat cvDilateKernel = new Mat();
 			Point cvDilateAnchor = new Point(-1, -1);
@@ -191,7 +198,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 			double filterContoursMinRatio = 0.0;
 			double filterContoursMaxRatio = 1000.0;
 			filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-		}
+		//}
 	}
 
 	private void cvDilate(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
