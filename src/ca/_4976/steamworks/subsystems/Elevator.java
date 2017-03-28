@@ -3,16 +3,16 @@ package ca._4976.steamworks.subsystems;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class Elevator {
 
     private Robot robot;
-    private Config config = new Config();
+    private Config.Elevator config;
 
     public Elevator(Robot robot) {
 
         this.robot = robot;
+        config = robot.config.elevator;
 
         robot.addListener(new RobotStateListener() {
 
@@ -48,33 +48,10 @@ public class Elevator {
 
     boolean isRunning() { return robot.outputs.elevator.get() != 0; }
 
-    private class Config {
+    void configNotify() {
 
-        private NetworkTable table = NetworkTable.getTable("Elevator");
+        if (robot.outputs.elevator.get() > 0) robot.outputs.elevator.set(config.speed);
 
-        private double speed;
-
-        private Config() {
-
-            if (table.containsKey("Speed (%)")) {
-
-                speed = table.getNumber("Speed (%)", 0);
-
-            } else {
-
-                table.putNumber("Speed (%)", 0);
-                speed = 0;
-            }
-
-            table.addTableListener((source, key, value, isNew) -> {
-
-                switch (key) {
-
-                    case "Speed (%)": speed = (double) value; break;
-                }
-
-                if (isRunning()) robot.outputs.elevator.set(-speed);
-            });
-        }
+        if (robot.outputs.elevator.get() < 0) robot.outputs.elevator.set(-config.speed);
     }
 }

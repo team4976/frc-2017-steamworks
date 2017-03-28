@@ -5,24 +5,21 @@ import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
-import ca._4976.steamworks.subsystems.Shooter;
 import com.ctre.CANTalon;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.buttons.Button;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class MotionControl {
 
+    public Playback playback;
+    private SaveFile saveFile = new SaveFile();
+
+    private NetworkTable table = NetworkTable.getTable("Motion Control");
+
     public MotionControl(Robot robot) {
 
-        Playback playback = new Playback(robot);
+        playback = new Playback(robot);
 
         Record record = new Record(robot);
-
-        SaveFile saveFile = new SaveFile();
-
-        NetworkTable table = NetworkTable.getTable("Motion Control");
-
 
         Boolean fake = new Boolean(0) { @Override public boolean get() { return false; }};
 
@@ -33,11 +30,11 @@ public class MotionControl {
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                 robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
                 robot.outputs.shooterSlave.set(12);
-                robot.outputs.shooter.set(robot.shooter.config.targetSpeed[robot.shooter.selection]);
+                robot.outputs.shooter.set(robot.shooter.getTargetRPM());
             }
         });
 
-        Boolean[] buttoms = new Boolean[] {
+        Boolean[] buttons = new Boolean[] {
                 robot.driver.A,
                 robot.driver.B,
                 robot.driver.X,
@@ -69,8 +66,8 @@ public class MotionControl {
                 robot.operator.DOWN_RIGHT
         };
 
-        record.changeControllerRecordPresets(buttoms);
-        saveFile.changeControllerRecordPresets(buttoms);
+        record.changeControllerRecordPresets(buttons);
+        saveFile.changeControllerRecordPresets(buttons);
 
         Double[] axes = new Double[] {
                 robot.driver.LV,
@@ -87,7 +84,7 @@ public class MotionControl {
         record.changeControllerRecordPresets(axes);
         saveFile.changeControllerRecordPresets(axes);
 
-        table.putString("load_table", table.getString("load_table", ""));
+        table.putString("load_table", "");
 
         robot.driver.BACK.addListener(new ButtonListener() {
 
@@ -109,15 +106,12 @@ public class MotionControl {
 
             @Override public void autonomousInit() {
 
-                if (!table.getString("load_table", "").equals(""))
-                    playback.setProfile(saveFile.load(table.getString("load_table", "")));
-
-                else playback.setProfile(record.getProfile());
+                if (table.getString("load_table", "").equals("")) playback.setProfile(record.getProfile());
 
                 robot.inputs.driveLeft.reset();
                 robot.inputs.driveRight.reset();
 
-                synchronized (this) { new Thread(playback).run(); }
+                synchronized (this) { new Thread(playback).start(); }
             }
 
             @Override public void testInit() {
@@ -130,5 +124,14 @@ public class MotionControl {
                 synchronized (this) { new Thread(record).start(); }
             }
         });
+    }
+
+    public void loadTable() {
+
+        String load = table.getString("load_table", "");
+
+        if (!load.equals("")) playback.setProfile(saveFile.load(load));
+
+        else System.out.println("<Motion Control> Successfully set autonomous to last record.");
     }
 }

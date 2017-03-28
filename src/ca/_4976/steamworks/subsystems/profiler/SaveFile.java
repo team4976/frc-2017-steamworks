@@ -1,9 +1,10 @@
 package ca._4976.steamworks.subsystems.profiler;
 
+import ca._4976.library.Evaluable;
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-
+import ca._4976.library.listeners.ButtonListener;
+import ca._4976.library.listeners.DoubleListener;
 import java.io.*;
 import java.util.ArrayList;
 
@@ -12,66 +13,37 @@ class SaveFile {
     private Boolean[] buttons = new Boolean[0];
     private Double[] axes = new Double[0];
 
-    void save(String name, Moment[] moments) {
+    Profile load(String name) {
 
-        try {
-
-            name = "/home/lvuser/motion/" + name;
-
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(name)));
-
-            System.out.println("<Motion Control> Writing auto to file. (" + new File(name).getAbsolutePath() + ")");
-
-            for (int x = 0; x < moments.length; x++) {
-
-                Moment moment = moments[x];
-
-                writer.write(moment.leftDriveOutput + ",");
-                writer.write(moment.rightDriveOutput + ",");
-                writer.write(moment.leftEncoderPosition + ",");
-                writer.write(moment.rightEncoderPosition + ",");
-                writer.write(moment.leftEncoderVelocity + ",");
-                writer.write(moment.rightEncoderVelocity + "");
-
-                if (moment.ids != null) {
-
-                    for (int i = 0; i < moment.ids.length; i++) {
-
-                        writer.write("," + moment.ids[i] + ".");
-                        writer.write(moment.states[i] + "");
-
-                    }
-                }
-
-                if (x == 0) {
-
-                    String start_params = NetworkTable.getTable("Motion Control").getString("start_params", "");
-
-                    if (!start_params.equals("")) {
-
-                        writer.write("," + start_params);
-                    }
-                }
-
-                writer.newLine();
-            }
-
-            writer.close();
-
-        } catch (IOException e) { e.printStackTrace();}
-    }
-
-    Moment[] load(String name) {
+        long start = System.nanoTime();
 
         ArrayList<Moment> moments = new ArrayList<>();
+        ArrayList<Evaluable> evaluables = new ArrayList<>();
+        ArrayList<Integer> times = new ArrayList<>();
 
-        String line = "";
+        String line;
+
+        double speed = 3200;
+        double angle = 0.48;
+        double position = 0;
 
         try {
 
             BufferedReader reader = new BufferedReader(new FileReader(new File("/home/lvuser/motion/" + name)));
 
+            int time = 0;
             for (line = reader.readLine(); line != null; line = reader.readLine()) {
+
+                if (line.toLowerCase().contains("config")) {
+
+                    String[] split = line.substring(line.indexOf(":") + 1).split(",");
+
+                    speed = java.lang.Double.parseDouble(split[0]);
+                    angle = java.lang.Double.parseDouble(split[1]);
+                    position = java.lang.Double.parseDouble(split[2]);
+
+                    continue;
+                }
 
                 //Duct tape
                 if (line.endsWith(",")) line = line.substring(0, line.length() - 1);
@@ -87,14 +59,6 @@ class SaveFile {
                         java.lang.Double.parseDouble(split[5])
                 ));
 
-//                System.out.print(split[0] + "  " + moments.get(moments.size() - 1).leftDriveOutput);
-//                System.out.print(" ");
-//                System.out.println(split[0] + " " + moments.get(moments.size() - 1).rightDriveOutput);
-
-                ArrayList<Object[]> evaluables = new ArrayList<>();
-                ArrayList<Integer> ids = new ArrayList<>();
-                ArrayList<Object> states = new ArrayList<>();
-
                 for (int i = 6; i < split.length; i++) {
 
                     String[] secondSplit = split[i].split("\\.");
@@ -102,62 +66,62 @@ class SaveFile {
                     int id = Integer.parseInt(secondSplit[0]);
                     String state = secondSplit[1];
 
-                    if (id < 100) {
+                    if (id > 100) id -= 100;
 
-                        evaluables.add(buttons[id].getListeners());
-                        ids.add(id);
+                    if (split.length == 2) for (ButtonListener listener : buttons[id].getListeners()) {
 
-                        if (Boolean.EVAL_STATE.FALLING.toString().equals(state))
-                            states.add(Boolean.EVAL_STATE.FALLING);
+                        switch (state) {
 
-                        else if (Boolean.EVAL_STATE.RISING.toString().equals(state))
-                            states.add(Boolean.EVAL_STATE.RISING);
+                            case "FALLING": evaluables.add(listener::held); break;
+                            case "RISING": evaluables.add(listener::rising);break;
+                            case "PRESSED": evaluables.add(listener::pressed); break;
+                            case "HELD": evaluables.add(listener::held); break;
 
-                        else if (Boolean.EVAL_STATE.PRESSED.toString().equals(state))
-                            states.add(Boolean.EVAL_STATE.PRESSED);
+                        }
 
-                        else if (Boolean.EVAL_STATE.HELD.toString().equals(state))
-                            states.add(Boolean.EVAL_STATE.HELD);
+                        times.add(time * 1000 / 200);
 
-                    } else {
+                    } else if (split.length == 3) for (DoubleListener listener : axes[id].getListeners()) {
 
-                        evaluables.add(axes[id - 100].getListeners());
-                        ids.add(id);
-
-                        states.add(Double.EVAL_STATE.CHANGED);
+                        evaluables.add(() -> listener.changed(java.lang.Double.parseDouble(split[2])));
+                        times.add(time * 1000 / 200);
                     }
                 }
 
-                Object[][] evals = new Object[evaluables.size()][];
-                int[] iDs = new int[ids.size()];
-
-                for (int i = 0; i < evals.length; i++) {
-                    evals[i] = evaluables.get(i);
-                }
-
-                for (int i = 0; i < iDs.length; i++) {
-                    iDs[i] = ids.get(i);
-                }
-
-                moments.get(moments.size() - 1).addControllerInputs(evals, iDs, states.toArray(), null);
+                time++;
             }
 
-        } catch (IOException e) { e.printStackTrace(); }
+            System.out.println("<Motion Control> File read successfully in " + (int) ((System.nanoTime() - start) / 1e+6) + "ms");
 
-        System.out.println("<Motion Control> File read successfully.");
+        } catch (IOException e) {
+
+            System.out.println("<Motion Control> Failed to read file.");
+            e.printStackTrace();
+        }
 
         Moment[] finalMoments = new Moment[moments.size()];
+        Evaluable[] finalEvaluables = new Evaluable[evaluables.size()];
+        int[] finalTimes = new int[times.size()];
 
         for (int i = 0; i < finalMoments.length; i++) { finalMoments[i] = moments.get(i); }
+        for (int i = 0; i < finalEvaluables.length; i++) { finalEvaluables[i] = evaluables.get(i); }
+        for (int i = 0; i < finalTimes.length; i++) { finalTimes[i] = times.get(i); }
 
-        return finalMoments;
+        return new Profile(
+                speed,
+                angle,
+                position,
+                finalMoments,
+                finalEvaluables,
+                finalTimes
+        );
     }
 
     String[] getFileNames() {
 
         File dir = new File("/home/lvuser/motion");
 
-        return dir.list();
+        return dir.list() != null ? dir.list() : new String[0];
     }
 
     void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }

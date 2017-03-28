@@ -1,6 +1,7 @@
 package ca._4976.library;
 
 import ca._4976.library.listeners.RobotStateListener;
+import com.sun.org.apache.xpath.internal.SourceTree;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
@@ -77,6 +78,8 @@ public class AsynchronousRobot extends RobotBase {
                     testInitialized = false;
 
                     listeners.forEach(RobotStateListener::autonomousInit);
+
+                    System.out.println("<Robot> Initialized Autonomous");
                 }
 
                 HAL.observeUserProgramAutonomous();

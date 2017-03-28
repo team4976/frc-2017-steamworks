@@ -1,8 +1,8 @@
 package ca._4976.library.inputs;
 
 import ca._4976.library.AsynchronousRobot;
-import edu.wpi.first.wpilibj.DigitalInput;
 import ca._4976.library.listeners.BooleanListener;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 import java.util.ArrayList;
 

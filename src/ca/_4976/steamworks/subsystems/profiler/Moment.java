@@ -11,11 +11,6 @@ class Moment {
     final double leftEncoderVelocity;
     final double rightEncoderVelocity;
 
-    Object[][] evaluables = null;
-    int[] ids = null;
-    Object[] states = null;
-    Object[] data = null;
-
     Moment(
             double leftDriveOutput,
             double rightDriveOutput,
@@ -30,13 +25,5 @@ class Moment {
         this.rightEncoderPosition = rightEncoderPosition;
         this.leftEncoderVelocity = leftEncoderVelocity;
         this.rightEncoderVelocity = rightEncoderVelocity;
-    }
-
-    void addControllerInputs(Object[][] evaluables, int[] ids, Object[] states, Object[] data) {
-
-        this.evaluables = evaluables;
-        this.ids = ids;
-        this.states = states;
-        this.data = data;
     }
 }

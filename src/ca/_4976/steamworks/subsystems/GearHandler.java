@@ -73,11 +73,7 @@ public class GearHandler {
                 robot.outputs.roller.set(config.releaseSpeed);
                 robot.outputs.gear.output(false);
 
-                robot.runNextLoop(() -> {  {
-
-                    robot.outputs.roller.set(0);
-
-                }}, config.releaseTime);
+                robot.runNextLoop(() -> robot.outputs.roller.set(0), config.releaseTime);
 
                 System.out.println(config.releaseTime);
 

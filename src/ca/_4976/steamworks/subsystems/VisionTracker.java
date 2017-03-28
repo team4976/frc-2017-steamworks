@@ -29,7 +29,11 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	private boolean pause = false;
 
-	public VisionTracker(Robot module) {
+	private Config.Vision config;
+
+	public VisionTracker(Robot robot) {
+
+		config = robot.config.vision;
 
 		UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
 		UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture(1);
@@ -48,17 +52,16 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 		table.putNumber("Setpoint", table.getNumber("Setpoint", 80));
 
-		pidController = new PIDController(0.007, 0, 0.004, this, module.outputs.pivot);
+		pidController = new PIDController(0.007, 0, 0.004, this, robot.outputs.pivot);
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 	}
 
-	public boolean isPaused() { return pause; }
+	public boolean isRunning() { return !pause; }
 
-	public void pause() {
-		//pause = true;
-	}
 
-	public void unpause() {
+	public void halt() { pause = true; }
+
+	public void run() {
 
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 		pause = false;
@@ -271,5 +274,10 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 			if (ratio < minRatio || ratio > maxRatio) continue;
 			output.add(contour);
 		}
+	}
+
+	void configNotify() {
+
+		pidController.setSetpoint(80 + config.offset);
 	}
 }

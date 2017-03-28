@@ -6,7 +6,6 @@ import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.outputs.*;
 import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
 
@@ -66,6 +65,7 @@ public class Outputs {
         arch = new TimedSolenoid(module, 20, 0, 7);
 
         agitator = new CANTalon(2);
+        agitator.reverseOutput(true);
 
         hood = new LinearActuator(4);
 

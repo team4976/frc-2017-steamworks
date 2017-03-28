@@ -1,16 +1,19 @@
 package ca._4976.steamworks.subsystems.profiler;
 
-import ca._4976.library.controllers.components.Boolean;
-import ca._4976.library.controllers.components.Double;
-import ca._4976.library.listeners.ButtonListener;
 import ca._4976.steamworks.Robot;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import ca._4976.steamworks.subsystems.Config;
 
-class Playback implements Runnable {
+public class Playback implements Runnable {
 
     private final Robot robot;
 
-    private Moment[] moments = new Moment[0];
+    private Profile profile = null;
+
+    private double leftTarget;
+    private double rightTarget;
+
+    private double leftError;
+    private double rightError;
 
     Playback(Robot robot) { this.robot = robot; }
 
@@ -26,59 +29,31 @@ class Playback implements Runnable {
         double lastLeftError = 0;
         double lastRightError = 0;
 
-        Config config = Config.getInstance();
+        Config.Motion config = robot.config.motion;
 
-        while (robot.isEnabled() && tickCount < moments.length) {
+        synchronized (this) { new Thread(() -> {
+
+            for (int i = 0; i < profile.Evaluable.length; i++)
+                robot.runNextLoop(profile.Evaluable[i], profile.Evaluate_Timing[i]);
+
+        }).start(); }
+
+        while (robot.isEnabled() && tickCount < profile.Moments.length) {
 
             if (System.nanoTime() - lastTickTime >= config.tickTime) {
 
-                System.out.println(config.kP);
-
                 lastTickTime = System.nanoTime();
 
-                Moment moment = moments[tickCount];
+                Moment moment = profile.Moments[tickCount];
 
-                if (moment.evaluables != null) {
-
-                    new Thread(() -> {
-
-                        for (int i = 0; i < moment.states.length; i++) {
-
-                            if (moment.states[i] instanceof Double.EVAL_STATE) {
-
-                                Double.EVAL_STATE state = (Double.EVAL_STATE) moment.states[i];
-
-                                //if (state == Double.EVAL_STATE.CHANGED)
-                                //for (Object o : moment.evaluables[i]) { ((DoubleListener) o).changed();  }
-
-                            } else {
-
-                                Boolean.EVAL_STATE state = (Boolean.EVAL_STATE) moment.states[i];
-
-                                System.out.println("<Motion Control> Triggering button: " + moment.ids[i] + "." + state);
-
-                                if (state == Boolean.EVAL_STATE.PRESSED)
-                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).pressed();
-
-                                if (state == Boolean.EVAL_STATE.HELD)
-                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).held();
-
-                                if (state == Boolean.EVAL_STATE.RISING)
-                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).rising();
-
-                                if (state == Boolean.EVAL_STATE.FALLING)
-                                    for (Object o : moment.evaluables[i]) ((ButtonListener) o).falling();
-                            }
-                        }
-
-                    }).start();
-                }
+                leftTarget = moment.leftEncoderPosition;
+                rightTarget = moment.rightEncoderPosition;
 
                 double actualLeftPosition = robot.inputs.driveLeft.getDistance();
                 double actualRightPosition = robot.inputs.driveRight.getDistance();
 
-                double leftError = actualLeftPosition - moment.leftEncoderPosition;
-                double rightError = actualRightPosition - moment.rightEncoderPosition;
+                leftError = actualLeftPosition - moment.leftEncoderPosition;
+                rightError = actualRightPosition - moment.rightEncoderPosition;
 
                 leftIntegral += leftError * config.tickTime;
                 rightIntegral += rightError * config.tickTime;
@@ -89,11 +64,15 @@ class Playback implements Runnable {
                 double leftDrive =
                         moment.leftDriveOutput
                                 + (config.kP * leftError)
+                                + (config.kI * leftIntegral)
+                                + (config.kD * leftDerivative)
                         ;
 
                 double rightDrive =
                         moment.rightDriveOutput
                                 + (config.kP * rightError)
+                                + (config.kI * rightIntegral)
+                                + (config.kD * rightDerivative)
                           ;
 
                 robot.outputs.driveLeftFront.set(leftDrive);
@@ -104,11 +83,6 @@ class Playback implements Runnable {
                 
                 lastLeftError = leftError;
                 lastRightError = rightError;
-
-                NetworkTable.getTable("motion").putNumber("leftTarget", moment.leftEncoderPosition);
-                NetworkTable.getTable("motion").putNumber("rightTarget", moment.rightEncoderPosition);
-                NetworkTable.getTable("motion").putNumber("leftError", leftError);
-                NetworkTable.getTable("motion").putNumber("rightError", rightError);
 
                 tickCount++;
                 avgTickRate += System.nanoTime() - lastTickTime;
@@ -126,5 +100,13 @@ class Playback implements Runnable {
         System.out.printf(" %.1f%%%n", config.tickTime / avgTickRate);
     }
 
-    void setProfile(Moment[] moments) { this.moments = moments; }
+    void setProfile(Profile profile) { this.profile = profile; }
+
+    public synchronized double getLeftTarget() { return leftTarget; }
+
+    public synchronized double getRightTarget() { return rightTarget; }
+
+    public synchronized double getLeftError() { return leftError; }
+
+    public synchronized double getRightError() { return rightError; }
 }

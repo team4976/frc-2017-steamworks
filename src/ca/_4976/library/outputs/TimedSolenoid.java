@@ -15,14 +15,14 @@ public class TimedSolenoid {
     public TimedSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
 
         this.module = module;
-        solenoid = new edu.wpi.first.wpilibj.DoubleSolenoid(pcmId, outPin, inPin);
+        solenoid = new DoubleSolenoid(pcmId, outPin, inPin);
     }
 
     public void output(boolean extended) {
 
         setTime = System.currentTimeMillis();
         this.extened = extended;
-        solenoid.set(extended ? edu.wpi.first.wpilibj.DoubleSolenoid.Value.kForward : edu.wpi.first.wpilibj.DoubleSolenoid.Value.kReverse);
+        solenoid.set(extended ? DoubleSolenoid.Value.kForward : DoubleSolenoid.Value.kReverse);
         module.runNextLoop(this::disable, offDelay);
     }
 
@@ -31,6 +31,6 @@ public class TimedSolenoid {
     private void disable() {
 
         if (setTime < System.currentTimeMillis() - (offDelay * 0.90))
-            solenoid.set(edu.wpi.first.wpilibj.DoubleSolenoid.Value.kOff);
+            solenoid.set(DoubleSolenoid.Value.kOff);
     }
 }
