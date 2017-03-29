@@ -33,6 +33,8 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	private Config.Vision config;
 
+	UsbCamera camera;
+
 	public VisionTracker(Robot robot) {
 
 		this.robot = robot;
@@ -41,9 +43,9 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 		UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
 		UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture(1);
 
-		UsbCamera camera = (camera0.getDescription().toLowerCase().contains("lifecam") ? camera0 : camera1);
+		camera = (camera0.getDescription().toLowerCase().contains("lifecam") ? camera0 : camera1);
 
-		camera.setResolution(160, 120);
+		camera.setResolution((int) config.resolution[0], (int) config.resolution[1]);
 		camera.setFPS(30);
 		camera.setExposureManual(0);
 		camera.setExposureHoldCurrent();
@@ -184,10 +186,14 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 			// Step HSV_Threshold0:
 			Mat hsvThresholdInput = cvErodeOutput;
-			double[] hsvThresholdHue = {60, 70};
-			double[] hsvThresholdSaturation = {115, 255.0};
-			double[] hsvThresholdValue = {40, 255.0};
-			hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, hsvThresholdOutput);
+
+			hsvThreshold(
+					hsvThresholdInput,
+					config.hsvThresholdHue,
+					config.hsvThresholdSaturation,
+					config.hsvThresholdValue,
+					hsvThresholdOutput
+			);
 
 			// Step Find_Contours0:
 			Mat findContoursInput = hsvThresholdOutput;
@@ -196,18 +202,21 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 			// Step Filter_Contours0:
 			ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-			double filterContoursMinArea = 0.0;
-			double filterContoursMinPerimeter = 30.0;
-			double filterContoursMinWidth = 0.0;
-			double filterContoursMaxWidth = 1000.0;
-			double filterContoursMinHeight = 0.0;
-			double filterContoursMaxHeight = 1000.0;
-			double[] filterContoursSolidity = {0, 100};
-			double filterContoursMaxVertices = 1000000.0;
-			double filterContoursMinVertices = 0.0;
-			double filterContoursMinRatio = 0.0;
-			double filterContoursMaxRatio = 1000.0;
-			filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
+
+			filterContours(
+					filterContoursContours,
+					config.filterContoursMinArea,
+					config.filterContoursMinPerimeter,
+					config.filterContoursMinWidth,
+					config.filterContoursMaxWidth,
+					config.filterContoursMinHeight,
+					config.filterContoursMaxHeight,
+					config.filterContoursSolidity,
+					config.filterContoursMaxVertices,
+					config.filterContoursMinVertices,
+					config.filterContoursMinRatio,
+					config.filterContoursMaxRatio,
+					filterContoursOutput);
 		}
 	}
 
@@ -284,6 +293,8 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	}
 
 	void configNotify() {
+
+		camera.setResolution((int) config.resolution[0], (int) config.resolution[1]);
 
 		pidController.setSetpoint(80 + config.offset);
 	}

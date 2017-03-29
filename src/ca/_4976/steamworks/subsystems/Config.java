@@ -19,7 +19,17 @@ public class Config {
 
     public Config(Robot robot) { this.robot = robot; }
 
-    private double getKey(ITable table, String key, double back) {
+	private double[] getKey(ITable table, String key, double[] back) {
+
+		if (table.containsKey(key)) return table.getNumberArray(key, back);
+
+		table.putNumberArray(key, back);
+
+		return back;
+	}
+
+
+	private double getKey(ITable table, String key, double back) {
 
         if (table.containsKey(key)) return table.getNumber(key, back);
 
@@ -85,10 +95,66 @@ public class Config {
     class Vision {
 
         private NetworkTable table = NetworkTable.getTable("Vision");
+        private ITable filter = table.getSubTable("Filter Contours");
+        private ITable threshold = table.getSubTable("HSV Threshold");
 
         double offset = getKey(table, "Offset (PIXELS)", 20);
 
+        double[] resolution = getKey(table, "Resolution (PIXELS)", new double[] { 160, 120} );
+
+	    double[] hsvThresholdHue = {
+			    getKey(threshold, "Min Hue", 60),
+			    getKey(threshold, "Max Hue", 70)
+	    };
+
+	    double[] hsvThresholdSaturation = {
+			    getKey(threshold, "Min Saturation", 115),
+			    getKey(threshold, "Max Saturation", 255)
+	    };
+
+	    double[] hsvThresholdValue = {
+			    getKey(threshold, "Min Value", 40),
+			    getKey(threshold, "Max Value", 255)
+	    };
+
+	    double filterContoursMinArea = getKey(filter, "Min Area (PIXELS)", 0.0);
+	    double filterContoursMinPerimeter = getKey(filter, "Min Perimeter (PIXELS)", 30.0);
+	    double filterContoursMinWidth = getKey(filter, "Min Width (PIXELS)", 0.0);
+	    double filterContoursMaxWidth = getKey(filter, "Max Width (PIXELS)", 1000.0);
+	    double filterContoursMinHeight = getKey(filter, "Min Height (PIXELS)", 0.0);
+	    double filterContoursMaxHeight =  getKey(filter, "Max Height (PIXELS)", 1000.0);
+
+	    double[] filterContoursSolidity = {
+	    		getKey(filter, "Min Solidity (%)", 0.0),
+			    getKey(filter, "Max Solidity (%)", 100.0)
+	    };
+
+	    double filterContoursMaxVertices = getKey(filter, "Max Vertices", 1000000.0);
+	    double filterContoursMinVertices = getKey(filter, "Min Vertices", 0.0);
+	    double filterContoursMinRatio = getKey(filter, "Min Ratio", 0.0);
+	    double filterContoursMaxRatio = getKey(filter, "Max Vertices", 0.0);
+
+
         private Vision() {
+
+        	filter.addTableListener(((source, key, value, isNew) -> {
+
+		        System.out.println("<Elevator> " + key + " was changed: " + value);
+
+		        filterContoursMinArea = getKey(filter, "Min Area (PIXELS)", 0.0);
+		        filterContoursMinPerimeter = getKey(filter, "Min Perimeter (PIXELS)", 30.0);
+		        filterContoursMinWidth = getKey(filter, "Min Width (PIXELS)", 0.0);
+		        filterContoursMaxWidth = getKey(filter, "Max Width (PIXELS)", 1000.0);
+		        filterContoursMinHeight = getKey(filter, "Min Height (PIXELS)", 0.0);
+		        filterContoursMaxHeight =  getKey(filter, "Max Height (PIXELS)", 1000.0);
+		        filterContoursSolidity[0] = getKey(filter, "Min Solidity (%)", 0.0);
+		        filterContoursSolidity[1] =  getKey(filter, "Max Solidity (%)", 100.0);
+		        filterContoursMaxVertices = getKey(filter, "Max Vertices", 1000000.0);
+		        filterContoursMinVertices = getKey(filter, "Min Vertices", 0.0);
+		        filterContoursMinRatio = getKey(filter, "Min Ratio", 0.0);
+		        filterContoursMaxRatio = getKey(filter, "Max Vertices", 0.0);
+
+	        }));
 
             table.addTableListener((source, key, value, isNew) -> {
 
@@ -96,7 +162,14 @@ public class Config {
 
                 offset = getKey(table, "Offset (PIXELS)", 1);
 
-                robot.vision.configNotify();
+                offset = getKey(table, "Resolution (PIXELS)", 1);
+
+                if (key.equals("Resolution (PIXELS)")) {
+
+                	if (resolution[0] / resolution[1] == 4 / 3) robot.vision.configNotify();
+
+                } else robot.vision.configNotify();
+
             });
         }
     }
