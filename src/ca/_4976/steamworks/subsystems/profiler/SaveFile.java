@@ -21,11 +21,14 @@ class SaveFile {
         ArrayList<Evaluable> evaluables = new ArrayList<>();
         ArrayList<Integer> times = new ArrayList<>();
 
-        String line;
+        String line = "";
 
         double speed = 3200;
         double angle = 0.48;
         double position = 0;
+
+        boolean runShooter = false;
+        boolean extendWinch = false;
 
         try {
 
@@ -34,6 +37,8 @@ class SaveFile {
             int time = 0;
             for (line = reader.readLine(); line != null; line = reader.readLine()) {
 
+                if (line.endsWith(",")) line = line.substring(0, line.length() - 1);
+
                 if (line.toLowerCase().contains("config")) {
 
                     String[] split = line.substring(line.indexOf(":") + 1).split(",");
@@ -41,6 +46,8 @@ class SaveFile {
                     speed = java.lang.Double.parseDouble(split[0]);
                     angle = java.lang.Double.parseDouble(split[1]);
                     position = java.lang.Double.parseDouble(split[2]);
+                    runShooter = java.lang.Boolean.parseBoolean(split[4]);
+                    extendWinch = java.lang.Boolean.parseBoolean(split[5]);
 
                     continue;
                 }
@@ -76,7 +83,6 @@ class SaveFile {
                             case "RISING": evaluables.add(listener::rising);break;
                             case "PRESSED": evaluables.add(listener::pressed); break;
                             case "HELD": evaluables.add(listener::held); break;
-
                         }
 
                         times.add(time * 1000 / 200);
@@ -97,6 +103,7 @@ class SaveFile {
 
             System.out.println("<Motion Control> Failed to read file.");
             e.printStackTrace();
+            System.out.println(line);
         }
 
         Moment[] finalMoments = new Moment[moments.size()];
@@ -113,7 +120,9 @@ class SaveFile {
                 position,
                 finalMoments,
                 finalEvaluables,
-                finalTimes
+                finalTimes,
+                runShooter,
+                extendWinch
         );
     }
 

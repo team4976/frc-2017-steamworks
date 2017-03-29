@@ -21,6 +21,8 @@ import sun.nio.ch.Net;
 
 public class VisionTracker implements VisionPipeline, PIDSource {
 
+	private Robot robot;
+
 	private Goal goal = null;
 
 	private PIDController pidController;
@@ -33,6 +35,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	public VisionTracker(Robot robot) {
 
+		this.robot = robot;
 		config = robot.config.vision;
 
 		UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
@@ -59,10 +62,15 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	public boolean isRunning() { return !pause; }
 
 
-	public void halt() { pause = true; }
+	public void halt() {
+
+		robot.outputs.visionLight.set(false);
+		pause = true;
+	}
 
 	public void run() {
 
+		robot.outputs.visionLight.set(true);
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 		pause = false;
 	}
@@ -154,10 +162,9 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public void process(Mat source0) {
-		//if (!pause) {
+		if (!pause) {
 			// Step CV_dilate0:
 
-			System.out.println(pause);
 			Mat cvDilateSrc = source0;
 			Mat cvDilateKernel = new Mat();
 			Point cvDilateAnchor = new Point(-1, -1);
@@ -201,7 +208,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 			double filterContoursMinRatio = 0.0;
 			double filterContoursMaxRatio = 1000.0;
 			filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
-		//}
+		}
 	}
 
 	private void cvDilate(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {

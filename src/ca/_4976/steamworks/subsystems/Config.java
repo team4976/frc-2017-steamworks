@@ -28,6 +28,15 @@ public class Config {
         return back;
     }
 
+    private boolean getKey(ITable table, String key, boolean back) {
+
+        if (table.containsKey(key)) return table.getBoolean(key, back);
+
+        table.putBoolean(key, back);
+
+        return back;
+    }
+
     private int getKey(ITable table, String key, int back) {
 
         if (table.containsKey(key)) return (int) table.getNumber(key, back);
@@ -47,6 +56,9 @@ public class Config {
         public double kP = getKey(pid, "P", -1.0);
         public double kI = getKey(pid, "I", 0.0);
         public double kD = getKey(pid, "D", 0.0);
+
+        public boolean runShooterAtStart = getKey(table, "Run Shooter at Start", true);
+        public boolean extendWinchArmAtStart = getKey(table, "Extend Winch at Start", true);
 
         private Motion() {
 
@@ -195,7 +207,7 @@ public class Config {
         int kIZone = getKey(pid, "IZone", 0);
         int kProfile = getKey(pid, "Profile", 0);
 
-        double[] targetSpeed = new double[4];
+        double[] targetSpeed = new double[5];
         double[] targetError = new double[4];
         double[] hoodPosition = new double[4];
         double[] turretPosition = new double[4];

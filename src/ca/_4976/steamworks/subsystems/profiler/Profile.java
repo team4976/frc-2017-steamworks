@@ -4,22 +4,27 @@ import ca._4976.library.Evaluable;
 
 public class Profile {
 
-    public final double Shooter_RPM;
-    public final double Hood_Position;
-    public final double Turret_Position;
+	final double Shooter_RPM;
+	final double Hood_Position;
+	final double Turret_Position;
 
-    public final Moment[] Moments;
+	final boolean Run_Shooter;
+	final boolean Extend_Winch_Arm;
+
+	final Moment[] Moments;
 
     public final Evaluable[] Evaluable;
-    public final int[] Evaluate_Timing;
+    final int[] Evaluate_Timing;
 
-    public Profile(
+    Profile(
             double speed,
             double angle,
             double position,
             Moment[] moments,
             Evaluable[] evals,
-            int[] times
+            int[] times,
+            boolean runShooterAtStart,
+            boolean extendWinchArmAtStart
     ) {
         Shooter_RPM = speed;
         Hood_Position = angle;
@@ -27,5 +32,7 @@ public class Profile {
         Moments = moments;
         Evaluable = evals;
         Evaluate_Timing = times;
+        Run_Shooter = runShooterAtStart;
+        Extend_Winch_Arm = extendWinchArmAtStart;
     }
 }

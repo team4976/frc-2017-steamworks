@@ -5,10 +5,12 @@ import ca._4976.steamworks.Robot;
 
 public class Winch {
 
+	private Robot robot;
     private Config.Winch config;
 
     public Winch(Robot robot) {
 
+    	this.robot = robot;
         config = robot.config.winch;
 
         robot.driver.Y.addListener(new ButtonListener() {
@@ -27,8 +29,10 @@ public class Winch {
 
         robot.operator.Y.addListener(new ButtonListener() {
 
-            @Override public void falling() { robot.outputs.arch.output(!robot.outputs.arch.isExtened());
+        	@Override public void falling() { robot.outputs.arch.output(!robot.outputs.arch.isExtended());
             }
         });
     }
+
+    public void extend() { robot.outputs.arch.output(true); }
 }

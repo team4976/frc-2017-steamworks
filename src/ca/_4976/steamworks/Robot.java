@@ -18,8 +18,8 @@ public class Robot extends AsynchronousRobot {
     public Outputs outputs = new Outputs(this);
 
     private GearHandler gearHandler = new GearHandler(this);
-    private Winch winch = new Winch(this);
 
+    public Winch winch = new Winch(this);
     public MotionControl profiler = new MotionControl(this);
     public Status status = new Status(this);
     public Shooter shooter = new Shooter(this);

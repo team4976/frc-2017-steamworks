@@ -1,7 +1,6 @@
 package ca._4976.library;
 
 import ca._4976.library.listeners.RobotStateListener;
-import com.sun.org.apache.xpath.internal.SourceTree;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
@@ -12,9 +11,6 @@ import java.util.ArrayList;
 public class AsynchronousRobot extends RobotBase {
 
     private ArrayList<RobotStateListener> listeners = new ArrayList<>();
-
-    private Evaluable[] userInput;
-    private Evaluable[] hardwareInput;
 
     private ArrayList<Evaluable> evaluables = new ArrayList<>();
     private ArrayList<Long> evalTimes = new ArrayList<>();
@@ -33,10 +29,10 @@ public class AsynchronousRobot extends RobotBase {
 
         listeners.forEach(RobotStateListener::robotInit);
 
-        userInput = new Evaluable[Initialization.USER_INPUT_EVALS.size()];
+        Evaluable[] userInput = new Evaluable[Initialization.USER_INPUT_EVALS.size()];
         for (int i = 0; i < userInput.length; i++) userInput[i] = Initialization.USER_INPUT_EVALS.get(i);
 
-        hardwareInput = new Evaluable[Initialization.HARDWARE_INPUT_EVALS.size()];
+        Evaluable[] hardwareInput = new Evaluable[Initialization.HARDWARE_INPUT_EVALS.size()];
         for (int i = 0; i < hardwareInput.length; i++) hardwareInput[i] = Initialization.HARDWARE_INPUT_EVALS.get(i);
 
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
@@ -44,7 +40,7 @@ public class AsynchronousRobot extends RobotBase {
 
         LiveWindow.setEnabled(false);
 
-        while (true) {
+        while (m_ds.getBatteryVoltage() > 4) {
 
             m_ds.waitForData();
 

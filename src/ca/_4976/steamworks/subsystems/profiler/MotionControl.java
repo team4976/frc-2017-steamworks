@@ -99,10 +99,9 @@ public class MotionControl {
 
         robot.addListener(new RobotStateListener() {
 
-            @Override public void disabledInit() {
+            @Override public void robotInit() { table.putStringArray("table", new SaveFile().getFileNames()); }
 
-                table.putStringArray("table", new SaveFile().getFileNames());
-            }
+            @Override public void disabledInit() { table.putStringArray("table", new SaveFile().getFileNames()); }
 
             @Override public void autonomousInit() {
 

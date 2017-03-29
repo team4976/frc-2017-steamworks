@@ -83,27 +83,29 @@ public class Shooter {
 
             @Override public void held() {
 
-                if (Math.abs(robot.outputs.shooter.getError()) < config.targetError[selection]) System.out.println("<Shooter> Beginning to shoot.");
+                if (Math.abs(robot.outputs.shooter.getError()) < config.targetError[selection]) {
 
-                else System.err.println("<Shooter> WARN: (RPM) too low to fire.");
+                    System.out.println("<Shooter> Beginning to shoot.");
 
-                new Evaluable() {
+                    new Evaluable() {
 
-                    @Override public void eval() {
+                        @Override public void eval() {
 
-                        if (Math.abs(robot.outputs.shooter.getError()) > config.targetError[selection]) {
+                            if (Math.abs(robot.outputs.shooter.getError()) > config.targetError[selection]) {
 
-                            if (robot.elevator.isRunning())
-                                System.err.println("<Shooter> WARN: (RPM) too low to fire.");
+                                if (robot.elevator.isRunning())
+                                    System.err.println("<Shooter> WARN: (RPM) too low to fire.");
 
-                            robot.elevator.stop();
+                                robot.elevator.stop();
 
-                        } else robot.elevator.run();
+                            } else robot.elevator.run();
 
-                        if (robot.operator.B.get()) robot.runNextLoop(this);
-                    }
+                            if (robot.operator.B.get()) robot.runNextLoop(this);
+                        }
 
-                }.eval();
+                    }.eval();
+
+                } else System.err.println("<Shooter> WARN: (RPM) too low to fire.");
             }
 
             @Override public void falling() {
@@ -194,6 +196,20 @@ public class Shooter {
     }
 
     public double getTargetRPM() { return config.targetSpeed[selection]; }
+
+    public void setTargetRPM(double speed) {
+
+        selection = 4;
+        config.targetSpeed[selection] = speed;
+    }
+
+    public void run() {
+
+        robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+        robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+        robot.outputs.shooterSlave.set(12);
+        robot.outputs.shooter.set(config.targetSpeed[selection]);
+    }
 
     void configNotify() {
 

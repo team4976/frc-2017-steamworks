@@ -9,7 +9,7 @@ public class TimedSolenoid {
 
     private DoubleSolenoid solenoid;
     private long setTime = 0;
-    private boolean extened = false;
+    private boolean extended = false;
     private int offDelay = 1000;
 
     public TimedSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
@@ -21,12 +21,12 @@ public class TimedSolenoid {
     public void output(boolean extended) {
 
         setTime = System.currentTimeMillis();
-        this.extened = extended;
+        this.extended = extended;
         solenoid.set(extended ? DoubleSolenoid.Value.kForward : DoubleSolenoid.Value.kReverse);
         module.runNextLoop(this::disable, offDelay);
     }
 
-    public boolean isExtened() { return extened; }
+    public boolean isExtended() { return extended; }
 
     private void disable() {
 

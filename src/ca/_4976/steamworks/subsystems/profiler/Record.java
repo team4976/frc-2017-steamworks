@@ -45,6 +45,8 @@ class Record implements Runnable {
 
     @Override public void run() {
 
+        System.out.println("Starting Recording.");
+
         start = System.currentTimeMillis();
         long lastTickTime = System.nanoTime();
         double avgTickRate = 0;
@@ -55,7 +57,7 @@ class Record implements Runnable {
         robot.inputs.driveLeft.reset();
         robot.inputs.driveRight.reset();
 
-        new Evaluable() {
+        robot.runNextLoop(new Evaluable() {
 
             @Override public void eval() {
 
@@ -116,8 +118,7 @@ class Record implements Runnable {
 
                 if (robot.isEnabled()) robot.runNextLoop(this);
             }
-
-        }.eval();
+        });
 
         double speed = robot.shooter.getTargetRPM();
         double angle = robot.outputs.hood.get();
@@ -125,10 +126,10 @@ class Record implements Runnable {
 
         try {
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             Date date = new Date();
 
-            String file = "Record: " + dateFormat.format(date) + "csv";
+            String file = "/home/lvuser/motion/Recording " + dateFormat.format(date) + ".csv";
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
 
@@ -160,6 +161,10 @@ class Record implements Runnable {
                     writer.write(moment.leftEncoderVelocity + ",");
                     writer.write(moment.rightEncoderVelocity + append);
 
+                    append = "";
+
+                    writer.newLine();
+
                     moments.add(moment);
 
                     avgTickRate += System.nanoTime() - lastTickTime;
@@ -178,11 +183,12 @@ class Record implements Runnable {
         for (int i = 0; i < staticEvals.length; i++) staticEvals[i] = evaluables.get(i);
         for (int i = 0; i < staticTimes.length; i++) staticTimes[i] = times.get(i).intValue();
 
-        profile = new Profile(speed, angle, position, staticMoments, staticEvals, staticTimes);
+        profile = new Profile(speed, angle, position, staticMoments,
+                staticEvals, staticTimes, config.runShooterAtStart, config.extendWinchArmAtStart);
 
         avgTickRate /= tickCount;
-        System.out.printf("<Motion Control> Average tick time: %.3f", avgTickRate);
-        System.out.printf(" %.1f%%%n", config.tickTime / avgTickRate);
+        System.out.printf("<Motion Control> Average tick time: %.3fms", avgTickRate / 1e+6);
+        System.out.printf(" %.1f%%%n", (avgTickRate / config.tickTime) * 100);
     }
 
     Profile getProfile() { return profile;  }
