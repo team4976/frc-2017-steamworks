@@ -45,7 +45,7 @@ public class MotionControl {
                 robot.driver.START,
                 robot.driver.LS,
                 robot.driver.RS,
-                robot.operator. A,
+                robot.operator.A,
                 robot.operator.B,
                 robot.operator.X,
                 robot.operator.Y,
@@ -129,7 +129,11 @@ public class MotionControl {
 
         String load = table.getString("load_table", "");
 
-        if (!load.equals("")) playback.setProfile(saveFile.load(load));
+        if (!load.equals("")) {
+
+            System.out.println("Getting autonomous: " + load);
+            playback.setProfile(saveFile.load(load));
+        }
 
         else System.out.println("<Motion Control> Successfully set autonomous to last record.");
     }

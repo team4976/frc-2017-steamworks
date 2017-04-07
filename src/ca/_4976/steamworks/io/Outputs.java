@@ -2,6 +2,7 @@ package ca._4976.steamworks.io;
 
 import ca._4976.library.AsynchronousRobot;
 
+import ca._4976.library.Initialization;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.library.outputs.*;
 import com.ctre.CANTalon;
@@ -34,37 +35,38 @@ public class Outputs {
 
     public Outputs(AsynchronousRobot module) {
 
-        driveLeftFront = new VictorSP(0);
-        driveLeftRear = new VictorSP(1);
-        driveRightFront = new VictorSP(2);
-        driveRightRear = new VictorSP(3);
+        driveLeftFront = Initialization.DEBUG ? new NetworkVictorSP(0) : new VictorSP(0);
+        driveLeftRear = Initialization.DEBUG ? new NetworkVictorSP(1) : new VictorSP(1);
+        driveRightFront = Initialization.DEBUG ? new NetworkVictorSP(2) : new VictorSP(2);
+        driveRightRear = Initialization.DEBUG ? new NetworkVictorSP(3) : new VictorSP(3);
 
         elevator = new Taloon(5);
 
-        shooter = new CANTalon(12);
+        shooter = Initialization.DEBUG ? new NetworkTalonSRX(12) : new CANTalon(12);
         shooter.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
         shooter.reverseSensor(true);
         shooter.configEncoderCodesPerRev(48);
 
-        pivot = new CANTalon(4);
+        pivot = Initialization.DEBUG ? new NetworkTalonSRX(4) : new CANTalon(4);
+        pivot.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 
-        shooterSlave = new CANTalon(13);
+        shooterSlave = Initialization.DEBUG ? new NetworkTalonSRX(13) : new CANTalon(13);
         shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         shooterSlave.set(12);
 
-        winchMaster = new CANTalon(6);
+        winchMaster = Initialization.DEBUG ? new NetworkTalonSRX(6) : new CANTalon(6);
         winchMaster.reverseOutput(true);
 
-        CANTalon winchSlave = new CANTalon(7);
+        CANTalon winchSlave = Initialization.DEBUG ? new NetworkTalonSRX(7) : new CANTalon(7);
         winchSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         winchSlave.set(winchMaster.getDeviceID());
 
-        roller = new CANTalon(15);
+        roller = Initialization.DEBUG ? new NetworkTalonSRX(15) : new CANTalon(15);
 
-        gear = new TimedSolenoid(module, 20, 1, 6);
-        arch = new TimedSolenoid(module, 20, 0, 7);
+        gear = Initialization.DEBUG ? new NetworkSolenoid(module, 20, 1, 6) : new TimedSolenoid(module, 20, 1, 6);
+        arch = Initialization.DEBUG ? new NetworkSolenoid(module, 20, 0, 7) : new TimedSolenoid(module, 20, 0, 7);
 
-        agitator = new CANTalon(2);
+        agitator = Initialization.DEBUG ? new NetworkTalonSRX(2) : new CANTalon(2);
         agitator.reverseOutput(true);
 
         hood = new LinearActuator(4);
@@ -81,18 +83,17 @@ public class Outputs {
 
                 //System.out.println(pivot.getEncPosition());
 
-//                //pivot.setForwardSoftLimit(pivot.getEncPosition() + 300);
-//                //pivot.setReverseSoftLimit(pivot.getEncPosition() - 300);
-//
-//                pivot.enableForwardSoftLimit(true);
-//                pivot.enableReverseSoftLimit(true);
 
 
-                pivot.setFeedbackDevice(CANTalon.FeedbackDevice.CtreMagEncoder_Absolute);
                 shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
                 shooter.set(0);
 
                 underGlow.set(true);
+            }
+
+            @Override public void autonomousInit() {
+
+                pivot.setEncPosition(0);
             }
 
             @Override public void teleopInit() {

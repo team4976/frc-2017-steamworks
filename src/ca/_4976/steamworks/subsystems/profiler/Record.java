@@ -124,6 +124,10 @@ class Record implements Runnable {
         double angle = robot.outputs.hood.get();
         double position = robot.outputs.pivot.getPosition();
 
+        if (config.runShooterAtStart) robot.shooter.run();
+
+        if (config.extendWinchArmAtStart) robot.outputs.arch.output(true);
+
         try {
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
@@ -133,7 +137,7 @@ class Record implements Runnable {
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
 
-            writer.write("config:" + speed + "," + angle + "," + position);
+            writer.write("config:" + speed + "," + angle + "," + position + ",true,true");
             writer.newLine();
 
             while (robot.isEnabled() && !robot.driver.BACK.get()) {
@@ -164,6 +168,7 @@ class Record implements Runnable {
                     append = "";
 
                     writer.newLine();
+                    writer.flush();
 
                     moments.add(moment);
 
@@ -184,7 +189,7 @@ class Record implements Runnable {
         for (int i = 0; i < staticTimes.length; i++) staticTimes[i] = times.get(i).intValue();
 
         profile = new Profile(speed, angle, position, staticMoments,
-                staticEvals, staticTimes, config.runShooterAtStart, config.extendWinchArmAtStart);
+                staticEvals, staticTimes, config.runShooterAtStart, config.extendWinchArmAtStart, 0.0);
 
         avgTickRate /= tickCount;
         System.out.printf("<Motion Control> Average tick time: %.3fms", avgTickRate / 1e+6);

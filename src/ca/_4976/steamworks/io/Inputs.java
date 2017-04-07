@@ -17,8 +17,8 @@ public class Inputs {
         driveLeft.setReverseDirection(true);
         driveRight.setReverseDirection(true);
 
-        driveLeft.setDistancePerPulse(0.00031179492);
-        driveRight.setDistancePerPulse(0.00031179492);
+        driveLeft.setDistancePerPulse(0.0001114); //THE POWER OF 1114
+        driveRight.setDistancePerPulse(0.0001114);
 
         driveLeft.setMinRate(0);
         driveRight.setMinRate(0);

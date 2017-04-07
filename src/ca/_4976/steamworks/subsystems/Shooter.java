@@ -98,7 +98,7 @@ public class Shooter {
 
                                 robot.elevator.stop();
 
-                            } else robot.elevator.run();
+                            } else if (robot.operator.B.get()) robot.elevator.run();
 
                             if (robot.operator.B.get()) robot.runNextLoop(this);
                         }
@@ -199,6 +199,7 @@ public class Shooter {
 
     public void setTargetRPM(double speed) {
 
+        config.targetError[4] = config.targetError[selection];
         selection = 4;
         config.targetSpeed[selection] = speed;
     }

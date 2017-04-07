@@ -13,6 +13,8 @@ public class Profile {
 
 	final Moment[] Moments;
 
+	public final double Disable_Motion;
+
     public final Evaluable[] Evaluable;
     final int[] Evaluate_Timing;
 
@@ -24,7 +26,8 @@ public class Profile {
             Evaluable[] evals,
             int[] times,
             boolean runShooterAtStart,
-            boolean extendWinchArmAtStart
+            boolean extendWinchArmAtStart,
+            double endTime
     ) {
         Shooter_RPM = speed;
         Hood_Position = angle;
@@ -34,5 +37,6 @@ public class Profile {
         Evaluate_Timing = times;
         Run_Shooter = runShooterAtStart;
         Extend_Winch_Arm = extendWinchArmAtStart;
+        Disable_Motion = endTime;
     }
 }

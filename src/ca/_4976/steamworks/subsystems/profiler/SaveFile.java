@@ -26,6 +26,7 @@ class SaveFile {
         double speed = 3200;
         double angle = 0.48;
         double position = 0;
+        double endTime = 0;
 
         boolean runShooter = false;
         boolean extendWinch = false;
@@ -41,13 +42,15 @@ class SaveFile {
 
                 if (line.toLowerCase().contains("config")) {
 
-                    String[] split = line.substring(line.indexOf(":") + 1).split(",");
+                    String[] split = line.split(":")[1].split(",");
 
                     speed = java.lang.Double.parseDouble(split[0]);
                     angle = java.lang.Double.parseDouble(split[1]);
                     position = java.lang.Double.parseDouble(split[2]);
-                    runShooter = java.lang.Boolean.parseBoolean(split[4]);
-                    extendWinch = java.lang.Boolean.parseBoolean(split[5]);
+                    runShooter = java.lang.Boolean.parseBoolean(split[3]);
+                    extendWinch = java.lang.Boolean.parseBoolean(split[4]);
+
+                    if (split.length > 5) endTime = java.lang.Double.parseDouble(split[5]);
 
                     continue;
                 }
@@ -75,7 +78,7 @@ class SaveFile {
 
                     if (id > 100) id -= 100;
 
-                    if (split.length == 2) for (ButtonListener listener : buttons[id].getListeners()) {
+                    if (secondSplit.length == 2) for (ButtonListener listener : buttons[id].getListeners()) {
 
                         switch (state) {
 
@@ -89,7 +92,7 @@ class SaveFile {
 
                     } else if (split.length == 3) for (DoubleListener listener : axes[id].getListeners()) {
 
-                        evaluables.add(() -> listener.changed(java.lang.Double.parseDouble(split[2])));
+                        evaluables.add(() -> listener.changed(java.lang.Double.parseDouble(split[2] + "." + split[3])));
                         times.add(time * 1000 / 200);
                     }
                 }
@@ -122,7 +125,8 @@ class SaveFile {
                 finalEvaluables,
                 finalTimes,
                 runShooter,
-                extendWinch
+                extendWinch,
+                endTime
         );
     }
 

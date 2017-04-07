@@ -58,16 +58,21 @@ public class Playback implements Runnable {
 
         try {
 
+            long startTime = System.currentTimeMillis() / 1000;
+
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             Date date = new Date();
 
-            String file = "/home/lvuser/motion/Log " + dateFormat.format(date) + ".csv";
+            String file = "/home/lvuser/motion/logs/Log " + dateFormat.format(date) + ".csv";
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
 
             while (robot.isEnabled() && tickCount < profile.Moments.length) {
 
                 if (System.nanoTime() - lastTickTime >= config.tickTime) {
+
+                    if (profile.Disable_Motion > 0)
+                        if (System.currentTimeMillis() / 1000 - startTime >= profile.Disable_Motion) break;
 
                     lastTickTime = System.nanoTime();
 

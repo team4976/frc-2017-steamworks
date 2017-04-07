@@ -12,14 +12,16 @@ public class AsynchronousRobot extends RobotBase {
 
     private ArrayList<RobotStateListener> listeners = new ArrayList<>();
 
-    private ArrayList<Evaluable> evaluables = new ArrayList<>();
-    private ArrayList<Long> evalTimes = new ArrayList<>();
+    private final ArrayList<Evaluable> evaluables = new ArrayList<>();
+    private final ArrayList<Long> evalTimes = new ArrayList<>();
 
     private boolean disabledInitialized = false;
     private boolean autonomousInitialized = false;
     private boolean teleopInitialized = false;
     private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
+
+    boolean adding = false;
 
     public void enableOperatorControl() { enableOperatorControl = true; }
 
@@ -49,6 +51,9 @@ public class AsynchronousRobot extends RobotBase {
                 if (!disabledInitialized) {
 
                     LiveWindow.setEnabled(false);
+
+                    evalTimes.clear();
+                    evaluables.clear();
 
                     disabledInitialized = true;
                     autonomousInitialized = false;
@@ -126,8 +131,10 @@ public class AsynchronousRobot extends RobotBase {
 
     public void runNextLoop(Evaluable evaluable, int delay) {
 
+    	adding = true;
         evaluables.add(evaluable);
         evalTimes.add(System.currentTimeMillis() + delay);
+        adding = false;
     }
 
     public void runNextLoop(Evaluable evaluable) { runNextLoop(evaluable, 0); }
@@ -136,18 +143,29 @@ public class AsynchronousRobot extends RobotBase {
 
     private void checkEvaluables() {
 
-        if (evalTimes.size() == evaluables.size()) {
+    	while (adding);
+    	
+	    if (evalTimes.size() == evaluables.size()) {
 
-            for (int i = evaluables.size() - 1; i >= 0; i--) {
+		    for (int i = evaluables.size() - 1; i >= 0; i--) {
 
-                if (evalTimes.get(i) <= System.currentTimeMillis()) {
+			    if (evalTimes.get(i) <= System.currentTimeMillis()) {
 
-                    evaluables.get(i).eval();
-                    evaluables.remove(i);
-                    evalTimes.remove(i);
-                }
-            }
+				    Evaluable evaluable = evaluables.get(i);
 
-        } else { throw new RuntimeException("Out of sync."); }
+				    adding = true;
+
+				    evaluables.remove(i);
+				    evalTimes.remove(i);
+
+				    adding = false;
+
+				    evaluable.eval();
+			    }
+		    }
+
+	    } else {
+		    throw new RuntimeException("Out of sync.");
+	    }
     }
 }

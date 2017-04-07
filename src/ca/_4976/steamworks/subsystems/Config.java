@@ -215,8 +215,8 @@ public class Config {
 
         private NetworkTable table = NetworkTable.getTable("Drive");
 
-        double[] linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 1.0, 1.0 });
-        double[] rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 1.0, 1.0 });
+        double[] linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
+        double[] rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
 
         private Drive() {
 
@@ -224,8 +224,8 @@ public class Config {
 
                 System.out.println("<Drive> " + key + " was changed");
 
-                linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 1.0, 1.0 });
-                rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 1.0, 1.0 });
+                linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
+                rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
             }));
         }
 
@@ -313,9 +313,9 @@ public class Config {
         int kProfile = getKey(pid, "Profile", 0);
 
         double[] targetSpeed = new double[5];
-        double[] targetError = new double[4];
-        double[] hoodPosition = new double[4];
-        double[] turretPosition = new double[4];
+        double[] targetError = new double[5];
+        double[] hoodPosition = new double[5];
+        double[] turretPosition = new double[5];
 
         private Shooter() {
 

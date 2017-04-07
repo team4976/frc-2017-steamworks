@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import ca._4976.library.Initialization;
 import ca._4976.steamworks.Robot;
+import com.ctre.CANTalon;
+import edu.wpi.cscore.CvSource;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PIDController;
@@ -29,31 +32,36 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	private NetworkTable table = NetworkTable.getTable("Vision");
 
-	private boolean pause = false;
+	private boolean pause = true;
 
 	private Config.Vision config;
 
 	UsbCamera camera;
+
+	CvSource stream = CameraServer.getInstance().putVideo("HSV Threshold", 160, 120);
 
 	public VisionTracker(Robot robot) {
 
 		this.robot = robot;
 		config = robot.config.vision;
 
-		UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
-		UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture(1);
+		if (!Initialization.DEBUG) {
 
-		camera = (camera0.getDescription().toLowerCase().contains("lifecam") ? camera0 : camera1);
+			UsbCamera camera0 = CameraServer.getInstance().startAutomaticCapture(0);
+			UsbCamera camera1 = CameraServer.getInstance().startAutomaticCapture(1);
 
-		camera.setResolution((int) config.resolution[0], (int) config.resolution[1]);
-		camera.setFPS(30);
-		camera.setExposureManual(0);
-		camera.setExposureHoldCurrent();
-		camera.setWhiteBalanceManual(7000);
-		camera.setWhiteBalanceHoldCurrent();
+			camera = (camera0.getDescription().toLowerCase().contains("lifecam") ? camera0 : camera1);
 
-		VisionThread visionThread = new VisionThread(camera, this, VisionTracker::track);
-		visionThread.start();
+			camera.setResolution((int) config.resolution[0], (int) config.resolution[1]);
+			camera.setFPS(30);
+			camera.setExposureManual(0);
+			camera.setExposureHoldCurrent();
+			camera.setWhiteBalanceManual(7000);
+			camera.setWhiteBalanceHoldCurrent();
+
+			VisionThread visionThread = new VisionThread(camera, this, VisionTracker::track);
+			visionThread.start();
+		}
 
 		table.putNumber("Setpoint", table.getNumber("Setpoint", 80));
 
@@ -72,13 +80,14 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	public void run() {
 
+		robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 		robot.outputs.visionLight.set(true);
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 		pause = false;
 	}
 
 	public void track() {
-		if (!pause && filterContoursOutput != null) {
+		if (filterContoursOutput != null) {
 			if (!filterContoursOutput.isEmpty()) {
 				filterContoursOutput.sort(Comparator.comparingDouble(Imgproc::contourArea));
 				goal = new Goal(filterContoursOutput.get(filterContoursOutput.size() - 1));
@@ -164,7 +173,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public void process(Mat source0) {
-		if (!pause) {
+		if (true) {
 			// Step CV_dilate0:
 
 			Mat cvDilateSrc = source0;
@@ -194,6 +203,8 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 					config.hsvThresholdValue,
 					hsvThresholdOutput
 			);
+
+			stream.putFrame(hsvThresholdOutput);
 
 			// Step Find_Contours0:
 			Mat findContoursInput = hsvThresholdOutput;
