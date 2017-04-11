@@ -7,7 +7,7 @@ public class Initialization {
     public static ArrayList<Evaluable> USER_INPUT_EVALS = new ArrayList<>();
     public static ArrayList<Evaluable> HARDWARE_INPUT_EVALS = new ArrayList<>();
 
-    public static boolean DEBUG = false;
-}
+        public static boolean DEBUG = true;
+    }
 
 

@@ -131,7 +131,7 @@ public class MotionControl {
 
         if (!load.equals("")) {
 
-            System.out.println("Getting autonomous: " + load);
+            System.out.println("<Motion Control> Getting autonomous: " + load);
             playback.setProfile(saveFile.load(load));
         }
 

@@ -31,11 +31,12 @@ class SaveFile {
         boolean runShooter = false;
         boolean extendWinch = false;
 
-        try {
+	    int time = 0;
+
+	    try {
 
             BufferedReader reader = new BufferedReader(new FileReader(new File("/home/lvuser/motion/" + name)));
 
-            int time = 0;
             for (line = reader.readLine(); line != null; line = reader.readLine()) {
 
                 if (line.endsWith(",")) line = line.substring(0, line.length() - 1);
@@ -71,7 +72,9 @@ class SaveFile {
 
                 for (int i = 6; i < split.length; i++) {
 
-                    String[] secondSplit = split[i].split("\\.");
+	                System.out.println("\t" + split[i] + " " + moments.size() * 1000 / 200);
+
+	                String[] secondSplit = split[i].split("\\.");
 
                     int id = Integer.parseInt(secondSplit[0]);
                     String state = secondSplit[1];
@@ -106,8 +109,13 @@ class SaveFile {
 
             System.out.println("<Motion Control> Failed to read file.");
             e.printStackTrace();
-            System.out.println(line);
-        }
+
+        } catch (NumberFormatException e) {
+
+		    System.out.println("<Motion Control> Failed to read file.");
+		    //e.printStackTrace();
+		    System.out.println(time + ": " +  line);
+	    }
 
         Moment[] finalMoments = new Moment[moments.size()];
         Evaluable[] finalEvaluables = new Evaluable[evaluables.size()];
@@ -134,7 +142,25 @@ class SaveFile {
 
         File dir = new File("/home/lvuser/motion");
 
-        return dir.list() != null ? dir.list() : new String[0];
+        int inadmissable = 0;
+
+	    File[] results = dir.listFiles();
+	    assert results != null;
+	    for (File result : results) { if (result.isDirectory()) inadmissable++; }
+
+	    String[] paths = new String[results.length - inadmissable];
+
+	    int b = 0;
+	    for (int i = b; i < paths.length; i++) {
+
+		    if (results[i].isDirectory()) paths[i] = results[++b].getName();
+
+		    else paths[i] = results[b].getName();
+
+		    b++;
+	    }
+
+        return paths;
     }
 
     void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }

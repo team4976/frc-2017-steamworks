@@ -1,5 +1,6 @@
 package ca._4976.steamworks.subsystems.profiler;
 
+import ca._4976.library.Evaluable;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;
 import com.ctre.CANTalon;
@@ -42,8 +43,15 @@ public class Playback implements Runnable {
 
         synchronized (this) { new Thread(() -> {
 
-            for (int i = 0; i < profile.Evaluable.length; i++)
+            //System.out.println(profile.Evaluable.length);
+
+            for (int i = 0; i < profile.Evaluable.length; i++) {
+
+                System.out.println(i);
                 robot.runNextLoop(profile.Evaluable[i], profile.Evaluate_Timing[i]);
+            }
+
+            System.out.println("end");
 
         }).start(); }
 
@@ -72,7 +80,12 @@ public class Playback implements Runnable {
                 if (System.nanoTime() - lastTickTime >= config.tickTime) {
 
                     if (profile.Disable_Motion > 0)
-                        if (System.currentTimeMillis() / 1000 - startTime >= profile.Disable_Motion) break;
+                        if (System.currentTimeMillis() / 1000 - startTime >= profile.Disable_Motion) {
+
+                            System.out.println("Max time exceeded");
+
+                            break;
+                        }
 
                     lastTickTime = System.nanoTime();
 
@@ -95,15 +108,15 @@ public class Playback implements Runnable {
 
                     double leftDrive =
                             moment.leftDriveOutput
-                                    + (config.kP * leftError)
-                                    + (config.kI * leftIntegral)
-                                    + (config.kD * leftDerivative);
+                                    + (config.kP * leftError);
+                                    //+ (config.kI * leftIntegral)
+                                    //+ (config.kD * leftDerivative);
 
                     double rightDrive =
                             moment.rightDriveOutput
-                                    + (config.kP * rightError)
-                                    + (config.kI * rightIntegral)
-                                    + (config.kD * rightDerivative);
+                                    + (config.kP * rightError);
+                                    //+ (config.kI * rightIntegral)
+                                    //+ (config.kD * rightDerivative);
 
                     robot.outputs.driveLeftFront.set(leftDrive);
                     robot.outputs.driveLeftRear.set(leftDrive);
@@ -122,15 +135,13 @@ public class Playback implements Runnable {
                     writer.write(moment.rightEncoderVelocity + ",");
                     writer.write(leftDrive + ",");
                     writer.write(rightDrive + ",");
-                    writer.write(leftError * config.kP + ",");
-                    writer.write(rightError * config.kP + ",");
-                    writer.write(leftIntegral * config.kI + ",");
-                    writer.write(rightIntegral * config.kI + ",");
-                    writer.write(leftDerivative * config.kD + ",");
-                    writer.write(rightDerivative * config.kD + "");
+                    writer.write(actualLeftPosition + ",");
+                    writer.write(actualRightPosition + ",");
+                    writer.write(leftError + ",");
+                    writer.write(rightError + "");
 
                     writer.newLine();
-
+    
                     tickCount++;
                     avgTickRate += System.nanoTime() - lastTickTime;
                 }

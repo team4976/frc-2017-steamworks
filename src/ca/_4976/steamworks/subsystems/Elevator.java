@@ -36,7 +36,6 @@ public class Elevator {
     void run() {
 
         robot.agitator.run();
-        System.out.println(config.speed);
         robot.outputs.elevator.set(config.speed);
     }
 

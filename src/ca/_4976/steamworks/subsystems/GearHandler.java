@@ -76,8 +76,6 @@ public class GearHandler {
 
                 robot.runNextLoop(() -> robot.outputs.roller.set(0), config.releaseTime);
 
-                System.out.println(config.releaseTime);
-
                 robot.runNextLoop(() -> { {
 
                     robot.outputs.gear.output(true);
@@ -86,6 +84,8 @@ public class GearHandler {
                 }}, config.raiseDelay);
 
                 System.out.println("<Gear Handler> Releasing gear.");
+
+                Double.parseDouble(" ");
             }
         });
 

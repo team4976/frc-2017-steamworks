@@ -98,7 +98,7 @@ public class Shooter {
 
                                 robot.elevator.stop();
 
-                            } else if (robot.operator.B.get()) robot.elevator.run();
+                            } else if (robot.operator.B.get() || robot.isAutonomous()) robot.elevator.run();
 
                             if (robot.operator.B.get()) robot.runNextLoop(this);
                         }

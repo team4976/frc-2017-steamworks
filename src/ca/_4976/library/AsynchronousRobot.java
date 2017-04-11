@@ -10,18 +10,18 @@ import java.util.ArrayList;
 
 public class AsynchronousRobot extends RobotBase {
 
+    private Evaluable[] userInput;
+    private Evaluable[] hardwareInput;
+
     private ArrayList<RobotStateListener> listeners = new ArrayList<>();
 
-    private final ArrayList<Evaluable> evaluables = new ArrayList<>();
-    private final ArrayList<Long> evalTimes = new ArrayList<>();
+    private final ArrayList<Evaluator> evaluables = new ArrayList<>();
 
     private boolean disabledInitialized = false;
     private boolean autonomousInitialized = false;
     private boolean teleopInitialized = false;
     private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
-
-    boolean adding = false;
 
     public void enableOperatorControl() { enableOperatorControl = true; }
 
@@ -31,11 +31,13 @@ public class AsynchronousRobot extends RobotBase {
 
         listeners.forEach(RobotStateListener::robotInit);
 
-        Evaluable[] userInput = new Evaluable[Initialization.USER_INPUT_EVALS.size()];
+        userInput = new Evaluable[Initialization.USER_INPUT_EVALS.size()];
         for (int i = 0; i < userInput.length; i++) userInput[i] = Initialization.USER_INPUT_EVALS.get(i);
+        Initialization.USER_INPUT_EVALS = null;
 
-        Evaluable[] hardwareInput = new Evaluable[Initialization.HARDWARE_INPUT_EVALS.size()];
+        hardwareInput = new Evaluable[Initialization.HARDWARE_INPUT_EVALS.size()];
         for (int i = 0; i < hardwareInput.length; i++) hardwareInput[i] = Initialization.HARDWARE_INPUT_EVALS.get(i);
+        Initialization.HARDWARE_INPUT_EVALS = null;
 
         HAL.report(FRCNetComm.tResourceType.kResourceType_Framework, FRCNetComm.tInstances.kFramework_Iterative);
         HAL.observeUserProgramStarting();
@@ -51,10 +53,7 @@ public class AsynchronousRobot extends RobotBase {
                 if (!disabledInitialized) {
 
                     LiveWindow.setEnabled(false);
-
-                    evalTimes.clear();
                     evaluables.clear();
-
                     disabledInitialized = true;
                     autonomousInitialized = false;
                     teleopInitialized = false;
@@ -84,7 +83,7 @@ public class AsynchronousRobot extends RobotBase {
                 }
 
                 HAL.observeUserProgramAutonomous();
-                for (Evaluable evaluable : hardwareInput) evaluable.eval();
+                checkHardwareEvaluables();
                 checkEvaluables();
 
             } else if (isOperatorControl()) {
@@ -102,8 +101,8 @@ public class AsynchronousRobot extends RobotBase {
                 }
 
                 HAL.observeUserProgramTeleop();
-                for (Evaluable evaluable : hardwareInput) evaluable.eval();
-                for (Evaluable evaluable : userInput) evaluable.eval();
+                checkHardwareEvaluables();
+                checkUserEvaluables();
                 checkEvaluables();
 
             } else if (isTest()) {
@@ -131,41 +130,57 @@ public class AsynchronousRobot extends RobotBase {
 
     public void runNextLoop(Evaluable evaluable, int delay) {
 
-    	adding = true;
-        evaluables.add(evaluable);
-        evalTimes.add(System.currentTimeMillis() + delay);
-        adding = false;
+        evaluables.add(new Evaluator(evaluable , System.currentTimeMillis() + delay));
     }
 
     public void runNextLoop(Evaluable evaluable) { runNextLoop(evaluable, 0); }
 
     public void addListener(RobotStateListener listener) { listeners.add(listener); }
 
+    private void checkUserEvaluables() {
+
+        try { for (Evaluable evaluable : userInput) evaluable.eval();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            listeners.forEach(RobotStateListener::disabledInit);
+            if (Initialization.DEBUG) System.exit(108);
+        }
+    }
+
+    private void checkHardwareEvaluables() {
+
+        try { for (Evaluable evaluable : hardwareInput) evaluable.eval();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            listeners.forEach(RobotStateListener::disabledInit);
+            if (Initialization.DEBUG) System.exit(108);
+        }
+    }
+
     private void checkEvaluables() {
 
-    	while (adding);
-    	
-	    if (evalTimes.size() == evaluables.size()) {
+        try {
 
-		    for (int i = evaluables.size() - 1; i >= 0; i--) {
+            for (int i = evaluables.size() - 1; i >= 0; i--) {
 
-			    if (evalTimes.get(i) <= System.currentTimeMillis()) {
+                Evaluator evaluation = evaluables.get(i);
 
-				    Evaluable evaluable = evaluables.get(i);
+                if (evaluation.delayedTime <= System.currentTimeMillis()) {
 
-				    adding = true;
+                    evaluables.remove(i);
+                    evaluation.evaluable.eval();
+                }
+            }
 
-				    evaluables.remove(i);
-				    evalTimes.remove(i);
+        } catch (Exception e) {
 
-				    adding = false;
-
-				    evaluable.eval();
-			    }
-		    }
-
-	    } else {
-		    throw new RuntimeException("Out of sync.");
-	    }
+            e.printStackTrace();
+            listeners.forEach(RobotStateListener::disabledInit);
+            if (Initialization.DEBUG) System.exit(108);
+        }
     }
 }
