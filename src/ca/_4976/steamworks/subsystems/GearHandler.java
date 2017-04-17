@@ -86,6 +86,8 @@ public class GearHandler {
                 }}, config.raiseDelay);
 
                 System.out.println("<Gear Handler> Releasing gear.");
+
+                Double.parseDouble(" ");
             }
         });
 
