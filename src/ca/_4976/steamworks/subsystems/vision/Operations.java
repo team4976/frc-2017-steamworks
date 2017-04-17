@@ -78,4 +78,8 @@ public class Operations {
 			output.add(contour);
 		}
 	}
+
+	public static void cvAdd(Mat src1, Mat src2, Mat out) {
+		Core.add(src1, src2, out);
+	}
 }

@@ -1,8 +1,11 @@
 package ca._4976.steamworks.subsystems.vision;
 
 import ca._4976.data.Contour;
+import ca._4976.library.Initialization;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;
+import edu.wpi.cscore.CvSource;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
@@ -21,6 +24,12 @@ public class GoalTracker extends Tracker implements PIDSource {
 	private double error = 0;
 	private Robot robot;
 
+	private CvSource erode;
+	private CvSource dilate;
+	private CvSource hsvThreshold;
+	private CvSource findContours;
+	private CvSource filterContours;
+
 	GoalTracker(Robot robot) {
 
 		this.robot = robot;
@@ -35,6 +44,15 @@ public class GoalTracker extends Tracker implements PIDSource {
 				this,
 				robot.outputs.pivot
 		);
+
+		if (Initialization.DEBUG) {
+
+			erode = CameraServer.getInstance().putVideo("Erode", 160, 120);
+			dilate = CameraServer.getInstance().putVideo("Dilate", 160, 120);
+			hsvThreshold = CameraServer.getInstance().putVideo("HSV", 160, 120);
+			findContours = CameraServer.getInstance().putVideo("Contours", 160, 120);
+			filterContours = CameraServer.getInstance().putVideo("Filtered Contours", 160, 120);
+		}
 	}
 
 	@Override protected void process(Contour contour) {
@@ -105,6 +123,22 @@ public class GoalTracker extends Tracker implements PIDSource {
 				config.filterContoursMinRatio,
 				config.filterContoursMaxRatio,
 				output);
+
+		if (Initialization.DEBUG) {
+
+			dilate.putFrame(cvDilateOutput);
+			erode.putFrame(cvErodeOutput);
+			hsvThreshold.putFrame(hsvThresholdOutput);
+
+			Mat foundContours = new Mat();
+
+			findContoursOutput.forEach(matOfPoint -> Operations.cvAdd(foundContours, matOfPoint, foundContours));
+			findContours.putFrame(foundContours);
+
+			Mat filteredContours = new Mat();
+			output.forEach(matOfPoint -> Operations.cvAdd(filteredContours, matOfPoint, filteredContours));
+			filterContours.putFrame(filteredContours);
+		}
 	}
 
 	@Override public void setPIDSourceType(PIDSourceType pidSource) { }
