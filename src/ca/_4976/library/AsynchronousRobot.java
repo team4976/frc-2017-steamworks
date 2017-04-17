@@ -1,6 +1,8 @@
 package ca._4976.library;
 
 import ca._4976.library.listeners.RobotStateListener;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
@@ -39,7 +41,7 @@ public class AsynchronousRobot extends RobotBase {
 
         LiveWindow.setEnabled(false);
 
-        while (m_ds.getBatteryVoltage() > 4) {
+        while (!Thread.interrupted()) {
 
             m_ds.waitForData();
 

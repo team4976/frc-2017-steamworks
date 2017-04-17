@@ -7,6 +7,7 @@ import ca._4976.steamworks.io.Inputs;
 import ca._4976.steamworks.io.Outputs;
 import ca._4976.steamworks.subsystems.*;
 import ca._4976.steamworks.subsystems.profiler.MotionControl;
+import ca._4976.steamworks.subsystems.vision.Vision;
 
 public class Robot extends AsynchronousRobot {
 
@@ -27,8 +28,6 @@ public class Robot extends AsynchronousRobot {
     public final DriveTrain drive = new DriveTrain(this);
     public final Agitator agitator = new Agitator(this);
     public final Elevator elevator = new Elevator(this);
-    public final VisionTracker vision = new VisionTracker(this);
-
-    public final Test test = new Test(this);
+    public final Vision vision = new Vision(this);
 }
 

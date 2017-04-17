@@ -22,7 +22,7 @@ public class Shooter {
 
             @Override public void disabledInit() {
 
-                robot.vision.halt();
+                robot.vision.goal.stop();
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
             }
@@ -36,7 +36,7 @@ public class Shooter {
 
                     System.out.println("<Shooter> Priming the Shooter.");
 
-                    if (robot.status.pivotEncoderFunctional) robot.vision.run();
+                    if (robot.status.pivotEncoderFunctional) robot.vision.goal.start();
 
                     else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
 
@@ -45,17 +45,17 @@ public class Shooter {
                     robot.outputs.shooterSlave.set(12);
                     robot.outputs.shooter.set(config.targetSpeed[selection]);
 
-                } else if (!robot.vision.isRunning() && robot.status.pivotEncoderFunctional) {
+                } else if (!robot.vision.goal.isRunning() && robot.status.pivotEncoderFunctional) {
 
                     System.out.println("<Shooter> Looking for target.");
 
-                    robot.vision.run();
+                    robot.vision.goal.start();
 
                 } else {
 
                     System.out.println("<Shooter> Stopping the Shooter.");
 
-                    robot.vision.halt();
+                    robot.vision.goal.stop();
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                     robot.outputs.shooter.set(0);
                 }
@@ -115,7 +115,7 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                robot.vision.halt();
+                robot.vision.goal.stop();
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
 
@@ -193,7 +193,22 @@ public class Shooter {
         }.eval());
     }
 
-    public double getTargetRPM() { return config.targetSpeed[selection]; }
+    public double getTargetRPM() {
+
+        if (robot.outputs.shooter.getControlMode() == CANTalon.TalonControlMode.Speed) {
+
+            return robot.outputs.shooter.getSetpoint();
+
+        } else return config.targetSpeed[selection];
+    }
+
+    public void correctRPM(double correction) {
+
+        if (robot.outputs.shooter.get() != 0) {
+
+            robot.outputs.shooter.set(config.targetSpeed[selection] + correction);
+        }
+    }
 
     public void setTargetRPM(double speed) {
 
@@ -220,7 +235,7 @@ public class Shooter {
 
         robot.outputs.hood.set(config.hoodPosition[selection]);
 
-        if (!robot.vision.isRunning() && robot.outputs.pivot.get() == 0) {
+        if (!robot.vision.goal.isRunning() && robot.outputs.pivot.get() == 0) {
 
             robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
             robot.outputs.pivot.set(config.turretPosition[selection]);
