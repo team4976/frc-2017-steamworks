@@ -28,7 +28,5 @@ public class Robot extends AsynchronousRobot {
     public final Agitator agitator = new Agitator(this);
     public final Elevator elevator = new Elevator(this);
     public final VisionTracker vision = new VisionTracker(this);
-
-    public final Test test = new Test(this);
 }
 
