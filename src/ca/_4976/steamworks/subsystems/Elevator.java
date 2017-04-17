@@ -3,6 +3,7 @@ package ca._4976.steamworks.subsystems;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import com.ctre.CANTalon;
 
 public class Elevator {
 
@@ -30,18 +31,20 @@ public class Elevator {
     private void runReversed() {
 
         robot.agitator.runReversed();
-        robot.outputs.elevator.set(-config.speed);
+        robot.outputs.elevator.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+        robot.outputs.elevator.set(-0.5);
     }
 
     void run() {
 
         robot.agitator.run();
-        System.out.println(config.speed);
+        robot.outputs.elevator.changeControlMode(CANTalon.TalonControlMode.Speed);
         robot.outputs.elevator.set(config.speed);
     }
 
     void stop() {
 
+        robot.outputs.elevator.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         robot.outputs.elevator.set(0);
         robot.agitator.stop();
     }

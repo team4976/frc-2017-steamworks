@@ -12,16 +12,13 @@ public class AsynchronousRobot extends RobotBase {
 
     private ArrayList<RobotStateListener> listeners = new ArrayList<>();
 
-    private final ArrayList<Evaluable> evaluables = new ArrayList<>();
-    private final ArrayList<Long> evalTimes = new ArrayList<>();
+    private final ArrayList<Evaluator> evaluators = new ArrayList<>();
 
     private boolean disabledInitialized = false;
     private boolean autonomousInitialized = false;
     private boolean teleopInitialized = false;
     private boolean testInitialized = false;
     private boolean enableOperatorControl = false;
-
-    boolean adding = false;
 
     public void enableOperatorControl() { enableOperatorControl = true; }
 
@@ -52,8 +49,7 @@ public class AsynchronousRobot extends RobotBase {
 
                     LiveWindow.setEnabled(false);
 
-                    evalTimes.clear();
-                    evaluables.clear();
+                    evaluators.clear();
 
                     disabledInitialized = true;
                     autonomousInitialized = false;
@@ -131,41 +127,29 @@ public class AsynchronousRobot extends RobotBase {
 
     public void runNextLoop(Evaluable evaluable, int delay) {
 
-    	adding = true;
-        evaluables.add(evaluable);
-        evalTimes.add(System.currentTimeMillis() + delay);
-        adding = false;
+        evaluators.add(new Evaluator(evaluable, System.currentTimeMillis() + delay));
     }
 
     public void runNextLoop(Evaluable evaluable) { runNextLoop(evaluable, 0); }
 
     public void addListener(RobotStateListener listener) { listeners.add(listener); }
 
+    public void runAtLoop(Evaluable evaluable, long time) {
+
+        evaluators.add(new Evaluator(evaluable, time));
+    }
+
     private void checkEvaluables() {
 
-    	while (adding);
-    	
-	    if (evalTimes.size() == evaluables.size()) {
+        for (int i = evaluators.size() - 1; i >= 0; i--) {
 
-		    for (int i = evaluables.size() - 1; i >= 0; i--) {
+            Evaluator evaluator = evaluators.get(i);
 
-			    if (evalTimes.get(i) <= System.currentTimeMillis()) {
+            if (evaluator.delay <= System.currentTimeMillis()) {
 
-				    Evaluable evaluable = evaluables.get(i);
-
-				    adding = true;
-
-				    evaluables.remove(i);
-				    evalTimes.remove(i);
-
-				    adding = false;
-
-				    evaluable.eval();
-			    }
-		    }
-
-	    } else {
-		    throw new RuntimeException("Out of sync.");
-	    }
+                evaluators.remove(i);
+                evaluator.evaluable.eval();
+            }
+        }
     }
 }

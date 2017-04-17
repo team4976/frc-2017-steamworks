@@ -1,8 +1,10 @@
 package ca._4976.steamworks.subsystems.profiler;
 
+import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;
 import com.ctre.CANTalon;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,9 +26,24 @@ public class Playback implements Runnable {
     private double leftError;
     private double rightError;
 
-    Playback(Robot robot) { this.robot = robot; }
+    boolean disable = false;
+
+    Playback(Robot robot) {
+
+        this.robot = robot;
+
+        robot.addListener(new RobotStateListener() {
+
+            @Override
+            public void disabledInit() {
+                disable = false;
+            }
+        });
+    }
 
     @Override public void run() {
+
+        final long startTime = System.currentTimeMillis();
 
         long lastTickTime = System.nanoTime();
         double avgTickRate = 0;
@@ -40,13 +57,6 @@ public class Playback implements Runnable {
 
         Config.Motion config = robot.config.motion;
 
-        synchronized (this) { new Thread(() -> {
-
-            for (int i = 0; i < profile.Evaluable.length; i++)
-                robot.runNextLoop(profile.Evaluable[i], profile.Evaluate_Timing[i]);
-
-        }).start(); }
-
         robot.shooter.setTargetRPM(profile.Shooter_RPM);
         robot.outputs.hood.set(profile.Hood_Position);
         robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
@@ -58,8 +68,6 @@ public class Playback implements Runnable {
 
         try {
 
-            long startTime = System.currentTimeMillis() / 1000;
-
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
             Date date = new Date();
 
@@ -67,12 +75,41 @@ public class Playback implements Runnable {
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
 
+            writer.write("Profile " + NetworkTable.getTable("Motion Control").getString("load_table", "") + ",,,,,Actual");
+            writer.newLine();
+            writer.write("Left Output,Right Output,Left Position,Right Position,Left Velocity,Right Velocity,");
+            writer.write("Left Output,Right Output,Left Position,Right Position,Left Error,Right Error");
+            writer.newLine();
+            writer.flush();
+
             while (robot.isEnabled() && tickCount < profile.Moments.length) {
 
                 if (System.nanoTime() - lastTickTime >= config.tickTime) {
 
-                    if (profile.Disable_Motion > 0)
-                        if (System.currentTimeMillis() / 1000 - startTime >= profile.Disable_Motion) break;
+                    for (int i = 0; i < profile.Evaluable.length; i++) {
+
+                        final int tick = i;
+
+                        if (profile.Evaluate_Timing[i] == tickCount)
+
+                            synchronized (this) {
+                                new Thread(() -> profile.Evaluable[tick].eval()).start();
+                            }
+                    }
+
+                    if (disable) {
+
+                        tickCount++;
+                        avgTickRate += System.nanoTime() - lastTickTime;
+
+                        robot.outputs.driveLeftFront.set(0);
+                        robot.outputs.driveLeftRear.set(0);
+
+                        robot.outputs.driveRightFront.set(0);
+                        robot.outputs.driveRightRear.set(0);
+
+                        continue;
+                    }
 
                     lastTickTime = System.nanoTime();
 
@@ -95,15 +132,15 @@ public class Playback implements Runnable {
 
                     double leftDrive =
                             moment.leftDriveOutput
-                                    + (config.kP * leftError)
-                                    + (config.kI * leftIntegral)
-                                    + (config.kD * leftDerivative);
+                                    + (config.kP * leftError);
+                                    //+ (config.kI * leftIntegral)
+                                    //+ (config.kD * leftDerivative);
 
                     double rightDrive =
                             moment.rightDriveOutput
-                                    + (config.kP * rightError)
-                                    + (config.kI * rightIntegral)
-                                    + (config.kD * rightDerivative);
+                                    + (config.kP * rightError);
+                                    //+ (config.kI * rightIntegral)
+                                    //+ (config.kD * rightDerivative);
 
                     robot.outputs.driveLeftFront.set(leftDrive);
                     robot.outputs.driveLeftRear.set(leftDrive);
@@ -122,19 +159,20 @@ public class Playback implements Runnable {
                     writer.write(moment.rightEncoderVelocity + ",");
                     writer.write(leftDrive + ",");
                     writer.write(rightDrive + ",");
-                    writer.write(leftError * config.kP + ",");
-                    writer.write(rightError * config.kP + ",");
-                    writer.write(leftIntegral * config.kI + ",");
-                    writer.write(rightIntegral * config.kI + ",");
-                    writer.write(leftDerivative * config.kD + ",");
-                    writer.write(rightDerivative * config.kD + "");
+                    writer.write(actualLeftPosition + ",");
+                    writer.write(actualRightPosition + ",");
+                    writer.write(leftError + ",");
+                    writer.write(rightError + "");
 
                     writer.newLine();
+                    writer.flush();
 
                     tickCount++;
                     avgTickRate += System.nanoTime() - lastTickTime;
                 }
             }
+
+            writer.close();
 
         } catch (IOException e) { e.printStackTrace(); }
 
@@ -148,6 +186,8 @@ public class Playback implements Runnable {
         System.out.printf("<Motion Control> Average tick time: %.3fms", avgTickRate / 1e+6);
         System.out.printf(" %.1f%%%n", (avgTickRate / config.tickTime) * 100);
     }
+
+    void disable() { disable = true; }
 
     void setProfile(Profile profile) { this.profile = profile; }
 

@@ -25,12 +25,9 @@ public class MotionControl {
 
         fake.addListener(new ButtonListener() {
             @Override
-            public void rising() {
+            public void pressed() {
 
-                robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
-                robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
-                robot.outputs.shooterSlave.set(12);
-                robot.outputs.shooter.set(robot.shooter.getTargetRPM());
+                playback.disable();
             }
         });
 
@@ -131,7 +128,7 @@ public class MotionControl {
 
         if (!load.equals("")) {
 
-            System.out.println("Getting autonomous: " + load);
+            System.out.println("<Motion Control> Getting autonomous: " + load);
             playback.setProfile(saveFile.load(load));
         }
 

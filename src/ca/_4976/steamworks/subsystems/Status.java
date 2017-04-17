@@ -42,11 +42,12 @@ public class Status {
 
             table.putBoolean("Vision Running (BOOLEAN)", robot.vision.isRunning());
             table.putNumber("Vision Error (PIXELS)", robot.vision.getError());
-//            table.putBoolean("Vision Light (BOOLEAN)", robot.outputs.visionLight.get());
+            table.putBoolean("Vision Light (BOOLEAN)", robot.outputs.visionLight.get());
 
             table.putBoolean("Winch Arm Extended (BOOLEAN)", robot.outputs.arch.isExtended());
             table.putBoolean("Intake Extended (BOOLEAN)", robot.outputs.gear.isExtended());
 
+            table.putNumber("Elevator Speed (UNITS)", robot.outputs.elevator.getSpeed());
 
             CANTalon.FeedbackDeviceStatus status = robot.outputs.pivot.isSensorPresent(CANTalon.FeedbackDevice.CtreMagEncoder_Absolute);
 

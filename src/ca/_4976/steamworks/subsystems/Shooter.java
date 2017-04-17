@@ -23,7 +23,6 @@ public class Shooter {
             @Override public void disabledInit() {
 
                 robot.vision.halt();
-                robot.outputs.visionLight.set(false);
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
             }
@@ -36,8 +35,6 @@ public class Shooter {
                 if (robot.outputs.shooter.get() == 0) {
 
                     System.out.println("<Shooter> Priming the Shooter.");
-
-                    robot.outputs.visionLight.set(true);
 
                     if (robot.status.pivotEncoderFunctional) robot.vision.run();
 
@@ -52,7 +49,6 @@ public class Shooter {
 
                     System.out.println("<Shooter> Looking for target.");
 
-                    robot.outputs.visionLight.set(true);
                     robot.vision.run();
 
                 } else {
@@ -60,7 +56,6 @@ public class Shooter {
                     System.out.println("<Shooter> Stopping the Shooter.");
 
                     robot.vision.halt();
-                    robot.outputs.visionLight.set(false);
                     robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                     robot.outputs.shooter.set(0);
                 }
@@ -98,7 +93,7 @@ public class Shooter {
 
                                 robot.elevator.stop();
 
-                            } else if (robot.operator.B.get()) robot.elevator.run();
+                            } else if (robot.operator.B.get() || robot.isAutonomous()) robot.elevator.run();
 
                             if (robot.operator.B.get()) robot.runNextLoop(this);
                         }
@@ -121,7 +116,6 @@ public class Shooter {
             @Override public void pressed() {
 
                 robot.vision.halt();
-                robot.outputs.visionLight.set(false);
                 robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
                 robot.outputs.shooter.set(0);
 
@@ -179,6 +173,8 @@ public class Shooter {
 
                     config.targetSpeed[selection] = config.targetSpeed[selection] - value * 2;
 
+                    if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(config.targetSpeed[selection]);
+
                     robot.runNextLoop(this);
 
                 } else if (Math.abs(value) <= 0.4) {
@@ -186,6 +182,8 @@ public class Shooter {
                     if (config.targetSpeed[selection] != ((int) config.targetSpeed[selection] / 10) * 10) {
 
                         config.targetSpeed[selection] = ((int) config.targetSpeed[selection] / 10) * 10;
+
+                        if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(config.targetSpeed[selection]);
 
                         System.out.println("<Shooter> Target Speed Set to: " + config.targetSpeed[selection]);
                     }
@@ -213,6 +211,10 @@ public class Shooter {
     }
 
     void configNotify() {
+
+        System.out.println("<Shooter>\t");
+        System.out.println("\t\tTarget RPM:\t" + getTargetRPM());
+        System.out.println("\t\tHood Position:\t" + robot.outputs.hood.get());
 
         if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(config.targetSpeed[selection]);
 

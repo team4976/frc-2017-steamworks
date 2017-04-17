@@ -1,6 +1,7 @@
 package ca._4976.library.outputs;
 
 import ca._4976.library.AsynchronousRobot;
+import ca._4976.library.listeners.RobotStateListener;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 public class TimedSolenoid {
@@ -16,6 +17,13 @@ public class TimedSolenoid {
 
         this.module = module;
         solenoid = new DoubleSolenoid(pcmId, outPin, inPin);
+
+        module.addListener(new RobotStateListener() {
+
+            @Override public void disabledInit() {
+               solenoid.set(DoubleSolenoid.Value.kOff);
+            }
+        });
     }
 
     public void output(boolean extended) {

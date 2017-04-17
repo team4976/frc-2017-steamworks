@@ -65,7 +65,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 		table.putNumber("Setpoint", table.getNumber("Setpoint", 80));
 
-		pidController = new PIDController(0.007, 0, 0.004, this, robot.outputs.pivot);
+		pidController = new PIDController(config.kP, config.kI, config.kD, this, robot.outputs.pivot);
 		pidController.setSetpoint(table.getNumber("Setpoint", 80));
 	}
 
@@ -87,10 +87,12 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 	}
 
 	public void track() {
-		if (filterContoursOutput != null) {
-			if (!filterContoursOutput.isEmpty()) {
-				filterContoursOutput.sort(Comparator.comparingDouble(Imgproc::contourArea));
-				goal = new Goal(filterContoursOutput.get(filterContoursOutput.size() - 1));
+
+
+		if (findContoursOutput != null) {
+			if (!findContoursOutput.isEmpty()) {
+				findContoursOutput.sort(Comparator.comparingDouble(Imgproc::contourArea));
+				goal = new Goal(findContoursOutput.get(findContoursOutput.size() - 1));
 			} else {
 				goal = null;
 			}
@@ -124,6 +126,7 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public double pidGet() {
+
 		if (goal != null) {
 
 			return goal.centerX;
@@ -173,62 +176,61 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 
 	@Override
 	public void process(Mat source0) {
-		if (true) {
-			// Step CV_dilate0:
+		// Step CV_dilate0:
 
-			Mat cvDilateSrc = source0;
-			Mat cvDilateKernel = new Mat();
-			Point cvDilateAnchor = new Point(-1, -1);
-			double cvDilateIterations = 1.0;
-			int cvDilateBordertype = Core.BORDER_CONSTANT;
-			Scalar cvDilateBordervalue = new Scalar(-1);
-			cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, cvDilateOutput);
+		Mat cvDilateSrc = source0;
+		Mat cvDilateKernel = new Mat();
+		Point cvDilateAnchor = new Point(-1, -1);
+		double cvDilateIterations = 1.0;
+		int cvDilateBordertype = Core.BORDER_CONSTANT;
+		Scalar cvDilateBordervalue = new Scalar(-1);
+		cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, cvDilateOutput);
 
-			// Step CV_erode0:
-			Mat cvErodeSrc = cvDilateOutput;
-			Mat cvErodeKernel = new Mat();
-			Point cvErodeAnchor = new Point(-1, -1);
-			double cvErodeIterations = 1.0;
-			int cvErodeBordertype = Core.BORDER_CONSTANT;
-			Scalar cvErodeBordervalue = new Scalar(-1);
-			cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
+		// Step CV_erode0:
+		Mat cvErodeSrc = cvDilateOutput;
+		Mat cvErodeKernel = new Mat();
+		Point cvErodeAnchor = new Point(-1, -1);
+		double cvErodeIterations = 1.0;
+		int cvErodeBordertype = Core.BORDER_CONSTANT;
+		Scalar cvErodeBordervalue = new Scalar(-1);
+		cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, cvErodeOutput);
 
-			// Step HSV_Threshold0:
-			Mat hsvThresholdInput = cvErodeOutput;
+		// Step HSV_Threshold0:
+		Mat hsvThresholdInput = cvErodeOutput;
 
-			hsvThreshold(
-					hsvThresholdInput,
-					config.hsvThresholdHue,
-					config.hsvThresholdSaturation,
-					config.hsvThresholdValue,
-					hsvThresholdOutput
-			);
+		hsvThreshold(
+				hsvThresholdInput,
+				config.hsvThresholdHue,
+				config.hsvThresholdSaturation,
+				config.hsvThresholdValue,
+				hsvThresholdOutput
+		);
 
-			stream.putFrame(hsvThresholdOutput);
+		stream.putFrame(hsvThresholdOutput);
 
-			// Step Find_Contours0:
-			Mat findContoursInput = hsvThresholdOutput;
-			boolean findContoursExternalOnly = false;
-			findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
+		// Step Find_Contours0:
+		Mat findContoursInput = hsvThresholdOutput;
+		boolean findContoursExternalOnly = false;
+		findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
-			// Step Filter_Contours0:
-			ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+		// Step Filter_Contours0:
+		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
 
-			filterContours(
-					filterContoursContours,
-					config.filterContoursMinArea,
-					config.filterContoursMinPerimeter,
-					config.filterContoursMinWidth,
-					config.filterContoursMaxWidth,
-					config.filterContoursMinHeight,
-					config.filterContoursMaxHeight,
-					config.filterContoursSolidity,
-					config.filterContoursMaxVertices,
-					config.filterContoursMinVertices,
-					config.filterContoursMinRatio,
-					config.filterContoursMaxRatio,
-					filterContoursOutput);
-		}
+		filterContours(
+				filterContoursContours,
+				config.filterContoursMinArea,
+				config.filterContoursMinPerimeter,
+				config.filterContoursMinWidth,
+				config.filterContoursMaxWidth,
+				config.filterContoursMinHeight,
+				config.filterContoursMaxHeight,
+				config.filterContoursSolidity,
+				config.filterContoursMaxVertices,
+				config.filterContoursMinVertices,
+				config.filterContoursMinRatio,
+				config.filterContoursMaxRatio,
+				filterContoursOutput);
+
 	}
 
 	private void cvDilate(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
@@ -308,5 +310,6 @@ public class VisionTracker implements VisionPipeline, PIDSource {
 		camera.setResolution((int) config.resolution[0], (int) config.resolution[1]);
 
 		pidController.setSetpoint(80 + config.offset);
+		pidController.setPID(config.kP, config.kI, config.kD);
 	}
 }

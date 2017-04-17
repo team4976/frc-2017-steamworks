@@ -97,7 +97,12 @@ public class Config {
 
         private NetworkTable table = NetworkTable.getTable("Vision");
         private ITable filter = table.getSubTable("Filter Contours");
+        private ITable pid = table.getSubTable("PID");
         private ITable threshold = table.getSubTable("HSV Threshold");
+
+        double kP = getKey(pid, "P", 0.007);
+        double kI = getKey(pid, "I", 0.0);
+        double kD = getKey(pid, "D", 0.004);
 
         double offset = getKey(table, "Offset (PIXELS)", 20);
 
@@ -137,6 +142,14 @@ public class Config {
 
 
         private Vision() {
+
+        	pid.addSubTableListener((source, key, value, isNew) -> {
+
+		        kP = getKey(pid, "P", 0.007);
+		        kI = getKey(pid, "I", 0.0);
+		        kD = getKey(pid, "D", 0.004);
+		        robot.vision.configNotify();
+	        });
 
         	filter.addTableListener(((source, key, value, isNew) -> {
 
@@ -179,7 +192,7 @@ public class Config {
 
         private NetworkTable table = NetworkTable.getTable("Elevator");
 
-        double speed = getKey(table, "Speed (%)", 1);
+        double speed = getKey(table, "Speed (%)", 1.0);
 
         private Elevator() {
 
@@ -187,7 +200,7 @@ public class Config {
 
                 System.out.println("<Elevator> " + key + " was changed: " + value);
 
-                speed = getKey(table, "Speed (%)", 1);
+                speed = getKey(table, "Speed (%)", 1.0);
 
                 robot.elevator.configNotify();
             });
@@ -271,28 +284,28 @@ public class Config {
 
 	    private NetworkTable table = NetworkTable.getTable("Gear Handler");
 
-	    double intakeSpeed = getKey(table, "Intake Speed (&)", 0.5);
-	    double releaseSpeed = getKey(table, "Release Speed (&)", 0.5);
-	    double gripSpeed = getKey(table, "Grip Speed (&)", 0.1);
+	    double intakeSpeed = getKey(table, "Intake Speed (%)", 0.5);
+	    double releaseSpeed = getKey(table, "Release Speed (%)", 0.5);
+	    double gripSpeed = getKey(table, "Grip Speed (%)", 0.1);
 
 	    int gripDelay = getKey(table, "Grip Delay (MILLIS)", 1000);
 	    int raiseDelay = getKey(table, "Raise Delay (MILLIS)", 1500);
 
 	    int releaseTime = getKey(table, "Release Time (MILLIS)", 300);
 
-	    double currentLimit = getKey(table, "Current Threshold (AMPS)", 5.0);
+	    double currentLimit = getKey(table, "Current Threshold (AMPS)", 15.0);
 
 	    private GearHandler() {
 
 			table.addTableListener(((source, key, value, isNew) -> {
 
-				double intakeSpeed = getKey(table, "Intake Speed (&)", 0.5);
-				double releaseSpeed = getKey(table, "Release Speed (&)", 0.5);
-				double gripSpeed = getKey(table, "Grip Speed (&)", 0.1);
-				int gripDelay = getKey(table, "Grip Delay (MILLIS)", 1000);
-				int raiseDelay = getKey(table, "Raise Delay (MILLIS)", 1500);
-				int releaseTime = getKey(table, "Release Time (MILLIS)", 300);
-				double currentLimit = getKey(table, "Current Threshold (AMPS)", 5.0);
+				intakeSpeed = getKey(table, "Intake Speed (%)", 0.5);
+				releaseSpeed = getKey(table, "Release Speed (%)", 0.5);
+				gripSpeed = getKey(table, "Grip Speed (%)", 0.1);
+				gripDelay = getKey(table, "Grip Delay (MILLIS)", 1000);
+				raiseDelay = getKey(table, "Raise Delay (MILLIS)", 1500);
+				releaseTime = getKey(table, "Release Time (MILLIS)", 300);
+				currentLimit = getKey(table, "Current Threshold (AMPS)", 15.0);
 
 			}));
 	    }

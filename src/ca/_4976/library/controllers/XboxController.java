@@ -2,6 +2,7 @@ package ca._4976.library.controllers;
 
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 
@@ -48,7 +49,10 @@ public class XboxController {
 
         private Axis(int id) { super(id); }
 
-        @Override public double get() { return stick.getRawAxis(id); }
+        @Override public double get() {
+
+            return stick.getRawAxis(id);
+        }
     }
 
     private class Button extends Boolean {

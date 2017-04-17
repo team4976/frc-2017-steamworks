@@ -53,6 +53,8 @@ class Record implements Runnable {
         int tickCount = 0;
 
         moments.clear();
+        evaluables.clear();
+        times.clear();
 
         robot.inputs.driveLeft.reset();
         robot.inputs.driveRight.reset();

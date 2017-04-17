@@ -17,7 +17,7 @@ public class Outputs {
     public VictorSP driveRightFront;
     public VictorSP driveRightRear;
 
-    public Taloon elevator;
+    public CANTalon elevator;
     public CANTalon roller;
     public CANTalon winchMaster;
     public CANTalon shooter;
@@ -40,7 +40,10 @@ public class Outputs {
         driveRightFront = Initialization.DEBUG ? new NetworkVictorSP(2) : new VictorSP(2);
         driveRightRear = Initialization.DEBUG ? new NetworkVictorSP(3) : new VictorSP(3);
 
-        elevator = new Taloon(5);
+        elevator = Initialization.DEBUG ? new NetworkTalonSRX(14) : new CANTalon(14);
+        elevator.reverseOutput(true);
+        elevator.reverseSensor(false);
+        elevator.changeControlMode(CANTalon.TalonControlMode.Speed);
 
         shooter = Initialization.DEBUG ? new NetworkTalonSRX(12) : new CANTalon(12);
         shooter.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
@@ -80,13 +83,6 @@ public class Outputs {
             Solenoid underGlow = new Solenoid(20, 5);
 
             @Override public void robotInit() {
-
-                //System.out.println(pivot.getEncPosition());
-
-
-
-                shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
-                shooter.set(0);
 
                 underGlow.set(true);
             }

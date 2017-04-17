@@ -28,6 +28,8 @@ public class GearHandler {
 
             @Override public void eval() {
 
+                System.out.println(config.currentLimit);
+
                 if (robot.outputs.roller.getOutputCurrent() > config.currentLimit) {
 
                     state = 2;
@@ -75,8 +77,6 @@ public class GearHandler {
                 robot.outputs.gear.output(false);
 
                 robot.runNextLoop(() -> robot.outputs.roller.set(0), config.releaseTime);
-
-                System.out.println(config.releaseTime);
 
                 robot.runNextLoop(() -> { {
 

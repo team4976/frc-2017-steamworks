@@ -1,6 +1,7 @@
 package ca._4976.steamworks.subsystems;
 
 import ca._4976.library.listeners.ButtonListener;
+import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 
 public class Winch {
@@ -13,6 +14,11 @@ public class Winch {
     	this.robot = robot;
         config = robot.config.winch;
 
+        robot.addListener(new RobotStateListener() {
+
+            @Override public void disabledInit() { robot.outputs.winchMaster.set(0); }
+        });
+
         robot.driver.Y.addListener(new ButtonListener() {
 
             @Override public void rising() { robot.outputs.winchMaster.set(-1); }
@@ -22,7 +28,7 @@ public class Winch {
 
         robot.driver.RB.addListener(new ButtonListener() {
 
-            @Override public void rising() { robot.outputs.winchMaster.set(0.2); }
+            @Override public void rising() { robot.outputs.winchMaster.set(0.5); }
 
             @Override public void falling() { robot.outputs.winchMaster.set(0); }
         });
@@ -34,5 +40,5 @@ public class Winch {
         });
     }
 
-    public void extend() { robot.outputs.arch.output(true); }
+    public void extend() { robot.outputs.arch.output(false); }
 }
