@@ -3,6 +3,7 @@ package ca._4976.library;
 import ca._4976.library.listeners.RobotStateListener;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.hal.FRCNetComm;
 import edu.wpi.first.wpilibj.hal.HAL;
@@ -41,89 +42,104 @@ public class AsynchronousRobot extends RobotBase {
 
         LiveWindow.setEnabled(false);
 
-        while (!Thread.interrupted()) {
+        while (!Thread.interrupted() && !m_ds.isFMSAttached()) { robotUpdate(userInput, hardwareInput); }
 
-            m_ds.waitForData();
+        while (!Thread.interrupted() && m_ds.isFMSAttached()) {
 
-            if (isDisabled()) {
+            try {
 
-                if (!disabledInitialized) {
+                robotUpdate(userInput, hardwareInput);
 
-                    LiveWindow.setEnabled(false);
+            } catch (Exception e) {
 
-                    evaluators.clear();
-
-                    disabledInitialized = true;
-                    autonomousInitialized = false;
-                    teleopInitialized = false;
-                    testInitialized = false;
-                    enableOperatorControl = false;
-
-                    listeners.forEach(RobotStateListener::disabledInit);
-                }
-
-                HAL.observeUserProgramDisabled();
-                checkEvaluables();
-
-            } else if (isAutonomous()) {
-
-                if (!autonomousInitialized) {
-
-                    LiveWindow.setEnabled(false);
-
-                    disabledInitialized = false;
-                    autonomousInitialized = true;
-                    teleopInitialized = false;
-                    testInitialized = false;
-
-                    listeners.forEach(RobotStateListener::autonomousInit);
-
-                    System.out.println("<Robot> Initialized Autonomous");
-                }
-
-                HAL.observeUserProgramAutonomous();
-                for (Evaluable evaluable : hardwareInput) evaluable.eval();
-                checkEvaluables();
-
-            } else if (isOperatorControl()) {
-
-                if (!teleopInitialized) {
-
-                    LiveWindow.setEnabled(false);
-
-                    disabledInitialized = false;
-                    autonomousInitialized = false;
-                    teleopInitialized = true;
-                    testInitialized = false;
-
-                    listeners.forEach(RobotStateListener::teleopInit);
-                }
-
-                HAL.observeUserProgramTeleop();
-                for (Evaluable evaluable : hardwareInput) evaluable.eval();
-                for (Evaluable evaluable : userInput) evaluable.eval();
-                checkEvaluables();
-
-            } else if (isTest()) {
-
-                if (!testInitialized) {
-
-                    LiveWindow.setEnabled(true);
-
-                    disabledInitialized = false;
-                    autonomousInitialized = false;
-                    teleopInitialized = false;
-                    testInitialized = true;
-
-                    listeners.forEach(RobotStateListener::testInit);
-                }
-
-                HAL.observeUserProgramTest();
-
-                if (enableOperatorControl) for (Evaluable evaluable : hardwareInput) evaluable.eval();
-                for (Evaluable evaluable : hardwareInput) evaluable.eval();
-                checkEvaluables();
+                listeners.forEach(RobotStateListener::disabledInit);
+                DriverStation.reportError(e.getMessage(), true);
             }
+        }
+    }
+
+    private void robotUpdate(Evaluable[] userInput, Evaluable[] hardwareInput) {
+
+        m_ds.waitForData();
+
+        if (isDisabled()) {
+
+            if (!disabledInitialized) {
+
+                LiveWindow.setEnabled(false);
+
+                evaluators.clear();
+
+                disabledInitialized = true;
+                autonomousInitialized = false;
+                teleopInitialized = false;
+                testInitialized = false;
+                enableOperatorControl = false;
+
+                listeners.forEach(RobotStateListener::disabledInit);
+            }
+
+            HAL.observeUserProgramDisabled();
+            checkEvaluables();
+
+        } else if (isAutonomous()) {
+
+            if (!autonomousInitialized) {
+
+                LiveWindow.setEnabled(false);
+
+                disabledInitialized = false;
+                autonomousInitialized = true;
+                teleopInitialized = false;
+                testInitialized = false;
+
+                listeners.forEach(RobotStateListener::autonomousInit);
+
+                System.out.println("<Robot> Initialized Autonomous");
+            }
+
+            HAL.observeUserProgramAutonomous();
+            for (Evaluable evaluable : hardwareInput) evaluable.eval();
+            checkEvaluables();
+
+        } else if (isOperatorControl()) {
+
+            if (!teleopInitialized) {
+
+                LiveWindow.setEnabled(false);
+
+                disabledInitialized = false;
+                autonomousInitialized = false;
+                teleopInitialized = true;
+                testInitialized = false;
+
+                listeners.forEach(RobotStateListener::teleopInit);
+            }
+
+            HAL.observeUserProgramTeleop();
+            for (Evaluable evaluable : hardwareInput) evaluable.eval();
+            for (Evaluable evaluable : userInput) evaluable.eval();
+            checkEvaluables();
+
+        } else if (isTest()) {
+
+            if (!testInitialized) {
+
+                LiveWindow.setEnabled(true);
+
+                disabledInitialized = false;
+                autonomousInitialized = false;
+                teleopInitialized = false;
+                testInitialized = true;
+
+                listeners.forEach(RobotStateListener::testInit);
+            }
+
+            HAL.observeUserProgramTest();
+
+            if (enableOperatorControl) for (Evaluable evaluable : hardwareInput) evaluable.eval();
+            for (Evaluable evaluable : hardwareInput) evaluable.eval();
+            checkEvaluables();
         }
     }
 
