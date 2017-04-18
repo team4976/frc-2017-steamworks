@@ -4,6 +4,7 @@ import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import ca._4976.steamworks.subsystems.profiler.Record;
 
 public class GearHandler {
 
@@ -108,6 +109,9 @@ public class GearHandler {
 
                 if (robot.isTest()) {
 
+                    Record record = new Record(robot);
+                    record.reset();
+                    record.start();
                     robot.vision.goal.start();
                 }
             }

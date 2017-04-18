@@ -4,8 +4,17 @@ import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
+import ca._4976.library.listeners.StringListener;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MotionControl {
 
@@ -18,13 +27,13 @@ public class MotionControl {
 
         playback = new Playback(robot);
 
-        Recorder record = new Recorder(robot);
+        Record record = new Record(robot);
 
         Boolean disable = new Boolean(0) { @Override public boolean get() { return false; }};
 
         disable.addListener(new ButtonListener() {
 
-            @Override public void pressed() { playback.disable(); }
+            @Override public void pressed() { playback.disableDrive(); }
         });
 
         Boolean[] buttons = new Boolean[] {
@@ -59,7 +68,7 @@ public class MotionControl {
                 robot.operator.DOWN_RIGHT
         };
 
-        record.changeControllerRecordPresets(buttons);
+        record.setButtons(buttons);
         saveFile.changeControllerRecordPresets(buttons);
 
         Double[] axes = new Double[] {
@@ -74,7 +83,7 @@ public class MotionControl {
                 robot.operator.RT,
         };
 
-        record.changeControllerRecordPresets(axes);
+        record.setAxes(axes);
         saveFile.changeControllerRecordPresets(axes);
 
         table.putString("load_table", "");
@@ -103,17 +112,72 @@ public class MotionControl {
                 robot.inputs.driveLeft.reset();
                 robot.inputs.driveRight.reset();
 
-                synchronized (this) { new Thread(playback).start(); }
+                synchronized (this) {
+
+                    try {
+
+                        playback.setListener(new StringListener() {
+
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                            Date date = new Date();
+
+                            String file = "/home/lvuser/motion/logs/Log " + dateFormat.format(date) + ".csv";
+
+                            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
+
+                            @Override public void append(String string) {
+
+                                try {
+
+                                    writer.write(string);
+                                    writer.newLine();
+                                    writer.flush();
+
+                                } catch (IOException e) { e.printStackTrace(); }
+                            }
+                        });
+
+                    } catch (Exception e) { e.printStackTrace(); }
+
+                    playback.reset();
+                    playback.start();
+                }
             }
 
             @Override public void testInit() {
 
-                robot.inputs.driveLeft.reset();
-                robot.inputs.driveRight.reset();
+                synchronized (this) {
 
-                robot.enableOperatorControl();
+                    try {
 
-                synchronized (this) { new Thread(record).start(); }
+                        playback.setListener(new StringListener() {
+
+                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                            Date date = new Date();
+
+                            String file = "/home/lvuser/motion/Record " + dateFormat.format(date) + ".csv";
+
+                            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
+
+                            @Override public void append(String string) {
+
+                                try {
+
+                                    writer.write(string);
+                                    writer.newLine();
+                                    writer.flush();
+
+                                } catch (IOException e) { e.printStackTrace(); }
+                            }
+                        });
+
+                    } catch (Exception e) { e.printStackTrace(); }
+
+                    robot.enableOperatorControl();
+
+                    record.reset();
+                    record.start();
+                }
             }
         });
     }

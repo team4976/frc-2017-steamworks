@@ -2,202 +2,167 @@ package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.data.Moment;
 import ca._4976.data.Profile;
-import ca._4976.library.listeners.RobotStateListener;
+import ca._4976.library.Evaluator;
+import ca._4976.library.listeners.StringListener;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;
 import com.ctre.CANTalon;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class Playback implements Runnable {
 
-    private final Robot robot;
+	private StringListener listener = string -> {};
+	private Profile profile = Profile.newEmpty();
+	private boolean run = false;
+	private boolean paused = false;
+	private boolean disable = false;
+	private Robot robot;
+	private Config.Motion config;
+	private double leftError = 0, rightError = 0;
+	private double leftTarget = 0, rightTarget = 0;
 
-    private Profile profile = null;
+	public Playback(Robot robot) {
 
-    private double leftTarget;
-    private double rightTarget;
+		config = robot.config.motion;
+		this.robot = robot;
+	}
 
-    private double leftError;
-    private double rightError;
+	public void setProfile(Profile profile) { this.profile = profile; }
 
-    boolean disable = false;
+	public void reset() {
 
-    Playback(Robot robot) {
+		robot.inputs.driveLeft.reset();
+		robot.inputs.driveRight.reset();
+	}
 
-        this.robot = robot;
+	public synchronized void start( ) {
 
-        robot.addListener(new RobotStateListener() {
+		run = true;
+		new Thread(this).start();
+	}
 
-            @Override
-            public void disabledInit() {
-                disable = false;
-            }
-        });
-    }
+	public void stop() { run = false; }
 
-    @Override public void run() {
+	public void setPaused(boolean paused) { this.paused = paused; }
 
-        final long startTime = System.currentTimeMillis();
+	public void setListener(StringListener listener) { this.listener = listener; }
 
-        long lastTickTime = System.nanoTime();
-        double avgTickRate = 0;
-        int tickCount = 0;
+	public void disableDrive() { disable = true; }
 
-        double leftIntegral = 0;
-        double rightIntegral = 0;
+	public synchronized double getLeftTarget() { return leftTarget; }
 
-        double lastLeftError = 0;
-        double lastRightError = 0;
+	public synchronized double getRightTarget() { return rightTarget; }
 
-        Config.Motion config = robot.config.motion;
+	public synchronized double getLeftError() { return leftError; }
 
-        robot.shooter.setTargetRPM(profile.Shooter_RPM);
-        robot.outputs.hood.set(profile.Hood_Position);
-        robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
-        robot.outputs.pivot.set(profile.Turret_Position);
+	public synchronized double getRightError() { return rightError; }
 
-        if (profile.Run_Shooter) robot.shooter.run();
+	@Override public void run() {
 
-        if (profile.Extend_Winch_Arm) robot.winch.extend();
+		long lastTick = System.nanoTime();
+		long time = 0;
 
-        try {
+		StringBuilder builder = new StringBuilder();
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            Date date = new Date();
+		robot.shooter.setTargetRPM(profile.Shooter_RPM);
+		robot.outputs.hood.set(profile.Hood_Position);
+		robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
+		robot.outputs.pivot.set(profile.Turret_Position);
 
-            String file = "/home/lvuser/motion/logs/Log " + dateFormat.format(date) + ".csv";
+		if (profile.Run_Shooter) robot.shooter.run();
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
+		if (profile.Extend_Winch_Arm) robot.outputs.arch.output(true);
 
-            writer.write("Profile " + NetworkTable.getTable("Motion Control").getString("load_table", "") + ",,,,,Actual");
-            writer.newLine();
-            writer.write("Left Output,Right Output,Left Position,Right Position,Left Velocity,Right Velocity,");
-            writer.write("Left Output,Right Output,Left Position,Right Position,Left Error,Right Error");
-            writer.newLine();
-            writer.flush();
+		double leftIntegral = 0, rightIntegral = 0;
+		double lastLeftError = 0, lastRightError = 0;
 
-            while (robot.isEnabled() && tickCount < profile.Moments.length) {
+		for (int i = 0; robot.isEnabled() && run && i < profile.Moments.length;) {
 
-                if (System.nanoTime() - lastTickTime >= config.tickTime) {
+			if (System.nanoTime() - lastTick >= config.tickTime && !paused) {
 
-                    for (int i = 0; i < profile.Evaluators.length; i++) {
+				lastTick = System.nanoTime();
 
-                        final int tick = i;
+				for (Evaluator evaluator : profile.Evaluators) {
 
-                        if (profile.Evaluators[i].delay == tickCount)
+					if (evaluator.delay == i)
+						synchronized (this) { new Thread(evaluator.evaluable::eval); }
+				}
 
-                            synchronized (this) {
-                                new Thread(() -> profile.Evaluators[tick].evaluable.eval()).start();
-                            }
-                    }
+				if (disable) {
 
-                    if (disable) {
+					robot.outputs.driveLeftFront.set(0);
+					robot.outputs.driveLeftRear.set(0);
 
-                        tickCount++;
-                        avgTickRate += System.nanoTime() - lastTickTime;
+					robot.outputs.driveRightFront.set(0);
+					robot.outputs.driveRightRear.set(0);
 
-                        robot.outputs.driveLeftFront.set(0);
-                        robot.outputs.driveLeftRear.set(0);
+				} else {
 
-                        robot.outputs.driveRightFront.set(0);
-                        robot.outputs.driveRightRear.set(0);
+					Moment moment = profile.Moments[i];
 
-                        continue;
-                    }
+					leftError = robot.inputs.driveLeft.getDistance() - moment.leftEncoderPosition;
+					rightError = robot.inputs.driveRight.getDistance() - moment.rightEncoderPosition;
 
-                    lastTickTime = System.nanoTime();
+					leftTarget = moment.leftEncoderPosition;
+					rightTarget = moment.rightEncoderPosition;
 
-                    Moment moment = profile.Moments[tickCount];
+					leftIntegral += leftError * config.tickTime;
+					rightIntegral += rightError * config.tickTime;
 
-                    leftTarget = moment.leftEncoderPosition;
-                    rightTarget = moment.rightEncoderPosition;
+					double leftDerivative = (leftError - lastLeftError) / config.tickTime - moment.leftEncoderVelocity;
+					double rightDerivative = (rightError - lastRightError) / config.tickTime - moment.rightEncoderVelocity;
 
-                    double actualLeftPosition = robot.inputs.driveLeft.getDistance();
-                    double actualRightPosition = robot.inputs.driveRight.getDistance();
+					double leftDrive =
+							moment.leftDriveOutput
+									+ (config.kP * leftError)
+									+ (config.kI * leftIntegral)
+									+ (config.kD * leftDerivative);
 
-                    leftError = actualLeftPosition - moment.leftEncoderPosition;
-                    rightError = actualRightPosition - moment.rightEncoderPosition;
+					double rightDrive =
+							moment.rightDriveOutput
+									+ (config.kP * rightError)
+									+ (config.kI * rightIntegral)
+									+ (config.kD * rightDerivative);
 
-                    leftIntegral += leftError * config.tickTime;
-                    rightIntegral += rightError * config.tickTime;
+					robot.outputs.driveLeftFront.set(leftDrive);
+					robot.outputs.driveLeftRear.set(leftDrive);
 
-                    double leftDerivative = (leftError - lastLeftError) / config.tickTime - moment.leftEncoderVelocity;
-                    double rightDerivative = (rightError - lastRightError) / config.tickTime - moment.rightEncoderVelocity;
+					robot.outputs.driveRightFront.set(rightDrive);
+					robot.outputs.driveRightRear.set(rightDrive);
 
-                    double leftDrive =
-                            moment.leftDriveOutput
-                                    + (config.kP * leftError);
-                                    //+ (config.kI * leftIntegral)
-                                    //+ (config.kD * leftDerivative);
+					lastLeftError = leftError;
+					lastRightError = rightError;
 
-                    double rightDrive =
-                            moment.rightDriveOutput
-                                    + (config.kP * rightError);
-                                    //+ (config.kI * rightIntegral)
-                                    //+ (config.kD * rightDerivative);
+					builder.append(moment.leftDriveOutput);
+					builder.append(',');
+					builder.append(moment.rightDriveOutput);
+					builder.append(',');
+					builder.append(moment.leftEncoderPosition);
+					builder.append(',');
+					builder.append(moment.rightEncoderPosition);
+					builder.append(',');
+					builder.append(robot.inputs.driveLeft.getDistance());
+					builder.append(',');
+					builder.append(robot.inputs.driveRight.getDistance());
+					builder.append(',');
+					builder.append(leftError);
+					builder.append(',');
+					builder.append(rightError);
+					builder.append(',');
+				}
 
-                    robot.outputs.driveLeftFront.set(leftDrive);
-                    robot.outputs.driveLeftRear.set(leftDrive);
+				listener.append(builder.toString());
+				time += System.nanoTime() - lastTick;
+				i++;
+			}
+		}
 
-                    robot.outputs.driveRightFront.set(rightDrive);
-                    robot.outputs.driveRightRear.set(rightDrive);
+		robot.outputs.driveLeftFront.set(0);
+		robot.outputs.driveLeftRear.set(0);
+		robot.outputs.driveRightFront.set(0);
+		robot.outputs.driveRightRear.set(0);
 
-                    lastLeftError = leftError;
-                    lastRightError = rightError;
-
-                    writer.write(moment.leftDriveOutput + ",");
-                    writer.write(moment.rightDriveOutput + ",");
-                    writer.write(moment.leftEncoderPosition + ",");
-                    writer.write(moment.rightEncoderPosition + ",");
-                    writer.write(moment.leftEncoderVelocity + ",");
-                    writer.write(moment.rightEncoderVelocity + ",");
-                    writer.write(leftDrive + ",");
-                    writer.write(rightDrive + ",");
-                    writer.write(actualLeftPosition + ",");
-                    writer.write(actualRightPosition + ",");
-                    writer.write(leftError + ",");
-                    writer.write(rightError + "");
-
-                    writer.newLine();
-                    writer.flush();
-
-                    tickCount++;
-                    avgTickRate += System.nanoTime() - lastTickTime;
-                }
-            }
-
-            writer.close();
-
-        } catch (IOException e) { e.printStackTrace(); }
-
-        robot.outputs.driveLeftFront.set(0);
-        robot.outputs.driveLeftRear.set(0);
-
-        robot.outputs.driveRightFront.set(0);
-        robot.outputs.driveRightRear.set(0);
-
-        avgTickRate /= tickCount;
-        System.out.printf("<Motion Control> Average tick time: %.3fms", avgTickRate / 1e+6);
-        System.out.printf(" %.1f%%%n", (avgTickRate / config.tickTime) * 100);
-    }
-
-    void disable() { disable = true; }
-
-    void setProfile(Profile profile) { this.profile = profile; }
-
-    public synchronized double getLeftTarget() { return leftTarget; }
-
-    public synchronized double getRightTarget() { return rightTarget; }
-
-    public synchronized double getLeftError() { return leftError; }
-
-    public synchronized double getRightError() { return rightError; }
+		time /= profile.Moments.length;
+		System.out.printf("<Motion Control> Average tick time: %.3fms", time / 1e+6);
+		System.out.printf(" %.1f%%%n", (time / config.tickTime) * 100);
+	}
 }

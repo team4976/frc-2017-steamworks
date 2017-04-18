@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 public class Record implements Runnable {
 
-	private ArrayList<StringListener> listeners = new ArrayList<>();
+	private StringListener listener = string -> { };
 	private Profile profile = Profile.newEmpty();
 	private Config.Motion config;
 	private boolean run = false;
@@ -30,7 +30,7 @@ public class Record implements Runnable {
 		config = robot.config.motion;
 	}
 
-	public void addListener(StringListener listener) { listeners.add(listener); }
+	public void setListener(StringListener listener) { this.listener = listener; }
 
 	public Profile getProfile() { return profile; }
 
@@ -40,7 +40,7 @@ public class Record implements Runnable {
 		robot.inputs.driveRight.reset();
 	}
 
-	public synchronized void start() {
+	public synchronized void start( ) {
 
 		run = true;
 		new Thread(this).start();
@@ -152,18 +152,18 @@ public class Record implements Runnable {
 					axesStates[x] = axes[x].getState();
 				}
 
-				listeners.forEach(stringListener -> stringListener.append(builder.toString()));
+				listener.append(builder.toString());
 
 				time += System.nanoTime() - lastTick;
 				i++;
 			}
 		}
 
-		Moment[] staticMoments = new Moment[moments.size()];
-		Evaluator[] staticEvals = new Evaluator[evaluators.size()];
+		Moment[] f_Moments = new Moment[moments.size()];
+		Evaluator[] f_Evaluators = new Evaluator[evaluators.size()];
 
-		for (int i = 0; i < staticMoments.length; i++) staticMoments[i] = moments.get(i);
-		for (int i = 0; i < staticEvals.length; i++) staticEvals[i] = evaluators.get(i);
+		for (int i = 0; i < f_Moments.length; i++) f_Moments[i] = moments.get(i);
+		for (int i = 0; i < f_Evaluators.length; i++) f_Evaluators[i] = evaluators.get(i);
 
 		profile = new Profile(
 				speed,
@@ -172,11 +172,11 @@ public class Record implements Runnable {
 				config.runShooterAtStart,
 				config.extendWinchArmAtStart,
 				0.0,
-				staticMoments,
-				staticEvals
+				f_Moments,
+				f_Evaluators
 		);
 
-		time /= staticMoments.length;
+		time /= f_Moments.length;
 		System.out.printf("<Motion Control> Average tick time: %.3fms", time / 1e+6);
 		System.out.printf(" %.1f%%%n", (time / config.tickTime) * 100);
 	}
