@@ -137,7 +137,7 @@ public class GearHandler {
 
         record.stop();
         try { Thread.sleep(2); } catch (InterruptedException e) { e.printStackTrace(); }
-        playback.setProfile(record.getProfile());
+        playback.setProfile(record.getProfile().getReversed());
         playback.setListener(robot.profiler.getLog());
         playback.start();
 
