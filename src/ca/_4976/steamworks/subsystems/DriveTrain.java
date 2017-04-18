@@ -7,12 +7,11 @@ public class DriveTrain {
 
     private Robot robot;
     private Config.Drive config;
-    
     private double[] targetVelocity = new double[] {0, 0};
     private double[] setVelocity = new double[] {0, 0};
-
     private double leftTrigger = 0;
     private double rightTrigger = 0;
+    private double limiter = 1.0;
 
     public DriveTrain(Robot robot) {
 
@@ -68,14 +67,34 @@ public class DriveTrain {
 
     private void output() {
 
-        robot.outputs.driveLeftFront.set(setVelocity[1] + setVelocity[0]);
-        robot.outputs.driveLeftRear.set(setVelocity[1] + setVelocity[0]);
-        robot.outputs.driveRightFront.set(setVelocity[1] - setVelocity[0]);
-        robot.outputs.driveRightRear.set(setVelocity[1] - setVelocity[0]);
+        final double sticktion = 0.1;
+
+        double left = (setVelocity[1] * limiter + setVelocity[0] * limiter);
+        left = (left > 0 ? sticktion : -sticktion) + left * (1 - sticktion);
+
+        double right = (setVelocity[1] * limiter - setVelocity[0] * limiter);
+        right = (right > 0 ? sticktion : -sticktion) + right * (1 - sticktion);
+
+        if (setVelocity[0] != 0 || setVelocity[1] != 0) {
+
+            robot.outputs.driveLeftFront.set(left);
+            robot.outputs.driveLeftRear.set(left);
+            robot.outputs.driveRightFront.set(right);
+            robot.outputs.driveRightRear.set(right);
+
+        } else {
+
+            robot.outputs.driveLeftFront.set(0);
+            robot.outputs.driveLeftRear.set(0);
+            robot.outputs.driveRightFront.set(0);
+            robot.outputs.driveRightRear.set(0);
+        }
+
     }
 
-    public void update() {
+    void setLimiter(double limit) { limiter = limit; }
 
+    public void update() {
 
         double diffX = targetVelocity[0] - setVelocity[0];
         double diffY = targetVelocity[1] - setVelocity[1];

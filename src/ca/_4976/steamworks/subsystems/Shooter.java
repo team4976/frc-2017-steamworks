@@ -63,6 +63,8 @@ public class Shooter {
 
             @Override public void held() {
 
+                robot.drive.setLimiter(.5);
+
                 System.out.println("<Shooter> Priming the Shooter.");
 
                 if (robot.status.pivotEncoderFunctional) {
@@ -79,7 +81,11 @@ public class Shooter {
                 robot.outputs.shooter.set(config.targetSpeed[selection]);
             }
 
-            @Override public void falling() { robot.vision.goal.enableCorrectRPM(false); }
+            @Override public void falling() {
+
+                robot.vision.goal.enableCorrectRPM(false);
+                robot.drive.setLimiter(1);
+            }
         });
 
         robot.operator.B.addListener(new ButtonListener() {
@@ -156,7 +162,7 @@ public class Shooter {
 
             @Override public void pressed() {
 
-                selection  = 1;
+                selection = 1;
                 configNotify();
             }
         });
