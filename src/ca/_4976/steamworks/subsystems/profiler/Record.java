@@ -50,6 +50,10 @@ public class Record implements Runnable {
 
 	public void setPaused(boolean paused) { this.paused = paused; }
 
+	public boolean isPaused() { return paused; }
+
+	public boolean isRunning() { return run; }
+
 	public void setButtons(Boolean[] buttons) { this.buttons = buttons; }
 
 	public void setAxes(Double[] axes) { this.axes = axes; }
@@ -78,6 +82,8 @@ public class Record implements Runnable {
 		for (int i = 0; robot.isEnabled() && run;) {
 
 			if (System.nanoTime() - lastTick >= config.tickTime && !paused) {
+
+				robot.drive.update();
 
 				lastTick = System.nanoTime();
 
@@ -158,6 +164,8 @@ public class Record implements Runnable {
 				i++;
 			}
 		}
+
+		run = false;
 
 		Moment[] f_Moments = new Moment[moments.size()];
 		Evaluator[] f_Evaluators = new Evaluator[evaluators.size()];

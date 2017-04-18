@@ -44,6 +44,10 @@ public class Playback implements Runnable {
 
 	public void setPaused(boolean paused) { this.paused = paused; }
 
+	public boolean isPaused() { return paused; }
+
+	public boolean isRunning() { return run; }
+
 	public void setListener(StringListener listener) { this.listener = listener; }
 
 	public void disableDrive() { disable = true; }
@@ -70,7 +74,7 @@ public class Playback implements Runnable {
 
 		if (profile.Run_Shooter) robot.shooter.run();
 
-		if (profile.Extend_Winch_Arm) robot.outputs.arch.output(true);
+		if (profile.Extend_Winch_Arm) robot.winch.extend();
 
 		double leftIntegral = 0, rightIntegral = 0;
 		double lastLeftError = 0, lastRightError = 0;
@@ -155,6 +159,8 @@ public class Playback implements Runnable {
 				i++;
 			}
 		}
+
+		run = false;
 
 		robot.outputs.driveLeftFront.set(0);
 		robot.outputs.driveLeftRear.set(0);

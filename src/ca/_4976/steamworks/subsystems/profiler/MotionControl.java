@@ -19,15 +19,16 @@ import java.util.Date;
 public class MotionControl {
 
     public Playback playback;
+    public Record record;
     private SaveFile saveFile = new SaveFile();
-
     private NetworkTable table = NetworkTable.getTable("Motion Control");
+	private Log log = null;
 
     public MotionControl(Robot robot) {
 
         playback = new Playback(robot);
 
-        Record record = new Record(robot);
+	    record = new Record(robot);
 
         Boolean disable = new Boolean(0) { @Override public boolean get() { return false; }};
 
@@ -116,26 +117,9 @@ public class MotionControl {
 
                     try {
 
-                        playback.setListener(new StringListener() {
+                    	log = new Log();
 
-                            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-                            Date date = new Date();
-
-                            String file = "/home/lvuser/motion/logs/Log " + dateFormat.format(date) + ".csv";
-
-                            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
-
-                            @Override public void append(String string) {
-
-                                try {
-
-                                    writer.write(string);
-                                    writer.newLine();
-                                    writer.flush();
-
-                                } catch (IOException e) { e.printStackTrace(); }
-                            }
-                        });
+                        playback.setListener(log);
 
                     } catch (Exception e) { e.printStackTrace(); }
 
@@ -182,6 +166,8 @@ public class MotionControl {
         });
     }
 
+    public Log getLog() { return log; }
+
     public void loadTable() {
 
         String load = table.getString("load_table", "");
@@ -194,4 +180,39 @@ public class MotionControl {
 
         else System.out.println("<Motion Control> Successfully set autonomous to last record.");
     }
+
+    private class Log implements StringListener {
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+		Date date = new Date();
+		String file = "/home/lvuser/motion/logs/Log " + dateFormat.format(date) + ".csv";
+		BufferedWriter writer;
+
+	    Log() {
+
+			try {
+
+				writer = new BufferedWriter(new FileWriter(new File(file)));
+
+				writer.write("Profile " + NetworkTable.getTable("Motion Control ").getString("load_table", "") + ",,,Actual,");
+				writer.newLine();
+				writer.write("Left Output,Right Output,Left Position,Right Position,");
+				writer.write("Left Output,Right Output,Left Position,Right Position,Left Error,Right Error");
+				writer.newLine();
+				writer.flush();
+
+			} catch (IOException e) { e.printStackTrace(); }
+		}
+
+		@Override public void append(String string) {
+
+			try {
+
+				writer.write(string);
+				writer.newLine();
+				writer.flush();
+
+			} catch (IOException e) { e.printStackTrace(); }
+		}
+	}
 }
