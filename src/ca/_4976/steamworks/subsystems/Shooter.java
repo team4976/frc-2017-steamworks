@@ -60,6 +60,26 @@ public class Shooter {
                     robot.outputs.shooter.set(0);
                 }
             }
+
+            @Override public void held() {
+
+                System.out.println("<Shooter> Priming the Shooter.");
+
+                if (robot.status.pivotEncoderFunctional) {
+
+                    robot.vision.goal.enableCorrectRPM(true);
+                    robot.vision.goal.start();
+                }
+
+                else System.out.println("<Shooter> Turret encoder not functional automated functions disabled.");
+
+                robot.outputs.shooter.changeControlMode(CANTalon.TalonControlMode.Speed);
+                robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
+                robot.outputs.shooterSlave.set(12);
+                robot.outputs.shooter.set(config.targetSpeed[selection]);
+            }
+
+            @Override public void falling() { robot.vision.goal.enableCorrectRPM(false); }
         });
 
         robot.operator.B.addListener(new ButtonListener() {

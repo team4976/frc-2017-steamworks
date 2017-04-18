@@ -28,6 +28,7 @@ public class GoalTracker extends Tracker implements PIDSource {
 	private CvSource hsvThreshold;
 	private CvSource findContours;
 	private CvSource filterContours;
+	private boolean correct = false;
 
 	GoalTracker(Robot robot) {
 
@@ -60,12 +61,15 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 			goalOffset = contour.position.center.x;
 
-			double rpmCorrection = ((contour.position.center.y - 53) / 7) * 60;
+			if (correct) {
 
-			if (Math.abs(rpmCorrection) < 100 && robot.isAutonomous())
-				robot.shooter.correctRPM(rpmCorrection);
+				double rpmCorrection = ((contour.position.center.y - 53) / 7) * 60;
 
-			else robot.shooter.correctRPM(0);
+				if (Math.abs(rpmCorrection) < 100 && robot.isAutonomous())
+					robot.shooter.correctRPM(rpmCorrection);
+
+				else robot.shooter.correctRPM(0);
+			}
 
 			if (!pid.isEnabled()) pid.enable();
 
@@ -139,6 +143,8 @@ public class GoalTracker extends Tracker implements PIDSource {
 			filterContours.putFrame(filteredContours);
 		}
 	}
+
+	public void enableCorrectRPM(boolean enable) { correct = enable; }
 
 	public double getError() { return pid.getError(); }
 
