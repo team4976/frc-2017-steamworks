@@ -1,11 +1,11 @@
 package ca._4976.library;
 
-class Evaluator {
+public class Evaluator {
 
-	final Evaluable evaluable;
-	final long delay;
+	public final Evaluable evaluable;
+	public final long delay;
 
-	Evaluator(Evaluable evaluable, long delay) {
+	public Evaluator(Evaluable evaluable, long delay) {
 
 		this.evaluable = evaluable;
 		this.delay = delay;

@@ -5,7 +5,6 @@ import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
-import com.ctre.CANTalon;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class MotionControl {
@@ -19,7 +18,7 @@ public class MotionControl {
 
         playback = new Playback(robot);
 
-        Record record = new Record(robot);
+        Recorder record = new Recorder(robot);
 
         Boolean disable = new Boolean(0) { @Override public boolean get() { return false; }};
 

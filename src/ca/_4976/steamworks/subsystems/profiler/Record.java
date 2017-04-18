@@ -2,205 +2,182 @@ package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.data.Moment;
 import ca._4976.data.Profile;
-import ca._4976.library.Evaluable;
+import ca._4976.library.Evaluator;
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.DoubleListener;
+import ca._4976.library.listeners.StringListener;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
-class Record implements Runnable {
+public class Record implements Runnable {
 
-    private Robot robot;
+	private ArrayList<StringListener> listeners = new ArrayList<>();
+	private Profile profile = Profile.newEmpty();
+	private Config.Motion config;
+	private boolean run = false;
+	private boolean paused = false;
+	private Robot robot;
+	private Boolean[] buttons = new Boolean[0];
+	private Double[] axes = new Double[0];
 
-    private Config.Motion config;
+	public Record(Robot robot) {
 
-    private Boolean[] buttons = new Boolean[0];
-    private Double[] axes = new Double[0];
+		this.robot = robot;
+		config = robot.config.motion;
+	}
 
-    Record(Robot robot) {
+	public void addListener(StringListener listener) { listeners.add(listener); }
 
-        this.robot = robot;
-        config = robot.config.motion;
-    }
+	public Profile getProfile() { return profile; }
 
-    private Profile profile = null;
+	public void reset() {
 
-    private ArrayList<Moment> moments = new ArrayList<>();
-    private ArrayList<Evaluable> evaluables = new ArrayList<>();
-    private ArrayList<Long> times = new ArrayList<>();
+		robot.inputs.driveLeft.reset();
+		robot.inputs.driveRight.reset();
+	}
 
-    private String append = "";
-    private long start;
+	public synchronized void start() {
 
-    @Override public void run() {
+		run = true;
+		new Thread(this).start();
+	}
 
-        System.out.println("Starting Recording.");
+	public void stop() { run = false; }
 
-        start = System.currentTimeMillis();
-        long lastTickTime = System.nanoTime();
-        double avgTickRate = 0;
-        int tickCount = 0;
+	public void setPaused(boolean paused) { this.paused = paused; }
 
-        moments.clear();
-        evaluables.clear();
-        times.clear();
+	public void setButtons(Boolean[] buttons) { this.buttons = buttons; }
 
-        robot.inputs.driveLeft.reset();
-        robot.inputs.driveRight.reset();
+	public void setAxes(Double[] axes) { this.axes = axes; }
 
-        robot.runNextLoop(new Evaluable() {
+	@Override public void run() {
 
-            @Override public void eval() {
+		ArrayList<Moment> moments = new ArrayList<>();
+		ArrayList<Evaluator> evaluators = new ArrayList<>();
+		long lastTick = System.nanoTime();
+		long time = 0;
+		Boolean.EVAL_STATE[] buttonStates = new Boolean.EVAL_STATE[buttons.length];
+		for (int x = 0; x < buttonStates.length; x++) buttonStates[x] = Boolean.EVAL_STATE.NON;
+		Double.EVAL_STATE[] axesStates = new Double.EVAL_STATE[axes.length];
+		for (int x = 0; x < axesStates.length; x++) axesStates[x] = Double.EVAL_STATE.NON;
 
-                for (int i = 0; i < buttons.length; i++) {
+		StringBuilder builder = new StringBuilder();
 
-                    if (buttons[i].getState() != Boolean.EVAL_STATE.NON) {
+		double speed = robot.shooter.getTargetRPM();
+		double angle = robot.outputs.hood.get();
+		double position = robot.outputs.pivot.getPosition();
 
-                        ButtonListener[] listeners = buttons[i].getListeners();
+		if (config.runShooterAtStart) robot.shooter.run();
 
-                        for (ButtonListener listener : listeners) {
+		if (config.extendWinchArmAtStart) robot.outputs.arch.output(true);
 
-                            switch (buttons[i].getState()) {
+		for (int i = 0; robot.isEnabled() && run;) {
 
-                                case FALLING:
-                                    append += "," + i + ".FALLING";
-                                    evaluables.add(listener::falling);
-                                    break;
-                                case RISING:
-                                    append += "," + i + ".RISING";
-                                    evaluables.add(listener::rising);
-                                    break;
-                                case PRESSED:
-                                    append += "," + i + ".PRESSED";
-                                    evaluables.add(listener::pressed);
-                                    break;
-                                case HELD:
-                                    append += "," + i + ".HELD";
-                                    evaluables.add(listener::held);
-                                    break;
-                            }
+			if (System.nanoTime() - lastTick >= config.tickTime && !paused) {
 
-                            times.add(System.currentTimeMillis() - start);
-                        }
-                    }
-                }
+				lastTick = System.nanoTime();
 
-                for (int i = 0; i < axes.length; i++) {
+				Moment moment = new Moment(
+						robot.outputs.driveLeftFront.get(),
+						robot.outputs.driveRightFront.get(),
+						robot.inputs.driveLeft.getDistance(),
+						robot.inputs.driveRight.getDistance(),
+						robot.inputs.driveLeft.getRate(),
+						robot.inputs.driveRight.getRate()
+				);
 
-                    if (axes[i].getState() != Double.EVAL_STATE.NON) {
+				moments.add(moment);
 
-                        DoubleListener[] listeners = axes[i].getListeners();
+				builder.append(moment.leftDriveOutput);
+				builder.append(',');
+				builder.append(moment.rightDriveOutput);
+				builder.append(',');
+				builder.append(moment.leftEncoderPosition);
+				builder.append(',');
+				builder.append(moment.rightEncoderPosition);
+				builder.append(',');
+				builder.append(moment.leftEncoderVelocity);
+				builder.append(',');
+				builder.append(moment.rightEncoderVelocity);
 
-                        for (DoubleListener listener : listeners) {
+				for (int x = 0; x < buttons.length; x++) {
 
-                            switch (axes[i].getState()) {
+					if (buttons[x].getState() != Boolean.EVAL_STATE.NON && buttons[x].getState() != buttonStates[x]) {
 
-                                case CHANGED:
-                                    double value = axes[i].get();
-                                    append += "," + i + ".CHANGED." + value;
-                                    evaluables.add(() -> listener.changed(value));
-                                    break;
-                            }
+						ButtonListener[] listeners = buttons[x].getListeners();
 
-                            times.add(System.currentTimeMillis() - start);
-                        }
-                    }
-                }
+						for (ButtonListener listener : listeners) {
 
-                if (robot.isEnabled()) robot.runNextLoop(this);
-            }
-        });
+							builder.append(',');
+							builder.append(x);
+							builder.append('.');
+							builder.append(buttons[i].getState());
 
-        double speed = robot.shooter.getTargetRPM();
-        double angle = robot.outputs.hood.get();
-        double position = robot.outputs.pivot.getPosition();
+							switch (buttons[i].getState()) {
 
-        if (config.runShooterAtStart) robot.shooter.run();
+								case FALLING: evaluators.add(new Evaluator(listener::falling, i)); break;
+								case RISING: evaluators.add(new Evaluator(listener::falling, i)); break;
+								case PRESSED: evaluators.add(new Evaluator(listener::falling, i)); break;
+								case HELD: evaluators.add(new Evaluator(listener::falling, i)); break;
+							}
+						}
+					}
 
-        if (config.extendWinchArmAtStart) robot.outputs.arch.output(true);
+					buttonStates[x] = buttons[x].getState();
+				}
 
-        try {
+				for (int x = 0; x < axes.length; x++) {
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            Date date = new Date();
+					if (axes[x].getState() != Double.EVAL_STATE.NON && axes[x].getState() != axesStates[x]) {
 
-            String file = "/home/lvuser/motion/Recording " + dateFormat.format(date) + ".csv";
+						DoubleListener[] listeners = axes[x].getListeners();
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(file)));
+						for (DoubleListener listener : listeners) {
 
-            writer.write("config:" + speed + "," + angle + "," + position + ",true,true");
-            writer.newLine();
+							double value = axes[x].get();
 
-            while (robot.isEnabled() && !robot.driver.BACK.get()) {
+							builder.append(',');
+							builder.append(x);
+							builder.append(".CHANGED.");
+							builder.append(value);
 
-                if (System.nanoTime() - lastTickTime >= config.tickTime) {
+							evaluators.add(new Evaluator(() ->  listener.changed(value), i));
+						}
+					}
 
-                    lastTickTime = System.nanoTime();
-                    tickCount++;
+					axesStates[x] = axes[x].getState();
+				}
 
-                    robot.drive.update();
+				listeners.forEach(stringListener -> stringListener.append(builder.toString()));
 
-                    Moment moment = new Moment(
-                            robot.outputs.driveLeftFront.get(),
-                            robot.outputs.driveRightFront.get(),
-                            robot.inputs.driveLeft.getDistance(),
-                            robot.inputs.driveRight.getDistance(),
-                            robot.inputs.driveLeft.getRate(),
-                            robot.inputs.driveRight.getRate()
-                    );
+				time += System.nanoTime() - lastTick;
+				i++;
+			}
+		}
 
-                    writer.write(moment.leftDriveOutput + ",");
-                    writer.write(moment.rightDriveOutput + ",");
-                    writer.write(moment.leftEncoderPosition + ",");
-                    writer.write(moment.rightEncoderPosition + ",");
-                    writer.write(moment.leftEncoderVelocity + ",");
-                    writer.write(moment.rightEncoderVelocity + append);
+		Moment[] staticMoments = new Moment[moments.size()];
+		Evaluator[] staticEvals = new Evaluator[evaluators.size()];
 
-                    append = "";
+		for (int i = 0; i < staticMoments.length; i++) staticMoments[i] = moments.get(i);
+		for (int i = 0; i < staticEvals.length; i++) staticEvals[i] = evaluators.get(i);
 
-                    writer.newLine();
-                    writer.flush();
+		profile = new Profile(
+				speed,
+				angle,
+				position,
+				config.runShooterAtStart,
+				config.extendWinchArmAtStart,
+				0.0,
+				staticMoments,
+				staticEvals
+		);
 
-                    moments.add(moment);
-
-                    avgTickRate += System.nanoTime() - lastTickTime;
-                }
-            }
-
-            writer.close();
-
-        } catch (IOException e) { e.printStackTrace(); }
-
-        Moment[] staticMoments = new Moment[moments.size()];
-        Evaluable[] staticEvals = new Evaluable[evaluables.size()];
-        int[] staticTimes = new int[times.size()];
-
-        for (int i = 0; i < staticMoments.length; i++) staticMoments[i] = moments.get(i);
-        for (int i = 0; i < staticEvals.length; i++) staticEvals[i] = evaluables.get(i);
-        for (int i = 0; i < staticTimes.length; i++) staticTimes[i] = times.get(i).intValue();
-
-        profile = new Profile(speed, angle, position, staticMoments,
-                staticEvals, staticTimes, config.runShooterAtStart, config.extendWinchArmAtStart, 0.0);
-
-        avgTickRate /= tickCount;
-        System.out.printf("<Motion Control> Average tick time: %.3fms", avgTickRate / 1e+6);
-        System.out.printf(" %.1f%%%n", (avgTickRate / config.tickTime) * 100);
-    }
-
-    Profile getProfile() { return profile;  }
-
-    void changeControllerRecordPresets(Boolean[] buttons) { this.buttons = buttons; }
-
-    void changeControllerRecordPresets(Double[] axes) { this.axes = axes; }
+		time /= staticMoments.length;
+		System.out.printf("<Motion Control> Average tick time: %.3fms", time / 1e+6);
+		System.out.printf(" %.1f%%%n", (time / config.tickTime) * 100);
+	}
 }

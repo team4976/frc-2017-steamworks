@@ -2,7 +2,7 @@ package ca._4976.steamworks.subsystems.profiler;
 
 import ca._4976.data.Moment;
 import ca._4976.data.Profile;
-import ca._4976.library.Evaluable;
+import ca._4976.library.Evaluator;
 import ca._4976.library.controllers.components.Boolean;
 import ca._4976.library.controllers.components.Double;
 import ca._4976.library.listeners.ButtonListener;
@@ -20,8 +20,7 @@ class SaveFile {
         long start = System.nanoTime();
 
         ArrayList<Moment> moments = new ArrayList<>();
-        ArrayList<Evaluable> evaluables = new ArrayList<>();
-        ArrayList<Integer> times = new ArrayList<>();
+        ArrayList<Evaluator> evaluators = new ArrayList<>();
 
         String line = "";
 
@@ -58,7 +57,7 @@ class SaveFile {
                     continue;
                 }
 
-                //Duct tape
+                while (line.contains(",,")) line = line.replace(",,", ",");
                 if (line.endsWith(",")) line = line.substring(0, line.length() - 1);
 
                 String[] split = line.split(",");
@@ -87,18 +86,17 @@ class SaveFile {
 
                         switch (state) {
 
-                            case "FALLING": evaluables.add(listener::held); break;
-                            case "RISING": evaluables.add(listener::rising);break;
-                            case "PRESSED": evaluables.add(listener::pressed); break;
-                            case "HELD": evaluables.add(listener::held); break;
+                            case "FALLING": evaluators.add(new Evaluator(listener::held, time)); break;
+                            case "RISING": evaluators.add(new Evaluator(listener::rising, time)); break;
+                            case "PRESSED": evaluators.add(new Evaluator(listener::pressed, time)); break;
+                            case "HELD": evaluators.add(new Evaluator(listener::held, time)); break;
                         }
-
-                        times.add(time);
 
                     } else if (split.length == 3) for (DoubleListener listener : axes[id].getListeners()) {
 
-                        evaluables.add(() -> listener.changed(java.lang.Double.parseDouble(split[2] + "." + split[3])));
-                        times.add(time);
+                        double value = java.lang.Double.parseDouble(split[2] + "." + split[3]);
+
+                        evaluators.add(new Evaluator(() -> listener.changed(value), time));
                     }
                 }
 
@@ -120,23 +118,20 @@ class SaveFile {
 	    }
 
         Moment[] finalMoments = new Moment[moments.size()];
-        Evaluable[] finalEvaluables = new Evaluable[evaluables.size()];
-        int[] finalTimes = new int[times.size()];
+        Evaluator[] finalEvaluators = new Evaluator[evaluators.size()];
 
         for (int i = 0; i < finalMoments.length; i++) { finalMoments[i] = moments.get(i); }
-        for (int i = 0; i < finalEvaluables.length; i++) { finalEvaluables[i] = evaluables.get(i); }
-        for (int i = 0; i < finalTimes.length; i++) { finalTimes[i] = times.get(i); }
+        for (int i = 0; i < finalEvaluators.length; i++) { finalEvaluators[i] = evaluators.get(i); }
 
         return new Profile(
                 speed,
                 angle,
                 position,
-                finalMoments,
-                finalEvaluables,
-                finalTimes,
                 runShooter,
                 extendWinch,
-                endTime
+                endTime,
+                finalMoments,
+                finalEvaluators
         );
     }
 
@@ -144,13 +139,13 @@ class SaveFile {
 
         File dir = new File("/home/lvuser/motion");
 
-        int inadmissable = 0;
+        int inadmissible = 0;
 
 	    File[] results = dir.listFiles();
 	    assert results != null;
-	    for (File result : results) { if (result.isDirectory()) inadmissable++; }
+	    for (File result : results) { if (result.isDirectory()) inadmissible++; }
 
-	    String[] paths = new String[results.length - inadmissable];
+	    String[] paths = new String[results.length - inadmissible];
 
 	    int b = 0;
 	    for (int i = b; i < paths.length; i++) {

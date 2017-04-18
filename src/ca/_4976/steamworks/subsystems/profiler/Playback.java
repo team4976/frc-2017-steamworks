@@ -88,14 +88,14 @@ public class Playback implements Runnable {
 
                 if (System.nanoTime() - lastTickTime >= config.tickTime) {
 
-                    for (int i = 0; i < profile.Evaluable.length; i++) {
+                    for (int i = 0; i < profile.Evaluators.length; i++) {
 
                         final int tick = i;
 
-                        if (profile.Evaluate_Timing[i] == tickCount)
+                        if (profile.Evaluators[i].delay == tickCount)
 
                             synchronized (this) {
-                                new Thread(() -> profile.Evaluable[tick].eval()).start();
+                                new Thread(() -> profile.Evaluators[tick].evaluable.eval()).start();
                             }
                     }
 
