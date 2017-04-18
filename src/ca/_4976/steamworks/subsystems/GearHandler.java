@@ -115,7 +115,7 @@ public class GearHandler {
 
             @Override public void pressed() {
 
-                if (robot.isTest()) {
+                if (robot.isTest() || robot.isAutonomous() || robot.isEnabled()) {
 
                     state = 1;
 
