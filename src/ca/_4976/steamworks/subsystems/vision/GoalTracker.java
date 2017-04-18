@@ -21,7 +21,7 @@ public class GoalTracker extends Tracker implements PIDSource {
 	private Mat hsvThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
 	private PIDController pid;
-	private double error = 0;
+	private double goalOffset = 0;
 	private Robot robot;
 	private CvSource erode;
 	private CvSource dilate;
@@ -58,7 +58,7 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 		if (contour != null) {
 
-			error = contour.position.center.x;
+			goalOffset = contour.position.center.x;
 
 			double rpmCorrection = ((contour.position.center.y - 53) / 7) * 60;
 
@@ -140,11 +140,13 @@ public class GoalTracker extends Tracker implements PIDSource {
 		}
 	}
 
+	public double getError() { return pid.getError(); }
+
 	@Override public void setPIDSourceType(PIDSourceType pidSource) { }
 
 	@Override public PIDSourceType getPIDSourceType() { return PIDSourceType.kDisplacement; }
 
-	@Override public double pidGet() { return error - (80 + config.offset); }
+	@Override public double pidGet() { return goalOffset - (80 + config.offset); }
 
 	public void configNotify() {
 

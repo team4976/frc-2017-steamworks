@@ -13,7 +13,8 @@ import java.util.ArrayList;
 
 public abstract class Tracker implements Runnable {
 
-	protected UsbCamera camera = null;
+	UsbCamera camera = null;
+	
 	private CvSink cvSink = new CvSink("Rebel Vision");
 	private Mat image = new Mat();
 	private boolean run = false;
@@ -30,7 +31,7 @@ public abstract class Tracker implements Runnable {
 
 	public synchronized void stop() { run = false; }
 
-	public void setCamera(String desc) {
+	void setCamera(String desc) {
 
 		for (int i = 0; i < 4; i++) {
 

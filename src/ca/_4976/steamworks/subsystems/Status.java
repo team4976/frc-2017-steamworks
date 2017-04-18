@@ -42,8 +42,8 @@ public class Status {
 
             table.putBoolean("Vision Tracking Goal (BOOLEAN)", robot.vision.goal.isRunning());
             table.putBoolean("Vision Tracking Gear (BOOLEAN)", robot.vision.gear.isRunning());
-            table.putNumber("Goal Error (PIXELS)", robot.vision.goal.pidGet());
-            table.putNumber("Gear Error (PIXELS)", robot.vision.gear.pidGet());
+            table.putNumber("Goal Error (PIXELS)", robot.vision.goal.getError());
+            table.putNumber("Gear Error (PIXELS)", robot.vision.gear.getError());
             table.putBoolean("Vision Light (BOOLEAN)", robot.outputs.visionLight.get());
 
             table.putBoolean("Winch Arm Extended (BOOLEAN)", robot.outputs.arch.isExtended());

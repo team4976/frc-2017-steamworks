@@ -203,12 +203,51 @@ public class Config {
 
 		    private ITable table = NetworkTable.getTable("Vision").getSubTable("Goal");
 		    private ITable filter = table.getSubTable("Filter Contours");
-		    private ITable pid = table.getSubTable("PID");
 		    private ITable threshold = table.getSubTable("HSV Threshold");
 
-		    public double kP = getKey(pid, "P", 0.007);
-		    public double kI = getKey(pid, "I", 0.0);
-		    public double kD = getKey(pid, "D", 0.004);
+		    public class Turn {
+
+			    private ITable pid = table.getSubTable("Turn PID");
+
+			    public double kP = getKey(pid, "P", 0.007);
+			    public double kI = getKey(pid, "I", 0.0);
+			    public double kD = getKey(pid, "D", 0.004);
+
+			    private Turn() {
+
+				    pid.addSubTableListener((source, key, value, isNew) -> {
+
+					    kP = getKey(pid, "P", 0.007);
+					    kI = getKey(pid, "I", 0.0);
+					    kD = getKey(pid, "D", 0.004);
+					    robot.vision.gear.configNotify();
+				    });
+			    }
+		    }
+
+		    public class Forward {
+
+			    private ITable pid = table.getSubTable("Turn PID");
+
+			    public double kP = getKey(pid, "P", 0.007);
+			    public double kI = getKey(pid, "I", 0.0);
+			    public double kD = getKey(pid, "D", 0.004);
+
+			    private Forward() {
+
+				    pid.addSubTableListener((source, key, value, isNew) -> {
+
+					    kP = getKey(pid, "P", 0.007);
+					    kI = getKey(pid, "I", 0.0);
+					    kD = getKey(pid, "D", 0.004);
+					    robot.vision.gear.configNotify();
+				    });
+			    }
+		    }
+
+		    public Turn turn = new Turn();
+		    public Forward forward = new Forward();
+
 		    public double offset = getKey(table, "Offset (PIXELS)", 20);
 		    public Dimension resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));
 
@@ -246,14 +285,6 @@ public class Config {
 
 
 		    private Gear() {
-
-			    pid.addSubTableListener((source, key, value, isNew) -> {
-
-				    kP = getKey(pid, "P", 0.007);
-				    kI = getKey(pid, "I", 0.0);
-				    kD = getKey(pid, "D", 0.004);
-				    robot.vision.gear.configNotify();
-			    });
 
 			    filter.addTableListener(((source, key, value, isNew) -> {
 
