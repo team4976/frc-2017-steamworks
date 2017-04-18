@@ -1,5 +1,7 @@
 package ca._4976.steamworks.subsystems.profiler;
 
+import ca._4976.data.Moment;
+import ca._4976.data.Profile;
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
 import ca._4976.steamworks.subsystems.Config;

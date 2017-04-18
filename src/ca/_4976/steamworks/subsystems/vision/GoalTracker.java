@@ -23,7 +23,6 @@ public class GoalTracker extends Tracker implements PIDSource {
 	private PIDController pid;
 	private double error = 0;
 	private Robot robot;
-
 	private CvSource erode;
 	private CvSource dilate;
 	private CvSource hsvThreshold;
@@ -34,7 +33,7 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 		this.robot = robot;
 
-		setCamera("Logitech");
+		setCamera("Microsoft");
 		config = robot.config.goal;
 
 		pid = new PIDController(

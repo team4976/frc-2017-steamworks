@@ -21,14 +21,11 @@ public class MotionControl {
 
         Record record = new Record(robot);
 
-        Boolean fake = new Boolean(0) { @Override public boolean get() { return false; }};
+        Boolean disable = new Boolean(0) { @Override public boolean get() { return false; }};
 
-        fake.addListener(new ButtonListener() {
-            @Override
-            public void pressed() {
+        disable.addListener(new ButtonListener() {
 
-                playback.disable();
-            }
+            @Override public void pressed() { playback.disable(); }
         });
 
         Boolean[] buttons = new Boolean[] {
@@ -52,7 +49,7 @@ public class MotionControl {
                 robot.operator.START,
                 robot.operator.LS,
                 robot.operator.RS,
-                fake,
+                disable,
                 robot.operator.UP,
                 robot.operator.UP_LEFT,
                 robot.operator.UP_RIGHT,

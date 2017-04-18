@@ -18,7 +18,6 @@ public class Contour {
 	public class Position {
 
 		public final Point center;
-		public final Point bottomLeftCorner;
 		public final double leftEdge;
 		public final double rightEdge;
 		public final double bottomEdge;
@@ -26,11 +25,9 @@ public class Contour {
 
 		private Position(Rect rect) {
 
-			bottomLeftCorner = new Point(rect.x, rect.y);
-
-			leftEdge = bottomLeftCorner.x;
+			leftEdge = rect.x;
 			rightEdge = leftEdge + width;
-			bottomEdge = bottomLeftCorner.y;
+			bottomEdge = rect.y;
 			topEdge = bottomEdge + height;
 
 			center = new Point((int) (leftEdge + (width / 2)), (int) (rightEdge + (height / 2)));

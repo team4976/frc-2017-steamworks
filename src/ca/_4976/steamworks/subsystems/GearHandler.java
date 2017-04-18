@@ -86,8 +86,6 @@ public class GearHandler {
                 }}, config.raiseDelay);
 
                 System.out.println("<Gear Handler> Releasing gear.");
-
-                Double.parseDouble(" ");
             }
         });
 
@@ -101,6 +99,17 @@ public class GearHandler {
                 robot.outputs.gear.output(true);
 
                 System.out.println("<Gear Handler> Resetting.");
+            }
+        });
+
+        robot.operator.LB.addListener(new ButtonListener() {
+
+            @Override public void pressed() {
+
+                if (robot.isTest()) {
+
+                    robot.vision.goal.start();
+                }
             }
         });
     }

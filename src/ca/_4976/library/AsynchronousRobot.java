@@ -152,11 +152,6 @@ public class AsynchronousRobot extends RobotBase {
 
     public void addListener(RobotStateListener listener) { listeners.add(listener); }
 
-    public void runAtLoop(Evaluable evaluable, long time) {
-
-        evaluators.add(new Evaluator(evaluable, time));
-    }
-
     private void checkEvaluables() {
 
         for (int i = evaluators.size() - 1; i >= 0; i--) {

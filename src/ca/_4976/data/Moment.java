@@ -1,17 +1,15 @@
-package ca._4976.steamworks.subsystems.profiler;
+package ca._4976.data;
 
-class Moment {
+public class Moment {
 
-    final double leftDriveOutput;
-    final double rightDriveOutput;
+    public final double leftDriveOutput;
+    public final double rightDriveOutput;
+    public final double leftEncoderPosition;
+    public final double rightEncoderPosition;
+    public final double leftEncoderVelocity;
+    public final double rightEncoderVelocity;
 
-    final double leftEncoderPosition;
-    final double rightEncoderPosition;
-
-    final double leftEncoderVelocity;
-    final double rightEncoderVelocity;
-
-    Moment(
+    public Moment(
             double leftDriveOutput,
             double rightDriveOutput,
             double leftEncoderPosition,
