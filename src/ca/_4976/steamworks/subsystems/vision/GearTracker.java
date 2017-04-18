@@ -186,6 +186,10 @@ public class GearTracker extends Tracker {
 
 			@Override public void pidWrite(double output) {
 
+				double maxOutput = 1 - turnPID.getError() / 80;
+
+				if (Math.abs(output) > maxOutput) output = output > 0 ? maxOutput : -maxOutput;
+
 				motion[0] = output;
 				drive();
 			}
