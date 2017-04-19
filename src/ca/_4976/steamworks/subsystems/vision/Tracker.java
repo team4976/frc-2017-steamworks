@@ -3,7 +3,6 @@ package ca._4976.steamworks.subsystems.vision;
 import ca._4976.data.Contour;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import org.opencv.core.Mat;
@@ -17,31 +16,32 @@ public abstract class Tracker implements Runnable {
 	
 	private CvSink cvSink = new CvSink("Rebel Vision");
 	private Mat image = new Mat();
-	private boolean run = false;
+	protected boolean run = false;
 
 	protected ArrayList<MatOfPoint> output = new ArrayList<>();
 
 	public boolean isRunning() { return run; }
 
-	public synchronized void start() {
-
-		run = true;
-		new Thread(this).start();
-	}
-
 	public synchronized void stop() { run = false; }
 
-	void setCamera(String desc) {
+	void setCamera(UsbCamera camera) {
 
-		for (int i = 0; i < 4; i++) {
+		this.camera = camera;
+		cvSink.setSource(camera);
+	}
 
-			UsbCamera camera = CameraServer.getInstance().startAutomaticCapture(i);
-
-			if (camera.getDescription().toLowerCase().contains(desc.toLowerCase()))
-				this.camera = camera;
-
-			else camera.free();
-		}
+	void setCameraSettings(
+			int[] resolution,
+	        int brightness,
+	        int exposure,
+	        int whiteBalance
+	) {
+		camera.setResolution(resolution[0], resolution[1]);
+		camera.setBrightness(brightness);
+		camera.setExposureManual(exposure);
+		camera.setExposureHoldCurrent();
+		camera.setWhiteBalanceManual(whiteBalance);
+		camera.setWhiteBalanceHoldCurrent();
 	}
 
 	private void getFrame() {
@@ -50,6 +50,7 @@ public abstract class Tracker implements Runnable {
 			// There was an error, report it
 			String error = cvSink.getError();
 			DriverStation.reportError(error, true);
+			System.out.println("hello");
 		} else {
 			// No errors, process the image
 			process(image);
@@ -67,7 +68,10 @@ public abstract class Tracker implements Runnable {
 					"Vision.start() cannot be called from the main robot thread");
 		}
 
-		while (run) { getFrame(); }
+		while (run) {
+
+			getFrame();
+		}
 	}
 
 	protected abstract void process(Mat image);

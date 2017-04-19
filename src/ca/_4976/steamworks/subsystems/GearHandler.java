@@ -35,8 +35,6 @@ public class GearHandler {
 
             @Override public void eval() {
 
-                System.out.println(config.currentLimit);
-
                 if (robot.outputs.roller.getOutputCurrent() > config.currentLimit) {
 
                     state = 2;
@@ -46,8 +44,6 @@ public class GearHandler {
                         robot.outputs.roller.set(-config.gripSpeed);
                         robot.outputs.gear.output(true);
                         System.out.println("<Gear Handler> Gear roller over current perhaps we have a gear.");
-
-                        if (record.isRunning()) play();
 
                         robot.driver.setRumble(1);
                         robot.runNextLoop(() -> robot.driver.setRumble(0), 200);
@@ -127,7 +123,7 @@ public class GearHandler {
 
                     robot.profiler.record.setPaused(true);
                     record.start();
-                    robot.vision.goal.start();
+                    robot.vision.gear.start();
                 }
             }
         });

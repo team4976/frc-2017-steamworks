@@ -33,8 +33,6 @@ public class GoalTracker extends Tracker implements PIDSource {
 	GoalTracker(Robot robot) {
 
 		this.robot = robot;
-
-		setCamera("Microsoft");
 		config = robot.config.goal;
 
 		pid = new PIDController(
@@ -45,14 +43,29 @@ public class GoalTracker extends Tracker implements PIDSource {
 				robot.outputs.pivot
 		);
 
+		setCamera(Vision.getCamera("Microsoft"));
+
+		setCameraSettings(
+				config.resolution.asIntArray(),
+				config.brightness,
+				config.exposure,
+				config.whiteBalance
+		);
+
 		if (Initialization.DEBUG) {
 
-			erode = CameraServer.getInstance().putVideo("Erode", 160, 120);
-			dilate = CameraServer.getInstance().putVideo("Dilate", 160, 120);
-			hsvThreshold = CameraServer.getInstance().putVideo("HSV", 160, 120);
-			findContours = CameraServer.getInstance().putVideo("Contours", 160, 120);
-			filterContours = CameraServer.getInstance().putVideo("Filtered Contours", 160, 120);
+			erode = CameraServer.getInstance().putVideo("Goal-Erode", 160, 120);
+			dilate = CameraServer.getInstance().putVideo("Goal-Dilate", 160, 120);
+			hsvThreshold = CameraServer.getInstance().putVideo("Goal-HSV", 160, 120);
+			findContours = CameraServer.getInstance().putVideo("Goal-Contours", 160, 120);
+			filterContours = CameraServer.getInstance().putVideo("Goal-Filtered Contours", 160, 120);
 		}
+	}
+
+	public synchronized void start() {
+
+		run = true;
+		new Thread(this).start();
 	}
 
 	@Override protected void process(Contour contour) {
@@ -81,6 +94,8 @@ public class GoalTracker extends Tracker implements PIDSource {
 	}
 
 	@Override protected void process(Mat image) {
+
+		System.out.println("hello");
 
 		Operations.cvDilate(
 				image,
@@ -134,12 +149,11 @@ public class GoalTracker extends Tracker implements PIDSource {
 			hsvThreshold.putFrame(hsvThresholdOutput);
 
 			Mat foundContours = new Mat();
-
-			findContoursOutput.forEach(matOfPoint -> Operations.cvAdd(foundContours, matOfPoint, foundContours));
+			for (MatOfPoint matOfPoint : findContoursOutput) Operations.cvAdd(foundContours, matOfPoint, foundContours);
 			findContours.putFrame(foundContours);
 
 			Mat filteredContours = new Mat();
-			output.forEach(matOfPoint -> Operations.cvAdd(filteredContours, matOfPoint, filteredContours));
+			for (MatOfPoint matOfPoint : output) Operations.cvAdd(filteredContours, matOfPoint, filteredContours);
 			filterContours.putFrame(filteredContours);
 		}
 	}
@@ -156,7 +170,12 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 	public void configNotify() {
 
-		camera.setResolution(config.resolution.width, config.resolution.height);
+		setCameraSettings(
+				config.resolution.asIntArray(),
+				config.brightness,
+				config.exposure,
+				config.whiteBalance
+		);
 
 		pid.reset();
 		pid.setPID(config.kP, config.kI, config.kD);

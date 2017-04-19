@@ -66,15 +66,15 @@ public class Outputs {
 
         roller = Initialization.DEBUG ? new NetworkTalonSRX(15) : new CANTalon(15);
 
-        gear = Initialization.DEBUG ? new NetworkSolenoid(module, 20, 1, 6) : new TimedSolenoid(module, 20, 1, 6);
-        arch = Initialization.DEBUG ? new NetworkSolenoid(module, 20, 0, 7) : new TimedSolenoid(module, 20, 0, 7);
+        gear = Initialization.DEBUG ? new NetworkTimedSolenoid(module, 20, 1, 6) : new TimedSolenoid(module, 20, 1, 6);
+        arch = Initialization.DEBUG ? new NetworkTimedSolenoid(module, 20, 0, 7) : new TimedSolenoid(module, 20, 0, 7);
 
         agitator = Initialization.DEBUG ? new NetworkTalonSRX(2) : new CANTalon(2);
         agitator.reverseOutput(true);
 
         hood = new LinearActuator(4);
 
-        visionLight = new Solenoid(20, 4);
+        visionLight = Initialization.DEBUG ? new NetworkSolenoid(20, 4) : new Solenoid(20, 4);
 
         module.addListener(new RobotStateListener() {
 
@@ -94,12 +94,14 @@ public class Outputs {
 
             @Override public void teleopInit() {
 
-                compressor.setClosedLoopControl(true);
-
+                if (!Initialization.DEBUG) compressor.setClosedLoopControl(true);
             }
 
 
-            @Override public void testInit() { compressor.setClosedLoopControl(true); }
+            @Override public void testInit() {
+
+                if (!Initialization.DEBUG) compressor.setClosedLoopControl(true);
+            }
         });
     }
 }

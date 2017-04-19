@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.*;
 import org.opencv.core.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GearTracker extends Tracker {
 
@@ -30,20 +31,33 @@ public class GearTracker extends Tracker {
 	GearTracker(Robot robot) {
 
 		this.robot = robot;
+		config = robot.config.gear;
 
 		pid = new DrivePID();
 
-		setCamera("Logitech");
-		config = robot.config.gear;
+		setCamera(Vision.getCamera("c903"));
+
+		setCameraSettings(
+				config.resolution.asIntArray(),
+				config.brightness,
+				config.exposure,
+				config.whiteBalance
+		);
 
 		if (Initialization.DEBUG) {
 
-			erode = CameraServer.getInstance().putVideo("Erode", 160, 120);
-			dilate = CameraServer.getInstance().putVideo("Dilate", 160, 120);
-			hsvThreshold = CameraServer.getInstance().putVideo("HSV", 160, 120);
-			findContours = CameraServer.getInstance().putVideo("Contours", 160, 120);
-			filterContours = CameraServer.getInstance().putVideo("Filtered Contours", 160, 120);
+			erode = CameraServer.getInstance().putVideo("Gear-Erode", 160, 120);
+			dilate = CameraServer.getInstance().putVideo("Gear-Dilate", 160, 120);
+			hsvThreshold = CameraServer.getInstance().putVideo("Gear-HSV", 160, 120);
+			findContours = CameraServer.getInstance().putVideo("Gear-Contours", 160, 120);
+			filterContours = CameraServer.getInstance().putVideo("Gear-Filtered-Contours", 160, 120);
 		}
+	}
+
+	public synchronized void start() {
+
+		run = true;
+		new Thread(this).start();
 	}
 
 	@Override protected void process(Contour contour) {
@@ -62,6 +76,8 @@ public class GearTracker extends Tracker {
 	}
 
 	@Override protected void process(Mat image) {
+
+		System.out.println(Arrays.toString(config.hsvThresholdHue));
 
 		Operations.cvDilate(
 				image,
@@ -115,20 +131,23 @@ public class GearTracker extends Tracker {
 			hsvThreshold.putFrame(hsvThresholdOutput);
 
 			Mat foundContours = new Mat();
-
-			findContoursOutput.forEach(matOfPoint -> Operations.cvAdd(foundContours, matOfPoint, foundContours));
+			for (MatOfPoint matOfPoint : findContoursOutput) Operations.cvAdd(foundContours, matOfPoint, foundContours);
 			findContours.putFrame(foundContours);
 
 			Mat filteredContours = new Mat();
-			output.forEach(matOfPoint -> Operations.cvAdd(filteredContours, matOfPoint, filteredContours));
+			for (MatOfPoint matOfPoint : output) Operations.cvAdd(filteredContours, matOfPoint, filteredContours);
 			filterContours.putFrame(filteredContours);
 		}
 	}
 
 	public void configNotify() {
 
-		camera.setResolution(config.resolution.width, config.resolution.height);
-
+		setCameraSettings(
+				config.resolution.asIntArray(),
+				config.brightness,
+				config.exposure,
+				config.whiteBalance
+		);
 	}
 
 	public double getError() { return pid.getError(); }

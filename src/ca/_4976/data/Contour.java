@@ -3,8 +3,6 @@ package ca._4976.data;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
-
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 

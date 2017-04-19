@@ -1,10 +1,9 @@
 package ca._4976.steamworks.subsystems;
 
+import ca._4976.data.Dimension;
 import ca._4976.steamworks.Robot;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
-
-import java.awt.*;
 
 public class Config {
 
@@ -18,8 +17,10 @@ public class Config {
     GearHandler gearHandler = new GearHandler();
 
     public Motion motion = new Motion();
-    public Vision.Goal goal = new Vision().goal;
-    public Vision.Gear gear = new Vision().gear;
+	private Vision vision = new Vision();
+
+    public Vision.Goal goal = vision.goal;
+    public Vision.Gear gear = vision.gear;
 
 	public Config(Robot robot) { this.robot = robot; }
 
@@ -119,6 +120,9 @@ public class Config {
 		    public double kD = getKey(pid, "D", 0.004);
 		    public double offset = getKey(table, "Offset (PIXELS)", 20);
 		    public Dimension resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));
+		    public int exposure = getKey(table, "Exposure (UNIT)", 0);
+		    public int brightness = getKey(table, "Brightness (UNIT)", 0);
+		    public int whiteBalance = getKey(table, "White Balance (UNIT)", 0);
 
 		    public double[] hsvThresholdHue = {
 				    getKey(threshold, "Min Hue", 60),
@@ -188,6 +192,9 @@ public class Config {
 
 				    offset = getKey(table, "Offset (PIXELS)", 1);
 				    resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));
+				    exposure = getKey(table, "Exposure (UNIT)", 0);
+				    brightness = getKey(table, "Brightness (UNIT)", 0);
+				    whiteBalance = getKey(table, "White Balance (UNIT)", 0);
 
 				    if (key.equals("Resolution (PIXELS)")) {
 
@@ -201,7 +208,7 @@ public class Config {
 
 	    public class Gear {
 
-		    private ITable table = NetworkTable.getTable("Vision").getSubTable("Goal");
+		    private ITable table = NetworkTable.getTable("Vision").getSubTable("Gear");
 		    private ITable filter = table.getSubTable("Filter Contours");
 		    private ITable threshold = table.getSubTable("HSV Threshold");
 
@@ -216,6 +223,8 @@ public class Config {
 			    private Turn() {
 
 				    pid.addSubTableListener((source, key, value, isNew) -> {
+
+					    System.out.println("<Config> Gear PID Updated");
 
 					    kP = getKey(pid, "P", 0.007);
 					    kI = getKey(pid, "I", 0.0);
@@ -237,6 +246,8 @@ public class Config {
 
 				    pid.addSubTableListener((source, key, value, isNew) -> {
 
+					    System.out.println("<Config> Gear PID Updated");
+
 					    kP = getKey(pid, "P", 0.007);
 					    kI = getKey(pid, "I", 0.0);
 					    kD = getKey(pid, "D", 0.004);
@@ -250,6 +261,10 @@ public class Config {
 
 		    public double offset = getKey(table, "Offset (PIXELS)", 20);
 		    public Dimension resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));
+			public int exposure = getKey(table, "Exposure (UNIT)", 0);
+			public int brightness = getKey(table, "Brightness (UNIT)", 0);
+			public int whiteBalance = getKey(table, "White Balance (UNIT)", 0);
+
 
 		    public double[] hsvThresholdHue = {
 				    getKey(threshold, "Min Hue", 60),
@@ -286,9 +301,29 @@ public class Config {
 
 		    private Gear() {
 
+			    threshold.addTableListener((source, key, value, isNew) -> {
+
+				    System.out.println("<Gear> " + key + " was changed: " + value);
+
+				    hsvThresholdHue = new double[] {
+						    getKey(threshold, "Min Hue", 60),
+						    getKey(threshold, "Max Hue", 70)
+				    };
+
+				    hsvThresholdSaturation = new double[] {
+						    getKey(threshold, "Min Saturation", 115),
+						    getKey(threshold, "Max Saturation", 255)
+				    };
+
+				    hsvThresholdValue = new double[] {
+						    getKey(threshold, "Min Value", 40),
+						    getKey(threshold, "Max Value", 255)
+				    };
+			    });
+
 			    filter.addTableListener(((source, key, value, isNew) -> {
 
-				    System.out.println("<Elevator> " + key + " was changed: " + value);
+				    System.out.println("<Gear> " + key + " was changed: " + value);
 
 				    filterContoursMinArea = getKey(filter, "Min Area (PIXELS)", 0.0);
 				    filterContoursMinPerimeter = getKey(filter, "Min Perimeter (PIXELS)", 30.0);
@@ -307,10 +342,13 @@ public class Config {
 
 			    table.addTableListener((source, key, value, isNew) -> {
 
-				    System.out.println("<Elevator> " + key + " was changed: " + value);
+				    System.out.println("<Gear> " + key + " was changed: " + value);
 
 				    offset = getKey(table, "Offset (PIXELS)", 1);
 				    resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));
+				    exposure = getKey(table, "Exposure (UNIT)", 0);
+				    brightness = getKey(table, "Brightness (UNIT)", 0);
+				    whiteBalance = getKey(table, "White Balance (UNIT)", 0);
 
 				    if (key.equals("Resolution (PIXELS)")) {
 

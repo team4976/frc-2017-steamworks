@@ -1,23 +1,30 @@
 package ca._4976.library.outputs;
 
-import ca._4976.library.AsynchronousRobot;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.tables.ITable;
 
-public class NetworkSolenoid extends TimedSolenoid {
+/**
+ * Created by Qormix on 4/19/2017.
+ */
+public class NetworkSolenoid extends Solenoid {
 
 	ITable table;
 
-	public NetworkSolenoid(AsynchronousRobot module, int pcmId, int outPin, int inPin) {
-		super(module, pcmId, outPin, inPin);
+	public NetworkSolenoid(int moduleNumber, int channel) {
+		super(moduleNumber, channel);
 
-		table = NetworkTable.getTable("Debug").getSubTable("Solenoids").getSubTable("Double: " + inPin + "," + outPin);
+		table = NetworkTable.getTable("Debug").getSubTable("Solenoids").getSubTable("Single: " + channel);
+
 	}
 
-	@Override public void output(boolean extended) {
+	public NetworkSolenoid(int channel) {
 
-		table.putBoolean("Extended", extended);
+		super(channel);
+
+		table = NetworkTable.getTable("Debug").getSubTable("Solenoids").getSubTable("Single: " + channel);
 	}
 
-	@Override public boolean isExtended() { return table.getBoolean("Extended", false); }
+	@Override public void set(boolean output) { table.putBoolean("output", output); }
+	@Override public boolean get() { return table.getBoolean("output", false); }
 }
