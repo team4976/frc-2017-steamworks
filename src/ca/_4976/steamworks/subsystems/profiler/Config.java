@@ -21,6 +21,13 @@ public class Config extends ConfigBase {
 
 	String loadTable = getKey(table, "load_table", "");
 
+	public static Config getInstance() {
+
+		if (config == null) config = new Config();
+
+		return config;
+	}
+
 	private Config() {
 
 		pid.addTableListener((source, key, value, isNew) -> {
@@ -41,12 +48,5 @@ public class Config extends ConfigBase {
 				runListener();
 			}
 		});
-	}
-
-	public static Config getInstance() {
-
-		if (config == null) config = new Config();
-
-		return config;
 	}
 }

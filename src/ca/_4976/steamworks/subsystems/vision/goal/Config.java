@@ -59,6 +59,8 @@ public class Config extends ConfigBase {
 
 		pid.addSubTableListener((source, key, value, isNew) -> {
 
+			System.out.println("<Goal Tracker> PID " + key + " was changed: " + value);
+
 			kP = getKey(pid, "P", 0.007);
 			kI = getKey(pid, "I", 0.0);
 			kD = getKey(pid, "D", 0.004);
@@ -67,7 +69,7 @@ public class Config extends ConfigBase {
 
 		filter.addTableListener(((source, key, value, isNew) -> {
 
-			System.out.println("<Elevator> " + key + " was changed: " + value);
+			System.out.println("<Goal Tracker> Filter Contours " + key + " was changed: " + value);
 
 			filterContoursMinArea = getKey(filter, "Min Area (PIXELS)", 0.0);
 			filterContoursMinPerimeter = getKey(filter, "Min Perimeter (PIXELS)", 30.0);
@@ -86,7 +88,7 @@ public class Config extends ConfigBase {
 
 		table.addTableListener((source, key, value, isNew) -> {
 
-			System.out.println("<Elevator> " + key + " was changed: " + value);
+			System.out.println("<Goal Tracker> " + key + " was changed: " + value);
 
 			offset = getKey(table, "Offset (PIXELS)", 1);
 			resolution = getKey(table, "Resolution (PIXELS)", new Dimension(160, 120));

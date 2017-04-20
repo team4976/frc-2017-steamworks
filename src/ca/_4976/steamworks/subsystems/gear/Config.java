@@ -22,6 +22,8 @@ public class Config extends ConfigBase {
 
 		table.addTableListener(((source, key, value, isNew) -> {
 
+			System.out.println("<Gear Handler> " + key + " was changed: " + value);
+
 			intakeSpeed = getKey(table, "Intake Speed (%)", 0.5);
 			releaseSpeed = getKey(table, "Release Speed (%)", 0.5);
 			gripSpeed = getKey(table, "Grip Speed (%)", 0.1);
