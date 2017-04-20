@@ -25,10 +25,10 @@ public class Contour {
 
 			leftEdge = rect.x;
 			rightEdge = leftEdge + width;
-			bottomEdge = rect.y;
-			topEdge = bottomEdge + height;
+			topEdge = rect.y;
+			bottomEdge = topEdge + height;
 
-			center = new Point((int) (leftEdge + (width / 2)), (int) (rightEdge + (height / 2)));
+			center = new Point((int) (leftEdge + (width / 2.0)), (int) (topEdge + (height / 2.0)));
 		}
 	}
 

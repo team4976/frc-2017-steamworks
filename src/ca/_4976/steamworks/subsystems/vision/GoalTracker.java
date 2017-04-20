@@ -42,6 +42,7 @@ public class GoalTracker extends Tracker implements PIDSource {
 				this,
 				robot.outputs.pivot
 		);
+		pid.setSetpoint(config.resolution.width / 2 + config.offset);
 
 		setCamera(Vision.getCamera("Microsoft"));
 
@@ -179,5 +180,6 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 		pid.reset();
 		pid.setPID(config.kP, config.kI, config.kD);
+		pid.setSetpoint(config.resolution.width / 2 + config.offset);
 	}
 }

@@ -222,7 +222,7 @@ public class Config {
 
 			    private Turn() {
 
-				    pid.addSubTableListener((source, key, value, isNew) -> {
+				    pid.addTableListener((source, key, value, isNew) -> {
 
 					    System.out.println("<Config> Gear PID Updated");
 
@@ -236,7 +236,7 @@ public class Config {
 
 		    public class Forward {
 
-			    private ITable pid = table.getSubTable("Turn PID");
+			    private ITable pid = table.getSubTable("Forward PID");
 
 			    public double kP = getKey(pid, "P", 0.007);
 			    public double kI = getKey(pid, "I", 0.0);
@@ -244,7 +244,7 @@ public class Config {
 
 			    private Forward() {
 
-				    pid.addSubTableListener((source, key, value, isNew) -> {
+				    pid.addTableListener((source, key, value, isNew) -> {
 
 					    System.out.println("<Config> Gear PID Updated");
 

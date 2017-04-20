@@ -7,9 +7,9 @@ import ca._4976.steamworks.subsystems.Config;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.first.wpilibj.*;
 import org.opencv.core.*;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class GearTracker extends Tracker {
 
@@ -18,13 +18,11 @@ public class GearTracker extends Tracker {
 	private Mat cvErodeOutput = new Mat();
 	private Mat hsvThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
+	private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<>();
 	private DrivePID pid;
 	private Robot robot;
-	private CvSource erode;
-	private CvSource dilate;
 	private CvSource hsvThreshold;
-	private CvSource findContours;
-	private CvSource filterContours;
+	private CvSource contours;
 	private double gearDistance = 0;
 	private double gearOffset = 0;
 
@@ -34,6 +32,7 @@ public class GearTracker extends Tracker {
 		config = robot.config.gear;
 
 		pid = new DrivePID();
+		pid.setOffset(config.offset);
 
 		setCamera(Vision.getCamera("c903"));
 
@@ -46,11 +45,8 @@ public class GearTracker extends Tracker {
 
 		if (Initialization.DEBUG) {
 
-			erode = CameraServer.getInstance().putVideo("Gear-Erode", 160, 120);
-			dilate = CameraServer.getInstance().putVideo("Gear-Dilate", 160, 120);
 			hsvThreshold = CameraServer.getInstance().putVideo("Gear-HSV", 160, 120);
-			findContours = CameraServer.getInstance().putVideo("Gear-Contours", 160, 120);
-			filterContours = CameraServer.getInstance().putVideo("Gear-Filtered-Contours", 160, 120);
+			contours = CameraServer.getInstance().putVideo("Gear-Contours", 160, 120);
 		}
 	}
 
@@ -62,14 +58,17 @@ public class GearTracker extends Tracker {
 
 	@Override protected void process(Contour contour) {
 
+
 		if (contour != null) {
 
 			gearOffset = contour.position.center.x;
-			gearDistance = contour.position.center.y;
+			gearDistance = config.resolution.height - contour.position.center.y;
 
 			if (!pid.isEnabled()) pid.enable();
 
 		} else if (pid.isEnabled()) {
+
+			System.out.println(":(");
 
 			pid.disable();
 		}
@@ -77,13 +76,11 @@ public class GearTracker extends Tracker {
 
 	@Override protected void process(Mat image) {
 
-		System.out.println(Arrays.toString(config.hsvThresholdHue));
-
 		Operations.cvDilate(
 				image,
 				new Mat(),
 				new Point(-1, -1),
-				1.0,
+				2.0,
 				Core.BORDER_CONSTANT,
 				new Scalar(-1),
 				cvDilateOutput
@@ -93,7 +90,7 @@ public class GearTracker extends Tracker {
 				cvDilateOutput,
 				new Mat(),
 				new Point(-1, -1),
-				1.0,
+				2.0,
 				Core.BORDER_CONSTANT,
 				new Scalar(-1),
 				cvErodeOutput
@@ -107,10 +104,14 @@ public class GearTracker extends Tracker {
 				hsvThresholdOutput
 		);
 
-		Operations.findContours(hsvThresholdOutput, false, findContoursOutput);
+		if (Initialization.DEBUG) hsvThreshold.putFrame(hsvThresholdOutput);
+
+		Operations.findContours(hsvThresholdOutput, true, findContoursOutput);
+
+		Operations.convexHulls(findContoursOutput, convexHullsOutput);
 
 		Operations.filterContours(
-				findContoursOutput,
+				convexHullsOutput,
 				config.filterContoursMinArea,
 				config.filterContoursMinPerimeter,
 				config.filterContoursMinWidth,
@@ -126,17 +127,8 @@ public class GearTracker extends Tracker {
 
 		if (Initialization.DEBUG) {
 
-			dilate.putFrame(cvDilateOutput);
-			erode.putFrame(cvErodeOutput);
-			hsvThreshold.putFrame(hsvThresholdOutput);
-
-			Mat foundContours = new Mat();
-			for (MatOfPoint matOfPoint : findContoursOutput) Operations.cvAdd(foundContours, matOfPoint, foundContours);
-			findContours.putFrame(foundContours);
-
-			Mat filteredContours = new Mat();
-			for (MatOfPoint matOfPoint : output) Operations.cvAdd(filteredContours, matOfPoint, filteredContours);
-			filterContours.putFrame(filteredContours);
+			Imgproc.drawContours(hsvThresholdOutput, output, 0, new Scalar(255, 255));
+			contours.putFrame(hsvThresholdOutput);
 		}
 	}
 
@@ -147,6 +139,17 @@ public class GearTracker extends Tracker {
 				config.brightness,
 				config.exposure,
 				config.whiteBalance
+		);
+
+		pid.setOffset(config.offset);
+
+		pid.setPID(
+				config.turn.kP,
+				config.turn.kI,
+				config.turn.kD,
+				config.forward.kP,
+				config.forward.kI,
+				config.forward.kD
 		);
 	}
 
@@ -174,6 +177,12 @@ public class GearTracker extends Tracker {
 				turn
 		);
 
+		private void setPID(double tP, double tI, double tD, double mP, double mI, double mD) {
+
+			turnPID.setPID(tP, tI, tD);
+			forwardPID.setPID(mP, mI, mD);
+		}
+
 		private void enable() {
 
 			turnPID.reset();
@@ -189,7 +198,12 @@ public class GearTracker extends Tracker {
 			forwardPID.disable();
 		}
 
-		private double getError() { return (forwardPID.get() + turnPID.getError()) / 2; }
+		public void setOffset(double offset) {
+
+			turnPID.setSetpoint(config.resolution.width / 2 + offset);
+		}
+
+		private double getError() { return turnPID.getError(); }
 
 		private boolean isEnabled() { return turnPID.isEnabled() || forwardPID.isEnabled(); }
 
@@ -205,12 +219,17 @@ public class GearTracker extends Tracker {
 
 			@Override public void pidWrite(double output) {
 
-				double maxOutput = 1 - turnPID.getError() / 80;
+				double maxOutput = 1 - Math.abs(turnPID.getError() / 20);
+				if (maxOutput < 0) maxOutput = 0;
+
+				maxOutput = 1;
 
 				if (Math.abs(output) > maxOutput) output = output > 0 ? maxOutput : -maxOutput;
 
-				motion[0] = output;
+				motion[0] = -output;
 				drive();
+
+				System.out.printf("%.2f\t%.2f\t%.2f%n",motion[0], gearOffset, gearDistance);
 			}
 
 			@Override public void setPIDSourceType(PIDSourceType pidSource) { }

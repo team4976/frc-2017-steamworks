@@ -3,11 +3,12 @@ package ca._4976.steamworks.subsystems.vision;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Operations {
+class Operations {
 
-	public static void cvDilate(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
+	static void cvDilate(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
 		if (kernel == null) {
 			kernel = new Mat();
 		}
@@ -20,7 +21,7 @@ public class Operations {
 		Imgproc.dilate(src, dst, kernel, anchor, (int) iterations, borderType, borderValue);
 	}
 
-	public static void cvErode(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
+	static void cvErode(Mat src, Mat kernel, Point anchor, double iterations, int borderType, Scalar borderValue, Mat dst) {
 		if (kernel == null) {
 			kernel = new Mat();
 		}
@@ -33,12 +34,12 @@ public class Operations {
 		Imgproc.erode(src, dst, kernel, anchor, (int) iterations, borderType, borderValue);
 	}
 
-	public static void hsvThreshold(Mat input, double[] hue, double[] sat, double[] val, Mat out) {
+	static void hsvThreshold(Mat input, double[] hue, double[] sat, double[] val, Mat out) {
 		Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HSV);
 		Core.inRange(out, new Scalar(hue[0], sat[0], val[0]), new Scalar(hue[1], sat[1], val[1]), out);
 	}
 
-	public static void findContours(Mat input, boolean externalOnly, List<MatOfPoint> contours) {
+	static void findContours(Mat input, boolean externalOnly, List<MatOfPoint> contours) {
 		Mat hierarchy = new Mat();
 		contours.clear();
 		int mode;
@@ -51,7 +52,7 @@ public class Operations {
 		Imgproc.findContours(input, contours, hierarchy, mode, method);
 	}
 
-	public static void filterContours(List<MatOfPoint> inputContours, double minArea, double minPerimeter, double minWidth, double maxWidth, double minHeight, double maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double minRatio, double maxRatio, List<MatOfPoint> output) {
+	static void filterContours(List<MatOfPoint> inputContours, double minArea, double minPerimeter, double minWidth, double maxWidth, double minHeight, double maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double minRatio, double maxRatio, List<MatOfPoint> output) {
 		final MatOfInt hull = new MatOfInt();
 		output.clear();
 		for (int i = 0; i < inputContours.size(); i++) {
@@ -79,7 +80,25 @@ public class Operations {
 		}
 	}
 
-	public static void cvAdd(Mat src1, Mat src2, Mat out) {
+	static void convexHulls(List<MatOfPoint> inputContours,
+	                         ArrayList<MatOfPoint> outputContours) {
+		final MatOfInt hull = new MatOfInt();
+		outputContours.clear();
+		for (int i = 0; i < inputContours.size(); i++) {
+			final MatOfPoint contour = inputContours.get(i);
+			final MatOfPoint mopHull = new MatOfPoint();
+			Imgproc.convexHull(contour, hull);
+			mopHull.create((int) hull.size().height, 1, CvType.CV_32SC2);
+			for (int j = 0; j < hull.size().height; j++) {
+				int index = (int) hull.get(j, 0)[0];
+				double[] point = new double[] {contour.get(index, 0)[0], contour.get(index, 0)[1]};
+				mopHull.put(j, 0, point);
+			}
+			outputContours.add(mopHull);
+		}
+	}
+
+	static void cvAdd(Mat src1, Mat src2, Mat out) {
 		Core.add(src1, src2, out);
 	}
 }
