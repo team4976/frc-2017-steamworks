@@ -1,4 +1,4 @@
-package ca._4976.steamworks.subsystems;
+package ca._4976.steamworks.subsystems.drive;
 
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
@@ -6,7 +6,7 @@ import ca._4976.steamworks.Robot;
 public class DriveTrain {
 
     private Robot robot;
-    private Config.Drive config;
+    private Config config = new Config();
     private double[] targetVelocity = new double[] {0, 0};
     private double[] setVelocity = new double[] {0, 0};
     private double leftTrigger = 0;
@@ -16,7 +16,6 @@ public class DriveTrain {
     public DriveTrain(Robot robot) {
 
         this.robot = robot;
-        config = robot.config.drive;
 
         robot.addListener(new RobotStateListener() {
             @Override
@@ -92,7 +91,7 @@ public class DriveTrain {
 
     }
 
-    void setLimiter(double limit) { limiter = limit; }
+    public void setLimiter(double limit) { limiter = limit; }
 
     public void update() {
 

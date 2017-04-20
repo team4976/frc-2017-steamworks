@@ -1,9 +1,11 @@
-package ca._4976.steamworks.subsystems.vision;
+package ca._4976.steamworks.subsystems.vision.gear;
 
 import ca._4976.data.Contour;
 import ca._4976.library.Initialization;
 import ca._4976.steamworks.Robot;
-import ca._4976.steamworks.subsystems.Config;
+import ca._4976.steamworks.subsystems.vision.Operations;
+import ca._4976.steamworks.subsystems.vision.Tracker;
+import ca._4976.steamworks.subsystems.vision.Vision;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.first.wpilibj.*;
 import org.opencv.core.*;
@@ -13,7 +15,7 @@ import java.util.ArrayList;
 
 public class GearTracker extends Tracker {
 
-	private Config.Vision.Gear config;
+	private Config config = new Config();
 	private Mat cvDilateOutput = new Mat();
 	private Mat cvErodeOutput = new Mat();
 	private Mat hsvThresholdOutput = new Mat();
@@ -26,10 +28,30 @@ public class GearTracker extends Tracker {
 	private double gearDistance = 0;
 	private double gearOffset = 0;
 
-	GearTracker(Robot robot) {
+	public GearTracker(Robot robot) {
 
 		this.robot = robot;
-		config = robot.config.gear;
+
+		config.setListener(() -> {
+
+			setCameraSettings(
+					config.resolution.asIntArray(),
+					config.brightness,
+					config.exposure,
+					config.whiteBalance
+			);
+
+			pid.setOffset(config.offset);
+
+			pid.setPID(
+					config.turn.kP,
+					config.turn.kI,
+					config.turn.kD,
+					config.forward.kP,
+					config.forward.kI,
+					config.forward.kD
+			);
+		});
 
 		pid = new DrivePID();
 		pid.setOffset(config.offset);
@@ -132,27 +154,6 @@ public class GearTracker extends Tracker {
 		}
 	}
 
-	public void configNotify() {
-
-		setCameraSettings(
-				config.resolution.asIntArray(),
-				config.brightness,
-				config.exposure,
-				config.whiteBalance
-		);
-
-		pid.setOffset(config.offset);
-
-		pid.setPID(
-				config.turn.kP,
-				config.turn.kI,
-				config.turn.kD,
-				config.forward.kP,
-				config.forward.kI,
-				config.forward.kD
-		);
-	}
-
 	public double getError() { return pid.getError(); }
 
 	private class DrivePID {
@@ -221,8 +222,6 @@ public class GearTracker extends Tracker {
 
 				double maxOutput = 1 - Math.abs(turnPID.getError() / 20);
 				if (maxOutput < 0) maxOutput = 0;
-
-				maxOutput = 1;
 
 				if (Math.abs(output) > maxOutput) output = output > 0 ? maxOutput : -maxOutput;
 

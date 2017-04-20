@@ -9,7 +9,7 @@ public class Status {
 
     private NetworkTable table = NetworkTable.getTable("Status");
 
-    boolean pivotEncoderFunctional = true;
+    public boolean pivotEncoderFunctional = true;
 
     public Status(Robot robot) {
 

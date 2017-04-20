@@ -2,9 +2,10 @@ package ca._4976.steamworks.subsystems.vision;
 
 import ca._4976.library.listeners.RobotStateListener;
 import ca._4976.steamworks.Robot;
+import ca._4976.steamworks.subsystems.vision.gear.GearTracker;
+import ca._4976.steamworks.subsystems.vision.goal.GoalTracker;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
-import javafx.scene.Camera;
 
 public class Vision {
 
@@ -28,7 +29,7 @@ public class Vision {
 
 	private static UsbCamera[] cameras = new UsbCamera[1];
 
-	static UsbCamera getCamera(String desc) {
+	public static UsbCamera getCamera(String desc) {
 
 		for (int i = 0; i < cameras.length; i++) {
 

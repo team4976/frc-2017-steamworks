@@ -10,9 +10,17 @@ public class Dimension {
 		this.height = height;
 	}
 
+	public Dimension(double[] dimension) {
+
+		this.width = dimension[0];
+		this.height = dimension[1];
+	}
+
 	public double getWidth() { return width; }
 
 	public double getHeight() { return height; }
 
 	public int[] asIntArray() { return new int[] { (int) width, (int) height }; }
+
+	public double[] asDoubleArray() { return new double[] { width, height }; }
 }

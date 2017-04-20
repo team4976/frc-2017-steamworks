@@ -1,4 +1,4 @@
-package ca._4976.steamworks.subsystems;
+package ca._4976.steamworks.subsystems.shooter;
 
 import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.ButtonListener;
@@ -8,7 +8,7 @@ import com.ctre.CANTalon;
 
 public class Shooter {
 
-    private Config.Shooter config;
+    private Config config = new Config();
     private Robot robot;
 
     private int selection = 0;
@@ -16,7 +16,23 @@ public class Shooter {
     public Shooter(Robot robot) {
 
         this.robot = robot;
-        config = robot.config.shooter;
+
+        config.setListener(() -> {
+
+            System.out.println("<Shooter>\t");
+            System.out.println("\t\tTarget RPM:\t" + getTargetRPM());
+            System.out.println("\t\tHood Position:\t" + robot.outputs.hood.get());
+
+            if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(config.targetSpeed[selection]);
+
+            robot.outputs.hood.set(config.hoodPosition[selection]);
+
+            if (!robot.vision.goal.isRunning() && robot.outputs.pivot.get() == 0) {
+
+                robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
+                robot.outputs.pivot.set(config.turretPosition[selection]);
+            }
+        });
 
         robot.addListener(new RobotStateListener() {
 
@@ -154,7 +170,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 selection = 0;
-                configNotify();
+                config.runListener();
             }
         });
 
@@ -163,7 +179,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 selection = 1;
-                configNotify();
+	            config.runListener();
             }
         });
 
@@ -172,7 +188,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 selection = 2;
-                configNotify();
+	            config.runListener();
             }
         });
 
@@ -181,7 +197,7 @@ public class Shooter {
             @Override public void pressed() {
 
                 selection = 3;
-                configNotify();
+	            config.runListener();
             }
         });
 
@@ -249,22 +265,5 @@ public class Shooter {
         robot.outputs.shooterSlave.changeControlMode(CANTalon.TalonControlMode.Follower);
         robot.outputs.shooterSlave.set(12);
         robot.outputs.shooter.set(config.targetSpeed[selection]);
-    }
-
-    void configNotify() {
-
-        System.out.println("<Shooter>\t");
-        System.out.println("\t\tTarget RPM:\t" + getTargetRPM());
-        System.out.println("\t\tHood Position:\t" + robot.outputs.hood.get());
-
-        if (robot.outputs.shooter.get() != 0) robot.outputs.shooter.set(config.targetSpeed[selection]);
-
-        robot.outputs.hood.set(config.hoodPosition[selection]);
-
-        if (!robot.vision.goal.isRunning() && robot.outputs.pivot.get() == 0) {
-
-            robot.outputs.pivot.changeControlMode(CANTalon.TalonControlMode.Position);
-            robot.outputs.pivot.set(config.turretPosition[selection]);
-        }
     }
 }

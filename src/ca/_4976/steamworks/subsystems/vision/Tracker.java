@@ -24,13 +24,13 @@ public abstract class Tracker implements Runnable {
 
 	public synchronized void stop() { run = false; }
 
-	void setCamera(UsbCamera camera) {
+	protected void setCamera(UsbCamera camera) {
 
 		this.camera = camera;
 		cvSink.setSource(camera);
 	}
 
-	void setCameraSettings(
+	protected void setCameraSettings(
 			int[] resolution,
 	        int brightness,
 	        int exposure,

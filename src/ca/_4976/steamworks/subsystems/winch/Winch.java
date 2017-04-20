@@ -1,4 +1,4 @@
-package ca._4976.steamworks.subsystems;
+package ca._4976.steamworks.subsystems.winch;
 
 import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.RobotStateListener;
@@ -7,12 +7,11 @@ import ca._4976.steamworks.Robot;
 public class Winch {
 
 	private Robot robot;
-    private Config.Winch config;
+    private Config config = new Config();
 
     public Winch(Robot robot) {
 
     	this.robot = robot;
-        config = robot.config.winch;
 
         robot.addListener(new RobotStateListener() {
 
@@ -35,8 +34,7 @@ public class Winch {
 
         robot.operator.Y.addListener(new ButtonListener() {
 
-        	@Override public void falling() { robot.outputs.arch.output(!robot.outputs.arch.isExtended());
-            }
+        	@Override public void falling() { robot.outputs.arch.output(!robot.outputs.arch.isExtended()); }
         });
     }
 

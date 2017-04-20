@@ -1,9 +1,11 @@
-package ca._4976.steamworks.subsystems.vision;
+package ca._4976.steamworks.subsystems.vision.goal;
 
 import ca._4976.data.Contour;
 import ca._4976.library.Initialization;
 import ca._4976.steamworks.Robot;
-import ca._4976.steamworks.subsystems.Config;
+import ca._4976.steamworks.subsystems.vision.Operations;
+import ca._4976.steamworks.subsystems.vision.Tracker;
+import ca._4976.steamworks.subsystems.vision.Vision;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PIDController;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 
 public class GoalTracker extends Tracker implements PIDSource {
 
-	private Config.Vision.Goal config;
+	private Config config = new Config();
 	private Mat cvDilateOutput = new Mat();
 	private Mat cvErodeOutput = new Mat();
 	private Mat hsvThresholdOutput = new Mat();
@@ -30,10 +32,23 @@ public class GoalTracker extends Tracker implements PIDSource {
 	private CvSource filterContours;
 	private boolean correct = false;
 
-	GoalTracker(Robot robot) {
+	public GoalTracker(Robot robot) {
 
 		this.robot = robot;
-		config = robot.config.goal;
+
+		config.setListener(() -> {
+
+			setCameraSettings(
+					config.resolution.asIntArray(),
+					config.brightness,
+					config.exposure,
+					config.whiteBalance
+			);
+
+			pid.reset();
+			pid.setPID(config.kP, config.kI, config.kD);
+			pid.setSetpoint(config.resolution.width / 2 + config.offset);
+		});
 
 		pid = new PIDController(
 				config.kP,
@@ -168,18 +183,4 @@ public class GoalTracker extends Tracker implements PIDSource {
 	@Override public PIDSourceType getPIDSourceType() { return PIDSourceType.kDisplacement; }
 
 	@Override public double pidGet() { return goalOffset - (80 + config.offset); }
-
-	public void configNotify() {
-
-		setCameraSettings(
-				config.resolution.asIntArray(),
-				config.brightness,
-				config.exposure,
-				config.whiteBalance
-		);
-
-		pid.reset();
-		pid.setPID(config.kP, config.kI, config.kD);
-		pid.setSetpoint(config.resolution.width / 2 + config.offset);
-	}
 }

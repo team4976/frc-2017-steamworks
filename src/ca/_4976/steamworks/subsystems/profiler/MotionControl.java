@@ -26,8 +26,20 @@ public class MotionControl {
 
     public MotionControl(Robot robot) {
 
-        playback = new Playback(robot);
+    	Config.getInstance().setListener(() -> {
 
+		    String load = Config.getInstance().loadTable;
+
+		    if (!load.equals("")) {
+
+			    System.out.println("<Motion Control> Getting autonomous: " + load);
+			    playback.setProfile(saveFile.load(load));
+		    }
+
+		    else System.out.println("<Motion Control> Successfully set autonomous to last record.");
+	    });
+
+        playback = new Playback(robot);
 	    record = new Record(robot);
 
         Boolean disable = new Boolean(0) { @Override public boolean get() { return false; }};
@@ -167,19 +179,6 @@ public class MotionControl {
     }
 
     public Log getLog() { return log; }
-
-    public void loadTable() {
-
-        String load = table.getString("load_table", "");
-
-        if (!load.equals("")) {
-
-            System.out.println("<Motion Control> Getting autonomous: " + load);
-            playback.setProfile(saveFile.load(load));
-        }
-
-        else System.out.println("<Motion Control> Successfully set autonomous to last record.");
-    }
 
     private class Log implements StringListener {
 

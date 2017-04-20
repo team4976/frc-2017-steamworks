@@ -1,4 +1,4 @@
-package ca._4976.steamworks.subsystems;
+package ca._4976.steamworks.subsystems.gear;
 
 import ca._4976.library.Evaluable;
 import ca._4976.library.listeners.ButtonListener;
@@ -9,7 +9,7 @@ import ca._4976.steamworks.subsystems.profiler.Record;
 
 public class GearHandler {
 
-    private Config.GearHandler config;
+    private Config config = new Config();
     private int state = 0;
     private Record record;
     private Playback playback;
@@ -18,7 +18,7 @@ public class GearHandler {
     public GearHandler(Robot robot){
 
         this.robot = robot;
-        config = robot.config.gearHandler;
+
         record = new Record(robot);
         playback = new Playback(robot);
 

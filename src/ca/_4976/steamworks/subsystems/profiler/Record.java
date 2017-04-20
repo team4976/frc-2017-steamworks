@@ -9,7 +9,6 @@ import ca._4976.library.listeners.ButtonListener;
 import ca._4976.library.listeners.DoubleListener;
 import ca._4976.library.listeners.StringListener;
 import ca._4976.steamworks.Robot;
-import ca._4976.steamworks.subsystems.Config;
 
 import java.util.ArrayList;
 
@@ -17,18 +16,14 @@ public class Record implements Runnable {
 
 	private StringListener listener = string -> { };
 	private Profile profile = Profile.newEmpty();
-	private Config.Motion config;
+	private Config config = Config.getInstance();
 	private boolean run = false;
 	private boolean paused = false;
 	private Robot robot;
 	private Boolean[] buttons = new Boolean[0];
 	private Double[] axes = new Double[0];
 
-	public Record(Robot robot) {
-
-		this.robot = robot;
-		config = robot.config.motion;
-	}
+	public Record(Robot robot) { this.robot = robot; }
 
 	public void setListener(StringListener listener) { this.listener = listener; }
 

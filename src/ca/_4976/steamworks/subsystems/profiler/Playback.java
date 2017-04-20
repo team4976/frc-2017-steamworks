@@ -5,7 +5,6 @@ import ca._4976.data.Profile;
 import ca._4976.library.Evaluator;
 import ca._4976.library.listeners.StringListener;
 import ca._4976.steamworks.Robot;
-import ca._4976.steamworks.subsystems.Config;
 import com.ctre.CANTalon;
 
 public class Playback implements Runnable {
@@ -16,13 +15,12 @@ public class Playback implements Runnable {
 	private boolean paused = false;
 	private boolean disable = false;
 	private Robot robot;
-	private Config.Motion config;
+	private Config config = Config.getInstance();
 	private double leftError = 0, rightError = 0;
 	private double leftTarget = 0, rightTarget = 0;
 
 	public Playback(Robot robot) {
 
-		config = robot.config.motion;
 		this.robot = robot;
 	}
 
