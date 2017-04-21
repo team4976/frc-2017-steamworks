@@ -12,6 +12,7 @@ public class DriveTrain {
     private double leftTrigger = 0;
     private double rightTrigger = 0;
     private double limiter = 1.0;
+    private boolean disabled = false;
 
     public DriveTrain(Robot robot) {
 
@@ -30,9 +31,9 @@ public class DriveTrain {
 
         robot.driver.LH.addListener(value -> {
 
-            targetVelocity[1] = (value > 0 ? value * value : value * -value) * 0.9;
+            if (!disabled) targetVelocity[1] = (value > 0 ? value * value : value * -value) * 0.9;
 
-            if (!robot.isTest()) {
+            if (!robot.isTest() && !disabled) {
 
                 setVelocity[1] = value > 0 ? value * value : value * -value;
                 output();
@@ -42,9 +43,9 @@ public class DriveTrain {
         robot.driver.LT.addListener(value -> {
 
             leftTrigger = value;
-            targetVelocity[0] = (rightTrigger - leftTrigger) * 0.9;
+            if (!disabled) targetVelocity[0] = (rightTrigger - leftTrigger) * 0.9;
 
-            if (!robot.isTest()) {
+            if (!robot.isTest() && !disabled) {
 
                 setVelocity[0] = rightTrigger - leftTrigger;
                 output();
@@ -66,13 +67,11 @@ public class DriveTrain {
 
     private void output() {
 
-        final double sticktion = 0.1;
-
         double left = (setVelocity[1] * limiter + setVelocity[0] * limiter);
-        left = (left > 0 ? sticktion : -sticktion) + left * (1 - sticktion);
+        left = (left > 0 ? config.sticktion : -config.sticktion) + left * (1 - config.sticktion);
 
         double right = (setVelocity[1] * limiter - setVelocity[0] * limiter);
-        right = (right > 0 ? sticktion : -sticktion) + right * (1 - sticktion);
+        right = (right > 0 ? config.sticktion : -config.sticktion) + right * (1 - config.sticktion);
 
         if (setVelocity[0] != 0 || setVelocity[1] != 0) {
 
@@ -91,6 +90,17 @@ public class DriveTrain {
 
     }
 
+    public void disableUserControl(boolean disabled) {
+
+            this.disabled = disabled;
+    }
+
+    public void arcadeDrive(double forward, double turn) {
+
+        targetVelocity[0] = forward;
+        targetVelocity[1] = turn;
+    }
+
     public void setLimiter(double limit) { limiter = limit; }
 
     public void update() {
@@ -103,13 +113,15 @@ public class DriveTrain {
 
             if (Math.abs(diffX) <= config.linearRamp[0]) setVelocity[0] = targetVelocity[0];
 
-            else if (setVelocity[0] < targetVelocity[0]) setVelocity[0] = setVelocity[0] + config.linearRamp[0];
+            else if (setVelocity[0] < targetVelocity[0])
+                setVelocity[0] = setVelocity[0] + config.linearRamp[0];
 
             else setVelocity[0] = setVelocity[0] - config.linearRamp[0];
 
         else if (Math.abs(diffX) <= config.linearRamp[1]) setVelocity[0] = targetVelocity[0];
 
-        else if (setVelocity[0] < targetVelocity[0]) setVelocity[0] = setVelocity[0] + config.linearRamp[1];
+        else if (setVelocity[0] < targetVelocity[0])
+            setVelocity[0] = setVelocity[0] + config.linearRamp[1];
 
         else setVelocity[0] = setVelocity[0] - config.linearRamp[1];
 
@@ -119,13 +131,16 @@ public class DriveTrain {
 
             if (Math.abs(diffY) <= config.rotationalRamp[0]) setVelocity[1] = targetVelocity[1];
 
-            else if (setVelocity[1] < targetVelocity[1]) setVelocity[1] = setVelocity[1] + config.rotationalRamp[0];
+            else if (setVelocity[1] < targetVelocity[1])
+                setVelocity[1] = setVelocity[1] + config.rotationalRamp[0];
 
             else setVelocity[1] = setVelocity[1] - config.rotationalRamp[0];
 
-        else if (Math.abs(diffY) <= config.rotationalRamp[1]) setVelocity[1] = targetVelocity[1];
+        else if (Math.abs(diffY) <= config.rotationalRamp[1])
+            setVelocity[1] = targetVelocity[1];
 
-        else if (setVelocity[1] < targetVelocity[1]) setVelocity[1] = setVelocity[1] + config.rotationalRamp[1];
+        else if (setVelocity[1] < targetVelocity[1])
+            setVelocity[1] = setVelocity[1] + config.rotationalRamp[1];
 
         else setVelocity[1] = setVelocity[1] - config.rotationalRamp[1];
 

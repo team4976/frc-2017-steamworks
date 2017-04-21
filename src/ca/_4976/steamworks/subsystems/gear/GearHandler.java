@@ -121,8 +121,8 @@ public class GearHandler {
 
                     System.out.println("<Gear Handler> Attempting to intake a gear.");
 
-                    robot.profiler.record.setPaused(true);
-                    record.start();
+                   // robot.profiler.record.setPaused(true);
+                   // record.start();
                     robot.vision.gear.start();
                 }
             }

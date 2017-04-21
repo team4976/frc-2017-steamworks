@@ -10,6 +10,8 @@ public class Config extends ConfigBase {
 	double[] linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
 	double[] rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
 
+	double sticktion = getKey(table, "Sticktion (%)", 0.1);
+
 	Config() {
 
 		for (int i = 0; i < linearRamp.length; i++) linearRamp[i] /= 200;
@@ -19,6 +21,7 @@ public class Config extends ConfigBase {
 
 			System.out.println("<Drive> " + key + " was changed");
 
+			sticktion = getKey(table, "Sticktion (%)", 0.1);
 			linearRamp = getKey(table, "Linear Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
 			rotationalRamp = getKey(table, "Rotational Ramp (% PER SECOND)", new double[] { 4.0, 4.0 });
 

@@ -21,16 +21,14 @@ public class GearTracker extends Tracker {
 	private Mat hsvThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<>();
 	private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<>();
-	private DrivePID pid;
-	private Robot robot;
+	private PID pid;
 	private CvSource hsvThreshold;
 	private CvSource contours;
-	private double gearDistance = 0;
-	private double gearOffset = 0;
 
 	public GearTracker(Robot robot) {
 
-		this.robot = robot;
+		pid = new PID(robot, config);
+		pid.setOffset(config.offset);
 
 		config.setListener(() -> {
 
@@ -52,9 +50,6 @@ public class GearTracker extends Tracker {
 					config.forward.kD
 			);
 		});
-
-		pid = new DrivePID();
-		pid.setOffset(config.offset);
 
 		setCamera(Vision.getCamera("c903"));
 
@@ -78,13 +73,19 @@ public class GearTracker extends Tracker {
 		new Thread(this).start();
 	}
 
+	@Override public synchronized void stop() {
+
+		super.stop();
+		pid.disable();
+	}
+
 	@Override protected void process(Contour contour) {
 
 
 		if (contour != null) {
 
-			gearOffset = contour.position.center.x;
-			gearDistance = config.resolution.height - contour.position.center.y;
+			pid.x = contour.position.center.x;
+			pid.y = config.resolution.height - contour.position.center.y;
 
 			if (!pid.isEnabled()) pid.enable();
 
@@ -155,102 +156,4 @@ public class GearTracker extends Tracker {
 	}
 
 	public double getError() { return pid.getError(); }
-
-	private class DrivePID {
-
-		private Forward forward = new Forward();
-		private Turn turn = new Turn();
-		private double[] motion = new double[] { 0.0, 0.0 };
-
-		private PIDController forwardPID = new PIDController(
-				config.forward.kP,
-				config.forward.kI,
-				config.forward.kD,
-				forward,
-				forward
-		);
-
-		private PIDController turnPID = new PIDController(
-				config.turn.kP,
-				config.turn.kI,
-				config.turn.kD,
-				turn,
-				turn
-		);
-
-		private void setPID(double tP, double tI, double tD, double mP, double mI, double mD) {
-
-			turnPID.setPID(tP, tI, tD);
-			forwardPID.setPID(mP, mI, mD);
-		}
-
-		private void enable() {
-
-			turnPID.reset();
-			turnPID.enable();
-
-			forwardPID.reset();
-			forwardPID.enable();
-		}
-
-		private void disable() {
-
-			turnPID.disable();
-			forwardPID.disable();
-		}
-
-		public void setOffset(double offset) {
-
-			turnPID.setSetpoint(config.resolution.width / 2 + offset);
-		}
-
-		private double getError() { return turnPID.getError(); }
-
-		private boolean isEnabled() { return turnPID.isEnabled() || forwardPID.isEnabled(); }
-
-		private void drive() {
-
-			robot.outputs.driveLeftFront.set(motion[1] + motion[0]);
-			robot.outputs.driveLeftRear.set(motion[1] + motion[0]);
-			robot.outputs.driveRightFront.set(motion[1] - motion[0]);
-			robot.outputs.driveRightRear.set(motion[1] - motion[0]);
-		}
-
-		private class Forward implements PIDOutput, PIDSource {
-
-			@Override public void pidWrite(double output) {
-
-				double maxOutput = 1 - Math.abs(turnPID.getError() / 20);
-				if (maxOutput < 0) maxOutput = 0;
-
-				if (Math.abs(output) > maxOutput) output = output > 0 ? maxOutput : -maxOutput;
-
-				motion[0] = -output;
-				drive();
-
-				System.out.printf("%.2f\t%.2f\t%.2f%n",motion[0], gearOffset, gearDistance);
-			}
-
-			@Override public void setPIDSourceType(PIDSourceType pidSource) { }
-
-			@Override public PIDSourceType getPIDSourceType() { return PIDSourceType.kDisplacement; }
-
-			@Override public double pidGet() { return gearDistance; }
-		}
-
-		private class Turn implements PIDOutput, PIDSource {
-
-			@Override public void pidWrite(double output) {
-
-				motion[1] = output;
-				drive();
-			}
-
-			@Override public void setPIDSourceType(PIDSourceType pidSource) { }
-
-			@Override public PIDSourceType getPIDSourceType() { return PIDSourceType.kDisplacement; }
-
-			@Override public double pidGet() { return gearOffset; }
-		}
-	}
 }
