@@ -80,8 +80,12 @@ public class GoalTracker extends Tracker implements PIDSource {
 
 	public synchronized void start() {
 
-		run = true;
-		new Thread(this).start();
+		if (!run) {
+
+			run = true;
+			robot.outputs.visionLight.set(true);
+			new Thread(this).start();
+		}
 	}
 
 	@Override protected void process(Contour contour) {

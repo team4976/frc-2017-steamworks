@@ -69,8 +69,11 @@ public class GearTracker extends Tracker {
 
 	public synchronized void start() {
 
-		run = true;
-		new Thread(this).start();
+		if (!run) {
+
+			run = true;
+			new Thread(this).start();
+		}
 	}
 
 	@Override public synchronized void stop() {
@@ -80,7 +83,6 @@ public class GearTracker extends Tracker {
 	}
 
 	@Override protected void process(Contour contour) {
-
 
 		if (contour != null) {
 

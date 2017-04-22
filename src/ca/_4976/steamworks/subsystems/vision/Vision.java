@@ -27,7 +27,7 @@ public class Vision {
 		});
 	}
 
-	private static UsbCamera[] cameras = new UsbCamera[1];
+	private static UsbCamera[] cameras = new UsbCamera[2];
 
 	public static UsbCamera getCamera(String desc) {
 

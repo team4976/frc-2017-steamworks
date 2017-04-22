@@ -10,6 +10,7 @@ public class Shooter {
 
     private Config config = new Config();
     private Robot robot;
+    private boolean enableCorrection = false;
 
     private int selection = 0;
 
@@ -79,6 +80,7 @@ public class Shooter {
 
             @Override public void held() {
 
+                enableCorrection = true;
                 robot.drive.setLimiter(.5);
 
                 System.out.println("<Shooter> Priming the Shooter.");
@@ -99,6 +101,7 @@ public class Shooter {
 
             @Override public void falling() {
 
+                enableCorrection = false;
                 robot.vision.goal.enableCorrectRPM(false);
                 robot.drive.setLimiter(1);
             }
@@ -246,7 +249,7 @@ public class Shooter {
 
     public void correctRPM(double correction) {
 
-        if (robot.outputs.shooter.get() != 0) {
+        if (robot.outputs.shooter.get() != 0 && enableCorrection) {
 
             robot.outputs.shooter.set(config.targetSpeed[selection] + correction);
         }
