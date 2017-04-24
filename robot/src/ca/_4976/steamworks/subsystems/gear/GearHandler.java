@@ -45,6 +45,8 @@ public class GearHandler {
                         robot.outputs.gear.output(true);
                         System.out.println("<Gear Handler> Gear roller over current perhaps we have a gear.");
 
+                        if (robot.vision.gear.isRunning()) play();
+
                         robot.driver.setRumble(1);
                         robot.runNextLoop(() -> robot.driver.setRumble(0), 200);
 
